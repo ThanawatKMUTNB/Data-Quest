@@ -185,17 +185,25 @@ class webScraping():
             write.writerows(data)
         f.close()
 
-    
-# url = "https://myanimelist.net/topanime.php"
-# req = requests.get(url)
-
-# # print(req)
-# if req.status_code == 200:
-#     print("Successful")
-#     req.encoding = "utf-8"
-#     soup = BeautifulSoup(req.text,"html.parser")
-#     # print(soup.prettify())
-#     # scrapingDiv()
+    def search(self,word):
+        file = open("WebScrapingData.csv", encoding="utf8")
+        # print(type(file))
+        if len(file.readlines()) != 0:
+            # print("Read not 0")
+            print("Search : ",word)
+            oldDf = pd.read_csv('WebScrapingData.csv',index_col=0)
+            searchDict = {"Word Count": [] ,"Page Title": [] ,"Page Date":[],"Page Link":[]}
+            searchDf = pd.DataFrame.from_dict(searchDict)
+            for i in range(len(oldDf)):
+                text = oldDf.iloc[i]["Page Data"]
+                wordCount = text.count(word.lower())+text.count(word.upper())
+                searchDf = searchDf.append({"Word Count": wordCount ,"Page Title": oldDf.iloc[i]["Page Data"] 
+                                            ,"Page Date":oldDf.iloc[i]["Page Date"],"Page Link":oldDf.iloc[i]["Page Link"]}
+                                           ,ignore_index=True)
+            sorted_df = searchDf.sort_values(by=['Word Count'], ascending=False)
+            print(sorted_df)
+        file.close()
 
 ex = webScraping()
-ex.creatDataframe()
+# ex.creatDataframe()
+ex.search("BL")
