@@ -1,3 +1,4 @@
+from ast import Try
 from datetime import date
 from email import header
 from turtle import ht
@@ -11,38 +12,58 @@ import re
 import pandas as pd
 class webScraping():
     def __init__(self):
-        self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/"]    
+        self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
+                    "https://myanimelist.net/anime.php#","https://otakumode.com/news/anime",
+                    "https://news.dexclub.com/","https://my-best.in.th/49872",
+                    "https://www.anime-japan.jp/2021/en/news/","https://the-japan-news.com/news/manga&anime/",
+                    "https://anime-news.tokyo/","https://manga.tokyo/news/",
+                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime","https://www.independent.co.uk/topic/anime",
+                    "https://soranews24.com/tag/anime/","https://anitrendz.net/news/",
+                    "https://thebestjapan.com/the-best-of-japan/anime-fans/","https://wiki.anime-os.com/chart/all-2020/",
+                    "https://kwaamsuk.net/10-anime-netflix/","https://www.online-station.net/anime/326294/",
+                    "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
+                    "https://www.metalbridges.com/cool-anime-songs/"
+                    ]    
         self.soupList = []
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
     
+    
     def getData(self,soup):
-        divSoup = soup.find_all('div')
-        textData = ''
+        # divSoup = soup.find_all('div')
+        textData = [""]
         for i in soup:
-            textData =  textData + i.text.strip() + "\n"
+            if type(i) != None:
+                textData =  textData + re.split("\s", i.text.strip())
+        textData = [i for i in textData if i != ""]
+        textData = [str(i) for i in textData]
+        textData = " ".join(textData)
         return textData
         # print(len(divSoup),type(divSoup))
         
-    def setData(self):
+    def setTodayData(self):
         today = date.today()
         d1 = today.strftime("%d/%m/%Y")
         for i in self.web:
             soup = self.makeSoup(i)
-            self.dfdict["Page Title"] = self.getTitle(soup)
-            self.dfdict["Page Date"] = d1
-            self.dfdict["Page Data"] = self.getData(soup)
-            self.dfdict["Page Image"] = "photo"
-            self.dfdict["Page Link"] = str(i)
-            # print(self.dfdict)
-            self.df = self.df.append(self.dfdict, ignore_index = True)
-            
+            if soup != None:
+                print("\n\n",i)
+                self.dfdict["Page Title"] = self.getTitle(soup)
+                self.dfdict["Page Date"] = d1
+                self.dfdict["Page Data"] = self.getData(soup)
+                self.dfdict["Page Image"] = "photo"
+                self.dfdict["Page Link"] = str(i)
+                # print(self.dfdict)
+                self.df = self.df.append(self.dfdict, ignore_index = True)
+            else:
+                print("\n\n---------None Soup -----------",i)
     def getTitle(self,soup):
         title = []
         # for t in self.soupList:
-        for i in soup.find_all('title'):            
-            title.append(i.text.strip())
-            return i.text.strip()
+        if soup != None:
+            for i in soup.find_all('title'):            
+                title.append(i.text.strip())
+                return i.text.strip()
     
     def makeSoup(self,link):
         # for link in self.web:
@@ -57,12 +78,15 @@ class webScraping():
         # else: return None
         
     def creatDataframe(self):
-        self.setData()
+        self.setTodayData()
         self.writeCSV()
         
     def writeCSV(self):
-        file = open("WebScrapingData.csv")
-        numline = len(file.readlines())
+        file = open("WebScrapingData.csv", encoding="utf8")
+        try:
+            numline = len(file.readlines())
+        except print(file.readlines()):
+            pass
         # print(numline)
         if numline != 0:
             # print("Read not 0")
@@ -161,17 +185,25 @@ class webScraping():
             write.writerows(data)
         f.close()
 
-    
-# url = "https://myanimelist.net/topanime.php"
-# req = requests.get(url)
-
-# # print(req)
-# if req.status_code == 200:
-#     print("Successful")
-#     req.encoding = "utf-8"
-#     soup = BeautifulSoup(req.text,"html.parser")
-#     # print(soup.prettify())
-#     # scrapingDiv()
+    def search(self,word):
+        file = open("WebScrapingData.csv", encoding="utf8")
+        # print(type(file))
+        if len(file.readlines()) != 0:
+            # print("Read not 0")
+            print("Search : ",word)
+            oldDf = pd.read_csv('WebScrapingData.csv',index_col=0)
+            searchDict = {"Word Count": [] ,"Page Title": [] ,"Page Date":[],"Page Link":[]}
+            searchDf = pd.DataFrame.from_dict(searchDict)
+            for i in range(len(oldDf)):
+                text = oldDf.iloc[i]["Page Data"]
+                wordCount = text.count(word.lower())+text.count(word.upper())
+                searchDf = searchDf.append({"Word Count": wordCount ,"Page Title": oldDf.iloc[i]["Page Data"] 
+                                            ,"Page Date":oldDf.iloc[i]["Page Date"],"Page Link":oldDf.iloc[i]["Page Link"]}
+                                           ,ignore_index=True)
+            sorted_df = searchDf.sort_values(by=['Word Count'], ascending=False)
+            print(sorted_df)
+        file.close()
 
 ex = webScraping()
-ex.creatDataframe()
+# ex.creatDataframe()
+ex.search("BL")
