@@ -1,0 +1,7 @@
+
+
+<div id="main">
+<div>
+<div class="same-width-as-main" id="notifications">
+<div class="info box" id="thai-dexclub" style="text-align:center">
+        
