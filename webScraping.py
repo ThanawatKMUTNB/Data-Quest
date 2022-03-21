@@ -202,8 +202,9 @@ class webScraping():
                                            ,ignore_index=True)
             sorted_df = searchDf.sort_values(by=['Word Count'], ascending=False)
             print(sorted_df)
+            
         file.close()
 
 ex = webScraping()
 # ex.creatDataframe()
-ex.search("BL")
+ex.search("anime")
