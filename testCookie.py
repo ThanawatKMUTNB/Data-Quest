@@ -1,7 +1,7 @@
 from cgitb import html
 import re
 from urllib.parse import urlparse
-import webScraping as web
+import webscraping as web
 ex = web.webScraping()
 s = ex.makeSoup("https://www.animenewsnetwork.com/")
 # s = s.text.strip()

@@ -1,15 +1,11 @@
-from ast import Try
 from datetime import date
-from email import header
 from turtle import ht
-from typing import Pattern
 from bs4 import BeautifulSoup
 import requests
-import csv
-from IPython.display import HTML
 from soupsieve import escape
 import re
 import pandas as pd
+from urllib.parse import urlparse
 class webScraping():
     def __init__(self):
         self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
@@ -28,6 +24,15 @@ class webScraping():
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
     
+    def getDomain(self,link):
+        domain = urlparse(link).netloc
+        return domain
+    
+    def getLang(self,soup):
+        for link in soup.find_all('html', lang=True):
+            # print(link['lang'])
+            return link['lang']
+        return "Don't Set"
     
     def getData(self,soup):
         # divSoup = soup.find_all('div')
@@ -57,13 +62,14 @@ class webScraping():
                 self.df = self.df.append(self.dfdict, ignore_index = True)
             else:
                 print("\n\n---------None Soup -----------",i)
+    
     def getTitle(self,soup):
-        title = []
         # for t in self.soupList:
         if soup != None:
             for i in soup.find_all('title'):            
-                title.append(i.text.strip())
                 return i.text.strip()
+        else:
+            return "None Title"
     
     def makeSoup(self,link):
         # for link in self.web:
@@ -103,87 +109,6 @@ class webScraping():
             # print(self.df)
             self.df.to_csv('WebScrapingData.csv')
         file.close()
-        
-    def writeText(data):
-        file = open("MyFile.txt","w")
-        # data = []
-        file.writelines(data)
-        file.close()
-    # def writeCSV(df):
-    #     https://www.animenewsnetwork.com/
-    def scrapingDiv():
-        want = soup.find_all('div')
-        print(len(want))
-        # want = list(want)
-        # print(str(want[0])[:500])
-        data = []
-        today = date.today()
-
-        # dd/mm/YY
-        d1 = today.strftime("%d/%m/%Y")
-        print(d1)
-        n=0
-        for i in want:
-            # print("\n\n")
-            # print(len(list(i.find_all('a'))))
-            # print(list(i.find_all('a')))
-            if len(list(i.find_all('a'))) != 0:
-                k = i.find_all('a')
-                for j in k:
-                    x = re.split('href="',str(j))
-                    x=x[-1]
-                    x = re.split('">',x)
-                    x=x[0]
-                    data.append("\n\n"+x)
-        # writeText(data)
-        print(len(data))
-            # n+=1
-            # if n == 2:
-            #     break
-        # print(want.find('a'))
-        # aWant = want.find_all('a')
-        # print("\n",len(aWant))
-        # print(aWant)
-        # for i in aWant:
-            # i = str(i)
-        # print("\n",aWant[:10]['href'])
-            # x = re.search("href=$",str(i))
-            # print(x)
-        # print(aWant.find_all('href'))
-        
-    def scrapingTable():
-        data = []
-        table = soup.find("table", attrs={ "class" : "top-ranking-table" })
-        # table_body = table.find('tbody')
-        # print(table)
-
-        rows = table.find_all('tr')
-        for row in rows:
-            # print("\n\n",row)
-            # print("\n\n",row.find_all('img'))
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            img = row.find_all('img')
-            # print(cols)
-            if len(img) == 0:
-                cols.append("Image")
-            if len(img) > 0:
-                src = img[0]["data-src"]
-                imghtml = f'<img src ="{src}"/>'
-                # print(type(HTML(imghtml)))
-                cols.append(src)
-                # cols[-1] = HTML(cols[-1])
-                # print("\n\n",img[0]["data-src"])
-            data.append([ele for ele in cols if ele]) # Get rid of empty values
-            
-        # print(data)
-        # print(type(data[-1]))
-
-        with open('animeRankTable.csv', 'w') as f:
-            # using csv.writer method from CSV package
-            write = csv.writer(f)
-            write.writerows(data)
-        f.close()
 
     def search(self,word):
         file = open("WebScrapingData.csv", encoding="utf8")
@@ -206,5 +131,5 @@ class webScraping():
         file.close()
 
 ex = webScraping()
-# ex.creatDataframe()
-ex.search("anime")
+ex.creatDataframe()
+# ex.search("anime")
