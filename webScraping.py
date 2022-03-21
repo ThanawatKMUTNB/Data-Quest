@@ -62,13 +62,14 @@ class webScraping():
                 self.df = self.df.append(self.dfdict, ignore_index = True)
             else:
                 print("\n\n---------None Soup -----------",i)
+    
     def getTitle(self,soup):
-        title = []
         # for t in self.soupList:
         if soup != None:
-            for i in soup:            
-                title.append(i.title.string)
-                return i.title.string
+            for i in soup.find_all('title'):            
+                return i.text.strip()
+        else:
+            return "None Title"
     
     def makeSoup(self,link):
         # for link in self.web:
