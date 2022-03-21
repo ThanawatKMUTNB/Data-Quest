@@ -1,13 +1,9 @@
 from cgitb import html
 import re
 from urllib.parse import urlparse
-import webscraping as web
+import webScraping as web
 ex = web.webScraping()
 s = ex.makeSoup("https://www.animenewsnetwork.com/")
-# s = s.text.strip()
-l = s.find("html")
-# print(l.find("lang"))
-# print(s.title.string)
 
 def writePaintext():
     s = ex.makeSoup("https://www.animenewsnetwork.com/")
@@ -48,7 +44,7 @@ def write():
     file.close()
     
 def wp(source):
-    # print(source)
+    print(source)
     print(type(source))
     
     file = open("MyFileCon.txt","w")
@@ -57,21 +53,24 @@ def wp(source):
     for i in source:
         # print(type(i))
         try:
-            file.writelines(str(i)+"\n")
+            file.writelines(i)
         except print("ERROR"):
+            file.writelines(source)
             pass
     file.close()
 # write()
 
-d = s.find('div',id="content").get_text()
-d = re.split("\n",d)
+# d = s.find('div',id="content").get_text()
+d = re.split("\n", s.text.strip())
+# d = re.split("\n",d)
 d = [i for i in d if i != "" and i != '']
+# wp(d)
 # print(d)
+ex.getMainDomain("https://www.animenewsnetwork.com/")
+sl = ex.getSubLink(s)
+print(sl)
 
-href = []
-for link in s.find_all('a', href=True):
-    href.append(link['href'])
+# for link in s.find_all('html', lang=True):
+#     print(link['lang'])
 
-for link in s.find_all('html', lang=True):
-    print(link['lang'])
 # wp(d)

@@ -23,10 +23,19 @@ class webScraping():
         self.soupList = []
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
+        self.MainDomain = ""
     
-    def getDomain(self,link):
+    def getMainDomain(self,link):
         domain = urlparse(link).netloc
+        self.MainDomain = domain
         return domain
+    
+    def getSubLink(self,soup):
+        href = []
+        for link in soup.find_all('a', href=True):
+            if urlparse(link['href']).netloc == self.MainDomain or urlparse(link['href']).netloc == "":
+                href.append(self.MainDomain + link['href'])
+        return href
     
     def getLang(self,soup):
         for link in soup.find_all('html', lang=True):
