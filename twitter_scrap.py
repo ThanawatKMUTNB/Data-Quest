@@ -88,8 +88,10 @@ class Twitter_Scrap:
                     text = tweet.full_text
                     params = {'text':text}
                     response = requests.get(self._url, headers=self._headers, params=params)
-                    tweet_polarity.append(response.json()['sentiment']['polarity'])
-                    tweet_sentiment.append(response.json()['sentiment']['score'])
+                    polarity = str(response.json()['sentiment']['polarity'])
+                    sentiment = str(response.json()['sentiment']['score'])
+                    tweet_polarity.append(polarity)
+                    tweet_sentiment.append(sentiment)
 
         self.df = pd.DataFrame({'Keyword':tweet_keyword,'User':twitter_users,'Tweet': tweet_string,'Language':tweet_language, 'Time': tweet_time,'User Location':twitter_users_location,
                             'Hashtag':tweet_hashtag,'Polarity':tweet_polarity,'Likes':tweet_fav,'Retweet':tweet_countRT,'Sentiment':tweet_sentiment})
@@ -121,7 +123,7 @@ class Twitter_Scrap:
             Ans = str(input()).lower()
             if Ans == 'yes':
                 self.keys.append(keyword)
-                self.df = self.savedata()
+                self.savedata()
                 return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
             else:
                 pass
@@ -134,4 +136,4 @@ class Twitter_Scrap:
 #         'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
 
 twsc = Twitter_Scrap('tweet_data_2132022.csv')
-print(twsc.searchkeys('turning red'))
+print(twsc.searchkeys('sasaki and miyano'))
