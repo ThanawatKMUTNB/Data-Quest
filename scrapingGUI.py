@@ -48,7 +48,7 @@ class Ui_MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QtWidgets.QTableView()
-        self.data = pd.read_csv("C:\\Users\\Pooncharat Wongkom\\Desktop\\Webscraping\\animeRankTable.csv", encoding='windows-1252',index_col=False)
+        self.data = pd.read_csv("animeRankTable.csv", encoding='windows-1252',index_col=False)
         self.model = TableModel(self.data)
         self.table.setModel(self.model)
         self.table = QtWidgets.QTableView()
