@@ -85,7 +85,7 @@ class Twitter_Scrap:
                     tweet_polarity.append(self.getSentiment(tweet.full_text))
                     tweet_sentiment.append(TextBlob(tweet.full_text).sentiment.polarity)
                 elif tweet.lang == 'th':
-                    text = tweet.full_text
+                    text = re.sub(r'[%]',' ',tweet.full_text)
                     params = {'text':text}
                     response = requests.get(self._url, headers=self._headers, params=params)
                     polarity = str(response.json()['sentiment']['polarity'])
