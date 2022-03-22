@@ -8,34 +8,57 @@ import pandas as pd
 from urllib.parse import urlparse
 class webScraping():
     def __init__(self):
-        self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
-                    "https://myanimelist.net/anime.php#","https://otakumode.com/news/anime",
-                    "https://news.dexclub.com/","https://my-best.in.th/49872",
-                    "https://www.anime-japan.jp/2021/en/news/","https://the-japan-news.com/news/manga&anime/",
-                    "https://anime-news.tokyo/","https://manga.tokyo/news/",
-                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime","https://www.independent.co.uk/topic/anime",
-                    "https://soranews24.com/tag/anime/","https://anitrendz.net/news/",
-                    "https://thebestjapan.com/the-best-of-japan/anime-fans/","https://wiki.anime-os.com/chart/all-2020/",
-                    "https://kwaamsuk.net/10-anime-netflix/","https://www.online-station.net/anime/326294/",
-                    "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
-                    "https://www.metalbridges.com/cool-anime-songs/"
-                    ]    
+        # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
+        #             "https://myanimelist.net/anime.php#","https://otakumode.com/news/anime",
+        #             "https://news.dexclub.com/","https://my-best.in.th/49872",
+        #             "https://www.anime-japan.jp/2021/en/news/","https://the-japan-news.com/news/manga&anime/",
+        #             "https://anime-news.tokyo/","https://manga.tokyo/news/",
+        #             "https://www.bbc.com/news/topics/c1715pzrj24t/anime","https://www.independent.co.uk/topic/anime",
+        #             "https://soranews24.com/tag/anime/","https://anitrendz.net/news/",
+        #             "https://thebestjapan.com/the-best-of-japan/anime-fans/","https://wiki.anime-os.com/chart/all-2020/",
+        #             "https://kwaamsuk.net/10-anime-netflix/","https://www.online-station.net/anime/326294/",
+        #             "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
+        #             "https://www.metalbridges.com/cool-anime-songs/"
+        #             ] 
+        
+        # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
+        #             "https://myanimelist.net/anime.php#","https://otakumode.com/news/anime"
+        #             ]
+        
+        self.web = ["https://www.animenewsnetwork.com/"]    
+        
         self.soupList = []
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
         self.MainDomain = ""
-    
-    def getMainDomain(self,link):
+        self.subLink = []
+        
+    def setMainDomain(self,link):
         domain = urlparse(link).netloc
-        self.MainDomain = domain
-        return domain
+        self.MainDomain = "https://" + domain
     
-    def getSubLink(self,soup):
+    def getMainDomain(self):
+        return self.MainDomain
+    
+    def getStatus(self,link):
+        req = requests.get(link)
+        if req.status_code == 200:
+            return True
+        else:
+            return False
+        
+    def setSubLink(self,soup):
         href = []
         for link in soup.find_all('a', href=True):
-            if urlparse(link['href']).netloc == self.MainDomain or urlparse(link['href']).netloc == "":
+            if urlparse(link['href']).netloc == self.MainDomain:
+                href.append(link['href'])
+            elif urlparse(link['href']).netloc == "":
+                # if self.getStatus(self.MainDomain + link['href']):
                 href.append(self.MainDomain + link['href'])
-        return href
+        self.subLink = href
+        
+    def getSubLink(self):
+        return self.subLink
     
     def getLang(self,soup):
         for link in soup.find_all('html', lang=True):
@@ -54,16 +77,18 @@ class webScraping():
         textData = " ".join(textData)
         return textData
         # print(len(divSoup),type(divSoup))
-        
-    def setTodayData(self):
+    def getTodayDate(self):
         today = date.today()
         d1 = today.strftime("%d/%m/%Y")
+        return d1
+    
+    def setTodayData(self):
         for i in self.web:
             soup = self.makeSoup(i)
             if soup != None:
                 print("\n\n",i)
                 self.dfdict["Page Title"] = self.getTitle(soup)
-                self.dfdict["Page Date"] = d1
+                self.dfdict["Page Date"] = self.getTodayDate()
                 self.dfdict["Page Data"] = self.getData(soup)
                 self.dfdict["Page Image"] = "photo"
                 self.dfdict["Page Link"] = str(i)
