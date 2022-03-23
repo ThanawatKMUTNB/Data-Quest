@@ -88,8 +88,12 @@ class Twitter_Scrap:
                     text = re.sub(r'[%]',' ',tweet.full_text)
                     params = {'text':text}
                     response = requests.get(self._url, headers=self._headers, params=params)
-                    polarity = str(response.json()['sentiment']['polarity'])
-                    sentiment = str(response.json()['sentiment']['score'])
+                    try:
+                        polarity = str(response.json()['sentiment']['polarity'])
+                        sentiment = str(response.json()['sentiment']['score'])
+                    except (KeyError):
+                        polarity = 'neutral'
+                        sentiment = 0
                     tweet_polarity.append(polarity)
                     tweet_sentiment.append(sentiment)
 
@@ -103,13 +107,13 @@ class Twitter_Scrap:
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
         #self.df = pd.read_csv(self.filename)
-        os.remove(self.filename)
 
         for keyword in self.keys:
             self.df = pd.concat([self.df,self.get_related_tweets(keyword)])
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
+        os.remove(self.filename)
         self.df.to_csv(self.filename,encoding='utf-8',index=False)
 
         print('save complete @',current_time)
