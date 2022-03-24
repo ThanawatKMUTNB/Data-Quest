@@ -21,12 +21,12 @@ class webScraping():
         #             "https://www.metalbridges.com/cool-anime-songs/"
         #             ] 
         
-        # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
-        #             "https://myanimelist.net/anime.php#","https://otakumode.com/news/anime"
+        # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/",
+        #             "https://myanimelist.net/","https://otakumode.com/"
         #             ]
         
         self.web = ["https://www.animenewsnetwork.com/"]    
-        
+        self.SaveFileName = 'WebScrapingData24.csv'
         self.soupList = []
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
@@ -35,7 +35,8 @@ class webScraping():
         
     def setMainDomain(self,link):
         domain = urlparse(link).netloc
-        self.MainDomain = "https://" + domain
+        self.MainDomain = "https://" + str(domain)
+        # print(domain)
     
     def getMainDomain(self):
         return self.MainDomain
@@ -48,17 +49,19 @@ class webScraping():
             return False
         
     def setSubLink(self,soup):
-        href = []
+        href = [str(self.getMainDomain())+'/']
+        # print(type(soup))
         for link in soup.find_all('a', href=True):
             if urlparse(link['href']).netloc == self.MainDomain:
                 href.append(link['href'])
-            elif urlparse(link['href']).netloc == "":
+            if urlparse(link['href']).netloc == "":
                 # if self.getStatus(self.MainDomain + link['href']):
                 href.append(self.MainDomain + link['href'])
-        self.subLink = href
+        # print("Href Type : ",type(href[0]))
+        self.subLink = list(set(href))
         
     def getSubLink(self):
-        return self.subLink
+        return sorted(self.subLink)
     
     def getLang(self,soup):
         for link in soup.find_all('html', lang=True):
@@ -122,7 +125,7 @@ class webScraping():
         self.writeCSV()
         
     def writeCSV(self):
-        file = open("WebScrapingData.csv", encoding="utf8")
+        file = open(self.SaveFileName, encoding="utf8")
         try:
             numline = len(file.readlines())
         except print(file.readlines()):
@@ -130,27 +133,27 @@ class webScraping():
         # print(numline)
         if numline != 0:
             # print("Read not 0")
-            oldDf = pd.read_csv('WebScrapingData.csv',index_col=0)
+            oldDf = pd.read_csv(self.SaveFileName,index_col=0)
             # print(oldDf)
             self.df = pd.concat([oldDf,self.df], ignore_index=True)
             # print(self.df.columns.to_list())
             self.df = self.df.drop_duplicates(subset=self.df.columns.to_list())
             # print("\n",self.df)
-            self.df.to_csv('WebScrapingData.csv')
+            self.df.to_csv(self.SaveFileName)
         if numline == 0:
             # print("Write 0 ")
             # print(self.df.columns.to_list())
             # print(self.df)
-            self.df.to_csv('WebScrapingData.csv')
+            self.df.to_csv(self.SaveFileName)
         file.close()
 
     def search(self,word):
-        file = open("WebScrapingData.csv", encoding="utf8")
+        file = open(self.SaveFileName, encoding="utf8")
         # print(type(file))
         if len(file.readlines()) != 0:
             # print("Read not 0")
             print("Search : ",word)
-            oldDf = pd.read_csv('WebScrapingData.csv',index_col=0)
+            oldDf = pd.read_csv(self.SaveFileName,index_col=0)
             searchDict = {"Word Count": [] ,"Page Title": [] ,"Page Date":[],"Page Link":[]}
             searchDf = pd.DataFrame.from_dict(searchDict)
             for i in range(len(oldDf)):
