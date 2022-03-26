@@ -1,10 +1,12 @@
 from cgitb import html
+from datetime import date, timedelta
+from itertools import count
+import json
 import re
 from urllib.parse import urlparse
 import webScraping as web
-ex = web.webScraping()
-s = ex.makeSoup("https://www.animenewsnetwork.com/")
-
+from io import StringIO
+import os
 def writePaintext():
     s = ex.makeSoup("https://www.animenewsnetwork.com/")
     # file = open("MyFileText.txt","w")
@@ -31,46 +33,178 @@ def write():
     file = open("MyFile.txt","w")
     titleT = s.find('title')
     file.writelines(titleT.text.strip()+"\n")
-
-    # s = s.text.strip()
-    # s = list(s)
     s = s.prettify()
     # print(s)
     try:
         file.writelines(s)
     except :
         pass
+    file.close()
+    
+def writeJson(dictForWrite):
+    #Over write
+    with open(ex.getPath(),"w") as f:
+        json.dump(dictForWrite,f)
+    f.close()
+    
+def readJson():
+    with open(ex.getPath(),encoding = "utf-8") as f:
+        data = json.load(f)
+    # print(data)
+    f.close()
+    # data = json.dumps(data, indent=4)
+    return data
+
+
+def updateDataWithClass(Link):
+    subpatt = {str(Link) : ""}    
+    try:
+        subsoup = ex.makeSoup(Link)
+        if subsoup != None :
+            content = subsoup.find('div')
+            classN = 1
+            if content != None:
+                classList = content.find_all('div',class_=True)
+                # classList = content.find_all('div',id=True)
+                print(str(classN) + " Class",len(classList))
+                classN += 1
+                n = 0
+                subpatt[str(Link)] = {}
+                for k in classList:
+                    # tag = [t.name for t in k if t.name != None]
+                    # print(tag,k['class'])
+                    
+                    if k.text != "" and len(k.text.strip()) != 0:
+                        
+                        # paragraph = k.text.strip()
+                        
+                        # paragraph = str(paragraph)
+                        # paragraph = str(paragraph.strip()).replace("\n",' ')
+                        
+                        dictKey = [str(n+1)] + k['class']
+                        dictKey = " ".join(dictKey)
+
+                        subpatt[str(Link)].update({str(dictKey) : 'paragraph'})
+                        n +=1
+                return subpatt
+            
+    except print("********* Error   *********** ",Link):
+        pass
+
+def updateData(Link):
+    subpatt = []  
+    # print("Error----------------",type(Link),Link)  
+    try:
+        print(Link)
+        subsoup = ex.makeSoup(Link)
+        if subsoup != None :
+            content = subsoup.find('div')
+            if content != None:
+                classList = content.find_all('div',class_=True)
+                for k in classList:
+                    # tag = [t.name for t in k if t.name != None]
+                    # print(tag,k['class'])
+                    if k.text != "" and len(k.text.strip()) != 0:
+                        paragraph = k.text.strip()
+                        paragraph = str(paragraph)
+                        paragraph = str(paragraph.strip()).replace("\n",' ')
+                        subpatt.append(paragraph)
+                return list(set(subpatt))
+    except :
+        pass
         
-    file.close()
-    
-def wp(source):
-    print(source)
-    print(type(source))
-    
-    file = open("MyFileCon.txt","w")
-    # file.writelines(source)
-    
-    for i in source:
-        # print(type(i))
-        try:
-            file.writelines(i)
-        except print("ERROR"):
-            file.writelines(source)
-            pass
-    file.close()
-# write()
+            
+def updateSubLink(patt,Link):
+    i = Link
+    soup = ex.makeSoup(i)
+    ex.setMainDomain(i)
 
-# d = s.find('div',id="content").get_text()
-d = re.split("\n", s.text.strip())
-# d = re.split("\n",d)
-d = [i for i in d if i != "" and i != '']
-# wp(d)
-# print(d)
-ex.getMainDomain("https://www.animenewsnetwork.com/")
-sl = ex.getSubLink(s)
-print(sl)
+    ex.setSubLink(soup)
+    subLink = ex.getSubLink()
 
-# for link in s.find_all('html', lang=True):
-#     print(link['lang'])
+    allLink = subLink 
+    # for j in subLink:
+    #     try:
+    #         print("\nMain Domain : ",ex.getMainDomain())
+    #         print("SubLink : ",j)
+    #         ssoup = ex.makeSoup(j)
+    #         ex.setSubLink(ssoup)
+    #         subSubLink = ex.getSubLink()
+    #         allLink += subSubLink
+    #         allLink = list(set(allLink))
+    #         print(len(allLink))
+    #         # print(str(countN)+" "+str(len(allLink))+" subSubLink : ",j)
+    #         # subpatt = { i : "ss" for i in subSubLink }
+    #         # subpatt = updateData(j)
+    #         # patt[str(i)].update(subpatt)
+    #     except :
+    #         pass
+    subpatt = { ssl : updateData(ssl) for ssl in sorted(allLink[:5])}
+    patt[str(i)].update(subpatt)
+    return patt        
 
-# wp(d)
+def updateDict(dictWithDate):
+    for i in ex.web:
+        patt = {
+                #MainLink
+                str(i) : 
+                    #SubLink
+                    {}
+                }
+        ex.setCurLink(i)
+        patt = updateSubLink(patt,i)
+        dictWithDate[str(ex.getTodayDate())].update(patt)
+        writeJson(dictWithDate)
+        # dictWithDate[dateKey][str(i)]["Sub 1"] = "LLL"
+    return dictWithDate
+
+def recursive_items(dictionary):
+    for key, value in dictionary.items():
+        if type(value) is dict:
+            yield from recursive_items(value)
+        else:
+            yield (key, value)
+            
+ex = web.webScraping()
+# linkMain = "https://www.animenewsnetwork.com/"
+# s = ex.makeSoup(linkMain)
+
+tm = timedelta(1)
+yd = timedelta(-1)
+
+# jsonDict = { str(date.today() + yd) : "4774",
+#              str(date.today()) : "2",
+#              str(date.today() + tm) : "3"}
+
+jsonDict = {}
+jsonDict[str(ex.getTodayDate())] = {}
+print("\n\n ----------------- Start")
+for i in ex.web[:1]:
+    # k = ex.makeSoup(i)
+    # soup = ex.makeSoup('https://www.animenewsnetwork.com/news/2022-03-22/crunchyroll-announces-release-schedule-for-spring-2022-anime-season/.183884')
+    print(type(i))
+    print(i)
+    
+    soup = ex.makeSoup(i)
+    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p']):
+        print("\n"+heading.name + ' ' + heading.text.strip())
+        # print("\n"+heading.name)
+        # if heading.find('a', href=True):
+        #     print(heading.previous_element.previous_element.text)
+            # print(len(heading.find('a', href=True)['href']))
+            # print(len(heading.find('a', href=True)))
+    
+    # for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+    #     print("\n"+heading.name + ' ' + heading.text.strip())
+    #     print(heading)
+    #     if heading.find('a', href=True):
+    #         print("----- "+heading.find('a', href=True)['href'])
+            # print(heading.find('a', href=True))
+    # allA = k.find_all('a', href=True)
+    
+# s = updateDict(jsonDict)
+# # print(s)
+
+# writeJson(s)
+# r = readJson()
+# print(r)
