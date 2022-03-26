@@ -202,20 +202,22 @@ class webScraping():
         else:
             return ""
     
-    def getSubLink(self,Alink):
+    def getSubLink(self,tag):
+        Alink = tag.find_all('a', href = True)
+        wrapTag = tag.previous_element.previous_element
         FullLink = {}
         for ListAlink in Alink:
-            FullLink[self.getFullLink(ListAlink['href'])] = ""
+            FullLink[self.getFullLink(ListAlink['href'])] = []
         return FullLink
             # dictForJson.update({FullLink:""})
             # print(ListAlink['href'])
             
-    def getDataBySoup(self,link):
+    def getDataByLink(self,link):
         dictForJson = {link : []}
         soup = self.makeSoup(link)
         self.MainDomain = self.getDomain(link)
         content = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p'])
-        print(len(content))
+        # print(link,len(content))
         n = 1
         for tag in content:
             # tag = 
@@ -224,20 +226,26 @@ class webScraping():
             # print(wrapTag.text.strip())
             # print(wrapTag)
             if tag.name == "p":
-                print("\n"+tag.name+ ' ' + tag.text.strip())
-                # print("---",wrapTag.text.strip())
                 Alink = tag.find_all('a', href = True)
                 if Alink != []:
-                    subLink = self.getSubLink(Alink)
+                    subLink = self.getSubLink(tag)
                     dictForJson.update(subLink)
-                # dictForJson[link] += [str(n)+' ' + tag.text.strip()]
-                n+=1
+                try:  
+                    dictForJson[link].append(["ParaGraph "+str(n) , tag.text.strip().replace("\n"," ")])
+                    n+=1
+                except :
+                    pass
+                    # print("\n"+tag.name+ ' ' + tag.text.strip())
+                    
+                    # print("------------- ",dictForJson[link]," ",link)
+                    
             else: #"h1", "h2", "h3", "h4", "h5", "h6"
                 Alink = tag.find_all('a', href = True)
                 if Alink != []:
-                    subLink = self.getSubLink(Alink)
+                    subLink = self.getSubLink(tag)
                     dictForJson.update(subLink)
-                dictForJson[link] += [[tag.name+ ' ' + tag.text.strip(),wrapTag.text.strip().replace(tag.text.strip(),"").replace("\n"," ")]]
+                    
+                dictForJson[link].append([tag.name+ ' ' + tag.text.strip(),wrapTag.text.strip().replace(tag.text.strip(),"").replace("\n"," ")])
         
         return dictForJson
     
@@ -258,10 +266,12 @@ class webScraping():
     def startScraping(self):
         dictForJson = {}
         dictForJson[self.getTodayDate()] = {}
-        for link in self.web[:2]:
+        for link in self.web:
             # soup = ex.makeSoup(link)
-            dictForJson[self.getTodayDate()].update({link : self.getDataBySoup(link)})
-        print(json.dumps(dictForJson, indent=4, sort_keys=True))
+            dictForJson[self.getTodayDate()].update({link : self.getDataByLink(link)})
+            # print("\n\n",list(dictForJson[self.getTodayDate()][link].keys()))
+        
+        # print(json.dumps(dictForJson, indent=4, sort_keys=True))
         self.writeJson(dictForJson)
         # print(dictForJson)
 ex = webScraping()
