@@ -10,10 +10,20 @@ from os.path import dirname, realpath, join
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox
 import numpy as np
 from datetime import datetime
+from textblob import TextBlob 
+from datetime import datetime
+import tweepy as tw
+import requests
+import re
+import glob
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
+
+import DataManager
+import twitter_scrap
+
 #class SearchKeyTweet() :
 #class SearchLinkWeb() :
 
@@ -53,16 +63,15 @@ class Ui_MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QtWidgets.QTableView()
-        self.data = pd.read_csv("tweet_data_1932022.csv", encoding='utf8',index_col=False)
+        self.data = dm.unionfile(['tweet_data_2432022.csv','tweet_data_2532022.csv'])
+        #self.data = dm.unionfile(glob.glob("*.csv"))
         self.model = TableModel(self.data)
         self.table.setModel(self.model)
         self.table = QtWidgets.QTableView()
         #self.maxDate()
         #self.setDate()
-        self.keywords = ['bl anime','anime comedy','anime romance','ต่างโลก','anime','animation','shounen','pixar',
-        'harem','fantasy anime','sport anime','from manga','disney animation','animation studio',
-        'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
-        
+        self.keywords = list(set(self.data['Keyword'].tolist()))
+
     def showDialog(self,keys):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
@@ -208,6 +217,8 @@ class Ui_MainWindow(QWidget):
     #def clickMethod(self):
 
 if __name__ == "__main__":
+    dm = DataManager.DataManager()
+    twSc = twitter_scrap.Twitter_Scrap()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

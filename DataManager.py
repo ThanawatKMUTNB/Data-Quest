@@ -43,21 +43,21 @@ class DataManager:
         self.df.sort_values(by=columns,inplace=True)
         return self.df
         
-    def searchkeys(self,keyword):
-        self.keys = self.df['Keyword'].tolist()
-        self.keys = list(set(self.keys))
-        keyword = keyword.lower()
-        if keyword in self.keys:
-            return self.df.loc[self.df['Keyword']==keyword]
-        else:
-            print(f'{keyword} not in Database. Do you want to search?')
-            Ans = str(input()).lower()                                                  #wait for GUI
-            if Ans == 'yes':
-                self.keys.append(keyword)
-                # self.savedata()
-                # return self.df.loc[self.df['Keyword']==keyword]
-            else:
-                pass
+    # def searchkeys(self,keyword):
+    #     self.keys = self.df['Keyword'].tolist()
+    #     self.keys = list(set(self.keys))
+    #     keyword = keyword.lower()
+    #     if keyword in self.keys:
+    #         return self.df.loc[self.df['Keyword']==keyword]
+    #     else:
+    #         print(f'{keyword} not in Database. Do you want to search?')
+    #         Ans = str(input()).lower()                                                  
+    #         if Ans == 'yes':
+    #             self.keys.append(keyword)
+    #             # self.savedata()
+    #             # return self.df.loc[self.df['Keyword']==keyword]
+    #         else:
+    #             pass
 
     def unionfile(self,filenames):              #type filename -> list
         for file in filenames:
@@ -70,7 +70,7 @@ class DataManager:
                 self._start += 1
         return self.df
 
-    def getdate(self,since,until):  ####edit
+    def getperiod(self,since,until):  ####edit
         self.df.sort_values(by=['Time','Keyword'],inplace=True)
         mask = (self.df['Time']>=since) & (self.df['Time']<=until)
         return self.df.loc[mask]
