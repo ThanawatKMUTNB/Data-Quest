@@ -10,7 +10,7 @@ import time
 import requests
 
 class Twitter_Scrap:
-    def __init__(self,filename):
+    def __init__(self):
 
         #twitter api
         consumer_key = "EaFU9nJw2utR0lo2PUmJE3VZy"
@@ -20,14 +20,16 @@ class Twitter_Scrap:
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         self._api = tw.API(auth, wait_on_rate_limit=True)
-        self.keys = []
 
         #thai api
         self._url = "https://api.aiforthai.in.th/ssense"                     
         self._headers = {'Apikey': "0kFkiFLdf4TAyY3JeUT9WVnB5naP6SjW"}
 
-        self.filename = filename
-        self.df = pd.read_csv(self.filename)
+        self.df = None
+        self.keys = []
+
+    def setdataframe(self,df):
+        self.df = df
         self.keys = self.df['Keyword'].tolist()
         self.keys = list(set(self.keys))
 
@@ -85,11 +87,15 @@ class Twitter_Scrap:
                     tweet_polarity.append(self.getSentiment(tweet.full_text))
                     tweet_sentiment.append(TextBlob(tweet.full_text).sentiment.polarity)
                 elif tweet.lang == 'th':
-                    text = tweet.full_text
+                    text = re.sub(r'[%]',' ',tweet.full_text)
                     params = {'text':text}
                     response = requests.get(self._url, headers=self._headers, params=params)
-                    polarity = str(response.json()['sentiment']['polarity'])
-                    sentiment = str(response.json()['sentiment']['score'])
+                    try:
+                        polarity = str(response.json()['sentiment']['polarity'])
+                        sentiment = str(response.json()['sentiment']['score'])
+                    except (KeyError):
+                        polarity = 'neutral'
+                        sentiment = 0
                     tweet_polarity.append(polarity)
                     tweet_sentiment.append(sentiment)
 
@@ -100,18 +106,25 @@ class Twitter_Scrap:
 
     def savedata(self):
 
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        #self.df = pd.read_csv(self.filename)
-        os.remove(self.filename)
+        current_time = datetime.now().strftime("%H:%M:%S")
+        print('\nstart saving @',current_time)
+        today = datetime.today()
+        filename = str("tweet_data_"+str(today.day)+str(today.month)+str(today.year)+".csv")
+
+        if filename not in glob.glob("*.csv"):
+            self.df = pd.DataFrame(columns=['Keyword','User','Tweet','Language','Time','User Location','Hashtag','Polarity','Likes','Retweet','Sentiment'])
+        else:
+            self.df = pd.read_csv(filename)
 
         for keyword in self.keys:
             self.df = pd.concat([self.df,self.get_related_tweets(keyword)])
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
-        self.df.to_csv(self.filename,encoding='utf-8',index=False)
-
+        if filename in glob.glob("*.csv"):
+            os.remove(filename)
+        self.df.to_csv(filename,encoding='utf-8',index=False)
+        current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
     def searchkeys(self,keyword):
@@ -130,10 +143,7 @@ class Twitter_Scrap:
             
 
 
-
-# keys = ['bl anime','anime comedy','anime romance','ต่างโลก','anime','animation','shounen','pixar',
-#         'harem','fantasy anime','sport anime','from manga','disney animation','animation studio',
-#         'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
-
-twsc = Twitter_Scrap('tweet_data_2132022.csv')
-print(twsc.searchkeys('sasaki and miyano'))
+df = pd.read_csv('tweet_data_2432022.csv')
+twsc = Twitter_Scrap()
+twsc.setdataframe(df)
+print(twsc.searchkeys('spy x family'))
