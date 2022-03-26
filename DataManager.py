@@ -20,14 +20,16 @@ class DataManager:
         access_token_secret = 'zFFc5OJywNMBrRAblI7kFV62ZTZPHfTU1Q5kZ1cKzUupD'
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
-
         self._api = tw.API(auth, wait_on_rate_limit=True)
+
+        self._url = "https://api.aiforthai.in.th/ssense"                     
+        self._headers = {'Apikey': "0kFkiFLdf4TAyY3JeUT9WVnB5naP6SjW"}
+
         self.keys = []
         self.df = None
         self._start = 0
 
-    def getSentiment(self,text):
-
+    def getSentimentENG(self,text):
         if TextBlob(text).sentiment.polarity > 0:
             return 'positive'
         elif TextBlob(text).sentiment.polarity == 0:
@@ -35,8 +37,18 @@ class DataManager:
         else:
             return 'negative'
 
+    def getSentimentTH(self,text):
+        text = re.sub(r'[%]',' ',text)
+        params = {'text':text}
+        response = requests.get(self._url, headers=self._headers, params=params)
+        try:
+            polarity = str(response.json()['sentiment']['polarity'])
+        except (KeyError):
+            polarity = 'neutral'
+        return polarity
+
     def formatdatetime(self,column):
-        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d')
+        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d') #dmY ทีหลัง
         self.df[column] = pd.to_datetime(self.df[column])
     
     def sortdf(self,columns):
@@ -51,7 +63,7 @@ class DataManager:
     #         return self.df.loc[self.df['Keyword']==keyword]
     #     else:
     #         print(f'{keyword} not in Database. Do you want to search?')
-    #         Ans = str(input()).lower()                                                  
+    #         Ans = str(input()).lower()
     #         if Ans == 'yes':
     #             self.keys.append(keyword)
     #             # self.savedata()
@@ -70,7 +82,7 @@ class DataManager:
                 self._start += 1
         return self.df
 
-    def getperiod(self,since,until):  ####edit
+    def getperiod(self,since,until):  ####column for twitter
         self.df.sort_values(by=['Time','Keyword'],inplace=True)
         mask = (self.df['Time']>=since) & (self.df['Time']<=until)
         return self.df.loc[mask]

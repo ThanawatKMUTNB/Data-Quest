@@ -63,14 +63,21 @@ class Ui_MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QtWidgets.QTableView()
-        self.data = dm.unionfile(['tweet_data_2432022.csv','tweet_data_2532022.csv'])
+        self.data = None
+        #self.data = dm.unionfile(['tweet_data_2432022.csv','tweet_data_2532022.csv'])
         #self.data = dm.unionfile(glob.glob("*.csv"))
-        self.model = TableModel(self.data)
-        self.table.setModel(self.model)
-        self.table = QtWidgets.QTableView()
+        self.model = None
+
+        # self.model = TableModel(self.data)
+        # self.table.setModel(self.model)
+        # self.table = QtWidgets.QTableView()
         #self.maxDate()
         #self.setDate()
-        self.keywords = list(set(self.data['Keyword'].tolist()))
+        #self.keywords = list(set(self.data['Keyword'].tolist()))
+    
+    def setNULLtable(self):
+        self.model = None
+        self.table.setModel(None)
 
     def showDialog(self,keys):
         msgBox = QMessageBox()

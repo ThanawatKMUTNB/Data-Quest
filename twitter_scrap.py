@@ -54,6 +54,9 @@ class Twitter_Scrap:
     def remove_url(self,txt):
 
         return " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", txt).split())
+    
+    def remove_url_th(txt):
+        return " ".join(re.sub("([^\u0E00-\u0E7Fa-zA-Z' ]|^'|'$|''|(\w+:\/\/\S+))", "", txt).split())
 
     def get_related_tweets(self,key_word):
 
@@ -77,16 +80,17 @@ class Twitter_Scrap:
                 twitter_users.append(tweet.user.screen_name)
                 twitter_users_location.append(tweet.user.location)
                 tweet_time.append(tweet.created_at)
-                tweet_string.append(self.remove_url(tweet.full_text))
                 tweet_countRT.append(tweet.retweet_count)
                 tweet_fav.append(tweet.favorite_count)
                 tweet_keyword.append(key_word)
                 tweet_hashtag.append(str(self.extract_hashtags(tweet.full_text)))
                 tweet_language.append(tweet.lang)
                 if tweet.lang == 'en':
+                    tweet_string.append(self.remove_url(tweet.full_text))
                     tweet_polarity.append(self.getSentiment(tweet.full_text))
                     tweet_sentiment.append(TextBlob(tweet.full_text).sentiment.polarity)
                 elif tweet.lang == 'th':
+                    tweet_string.append(self.remove_url_th(tweet.full_text))
                     text = re.sub(r'[%]',' ',tweet.full_text)
                     params = {'text':text}
                     response = requests.get(self._url, headers=self._headers, params=params)
@@ -143,7 +147,7 @@ class Twitter_Scrap:
             
 
 
-df = pd.read_csv('tweet_data_2432022.csv')
-twsc = Twitter_Scrap()
-twsc.setdataframe(df)
-print(twsc.searchkeys('spy x family'))
+# df = pd.read_csv('tweet_data_2432022.csv')
+# twsc = Twitter_Scrap()
+# twsc.setdataframe(df)
+# print(twsc.searchkeys('spy x family'))
