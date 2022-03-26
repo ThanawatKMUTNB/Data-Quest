@@ -6,6 +6,7 @@ import re
 from urllib.parse import urlparse
 import webScraping as web
 from io import StringIO
+import os
 def writePaintext():
     s = ex.makeSoup("https://www.animenewsnetwork.com/")
     # file = open("MyFileText.txt","w")
@@ -32,46 +33,26 @@ def write():
     file = open("MyFile.txt","w")
     titleT = s.find('title')
     file.writelines(titleT.text.strip()+"\n")
-
-    # s = s.text.strip()
-    # s = list(s)
     s = s.prettify()
     # print(s)
     try:
         file.writelines(s)
     except :
         pass
-        
     file.close()
     
-def wp(source):
-    print(source)
-    print(type(source))
-    
-    file = open("MyFileCon.txt","w")
-    # file.writelines(source)
-    
-    for i in source:
-        # print(type(i))
-        try:
-            file.writelines(i)
-        except print("ERROR"):
-            file.writelines(source)
-            pass
-    file.close()
-
 def writeJson(dictForWrite):
     #Over write
-    with open("WebJsonData.json","w") as f:
+    with open(ex.getPath(),"w") as f:
         json.dump(dictForWrite,f)
     f.close()
     
 def readJson():
-    with open("WebJsonData.json",encoding = "utf-8") as f:
+    with open(ex.getPath(),encoding = "utf-8") as f:
         data = json.load(f)
     # print(data)
     f.close()
-    data = json.dumps(data, indent=4)
+    # data = json.dumps(data, indent=4)
     return data
 
 
@@ -80,7 +61,7 @@ def updateDataWithClass(Link):
     try:
         subsoup = ex.makeSoup(Link)
         if subsoup != None :
-            content = subsoup.find('body')
+            content = subsoup.find('div')
             classN = 1
             if content != None:
                 classList = content.find_all('div',class_=True)
@@ -114,20 +95,21 @@ def updateData(Link):
     subpatt = []  
     # print("Error----------------",type(Link),Link)  
     try:
+        print(Link)
         subsoup = ex.makeSoup(Link)
         if subsoup != None :
-            content = subsoup.find('body')
+            content = subsoup.find('div')
             if content != None:
-                for k in content:
+                classList = content.find_all('div',class_=True)
+                for k in classList:
                     # tag = [t.name for t in k if t.name != None]
                     # print(tag,k['class'])
-                    
                     if k.text != "" and len(k.text.strip()) != 0:
                         paragraph = k.text.strip()
                         paragraph = str(paragraph)
                         paragraph = str(paragraph.strip()).replace("\n",' ')
                         subpatt.append(paragraph)
-                return subpatt
+                return list(set(subpatt))
     except :
         pass
         
@@ -136,31 +118,32 @@ def updateSubLink(patt,Link):
     i = Link
     soup = ex.makeSoup(i)
     ex.setMainDomain(i)
-    print("\nMain Domain : ",ex.getMainDomain())
+
     ex.setSubLink(soup)
     subLink = ex.getSubLink()
-    countN = len(subLink)
-    print("----------- SubLink ----------",countN)
+
     allLink = subLink 
-    for j in subLink[:3]:
-        ssoup = ex.makeSoup(j)
-        try:
-            ex.setSubLink(ssoup)
-            subSubLink = ex.getSubLink()
-            allLink += subSubLink
-            allLink = list(set(allLink))
-            print(str(countN)+" "+str(len(allLink))+" subSubLink : ",j)
-            countN -= 1
-            # subpatt = { i : "ss" for i in subSubLink }
-            # subpatt = updateData(j)
-            # patt[str(i)].update(subpatt)
-        except :
-            pass
-    subpatt = { ssl : updateData(ssl) for ssl in allLink[:3] }
+    # for j in subLink:
+    #     try:
+    #         print("\nMain Domain : ",ex.getMainDomain())
+    #         print("SubLink : ",j)
+    #         ssoup = ex.makeSoup(j)
+    #         ex.setSubLink(ssoup)
+    #         subSubLink = ex.getSubLink()
+    #         allLink += subSubLink
+    #         allLink = list(set(allLink))
+    #         print(len(allLink))
+    #         # print(str(countN)+" "+str(len(allLink))+" subSubLink : ",j)
+    #         # subpatt = { i : "ss" for i in subSubLink }
+    #         # subpatt = updateData(j)
+    #         # patt[str(i)].update(subpatt)
+    #     except :
+    #         pass
+    subpatt = { ssl : updateData(ssl) for ssl in sorted(allLink[:5])}
     patt[str(i)].update(subpatt)
     return patt        
 
-def updateDict(dateKey,dictWithDate):
+def updateDict(dictWithDate):
     for i in ex.web:
         patt = {
                 #MainLink
@@ -168,8 +151,10 @@ def updateDict(dateKey,dictWithDate):
                     #SubLink
                     {}
                 }
+        ex.setCurLink(i)
         patt = updateSubLink(patt,i)
-        dictWithDate[dateKey].update(patt)
+        dictWithDate[str(ex.getTodayDate())].update(patt)
+        writeJson(dictWithDate)
         # dictWithDate[dateKey][str(i)]["Sub 1"] = "LLL"
     return dictWithDate
 
@@ -190,15 +175,36 @@ yd = timedelta(-1)
 # jsonDict = { str(date.today() + yd) : "4774",
 #              str(date.today()) : "2",
 #              str(date.today() + tm) : "3"}
+
 jsonDict = {}
 jsonDict[str(ex.getTodayDate())] = {}
 print("\n\n ----------------- Start")
-s = updateDict(str(ex.getTodayDate()),jsonDict)
-# print(s)
+for i in ex.web[:1]:
+    # k = ex.makeSoup(i)
+    # soup = ex.makeSoup('https://www.animenewsnetwork.com/news/2022-03-22/crunchyroll-announces-release-schedule-for-spring-2022-anime-season/.183884')
+    print(type(i))
+    print(i)
+    
+    soup = ex.makeSoup(i)
+    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p']):
+        print("\n"+heading.name + ' ' + heading.text.strip())
+        # print("\n"+heading.name)
+        # if heading.find('a', href=True):
+        #     print(heading.previous_element.previous_element.text)
+            # print(len(heading.find('a', href=True)['href']))
+            # print(len(heading.find('a', href=True)))
+    
+    # for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+    #     print("\n"+heading.name + ' ' + heading.text.strip())
+    #     print(heading)
+    #     if heading.find('a', href=True):
+    #         print("----- "+heading.find('a', href=True)['href'])
+            # print(heading.find('a', href=True))
+    # allA = k.find_all('a', href=True)
+    
+# s = updateDict(jsonDict)
+# # print(s)
 
-writeJson(s)
-r = readJson()
-print(r)
-
-# ex.setMainDomain('https://otakumode.com/')
-# print(ex.getMainDomain())
+# writeJson(s)
+# r = readJson()
+# print(r)
