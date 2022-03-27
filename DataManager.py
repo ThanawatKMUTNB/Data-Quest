@@ -1,5 +1,9 @@
 from textblob import TextBlob 
 from datetime import datetime
+from pythainlp import word_tokenize
+from nltk.corpus import stopwords
+import nltk
+import langdetect
 import tweepy as tw
 import pandas as pd
 import re
@@ -20,14 +24,13 @@ class DataManager:
         access_token_secret = 'zFFc5OJywNMBrRAblI7kFV62ZTZPHfTU1Q5kZ1cKzUupD'
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
-
         self._api = tw.API(auth, wait_on_rate_limit=True)
+
         self.keys = []
         self.df = None
         self._start = 0
 
-    def getSentiment(self,text):
-
+    def getSentimentENG(self,text):
         if TextBlob(text).sentiment.polarity > 0:
             return 'positive'
         elif TextBlob(text).sentiment.polarity == 0:
@@ -35,15 +38,25 @@ class DataManager:
         else:
             return 'negative'
 
+    def getSentimentTH(self,text):
+        text = re.sub(r'[%]',' ',text)
+        params = {'text':text}
+        response = requests.get(self._url, headers=self._headers, params=params)
+        try:
+            polarity = str(response.json()['sentiment']['polarity'])
+        except (KeyError):
+            polarity = 'neutral'
+        return polarity
+
     def formatdatetime(self,column):
-        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d')
+        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d') #dmY ทีหลัง
         self.df[column] = pd.to_datetime(self.df[column])
     
     def sortdf(self,columns):
         self.df.sort_values(by=columns,inplace=True)
         return self.df
         
-    # def searchkeys(self,keyword):
+    # def searchkeys(self,keyword):     #it on GUI
     #     self.keys = self.df['Keyword'].tolist()
     #     self.keys = list(set(self.keys))
     #     keyword = keyword.lower()
@@ -51,7 +64,7 @@ class DataManager:
     #         return self.df.loc[self.df['Keyword']==keyword]
     #     else:
     #         print(f'{keyword} not in Database. Do you want to search?')
-    #         Ans = str(input()).lower()                                                  
+    #         Ans = str(input()).lower()
     #         if Ans == 'yes':
     #             self.keys.append(keyword)
     #             # self.savedata()
@@ -69,8 +82,51 @@ class DataManager:
                 self.df = df1
                 self._start += 1
         return self.df
+    
+    def setnewdf(self,dataframe):
+        self.df = dataframe
+        return self.df
 
-    def getperiod(self,since,until):  ####edit
-        self.df.sort_values(by=['Time','Keyword'],inplace=True)
-        mask = (self.df['Time']>=since) & (self.df['Time']<=until)
-        return self.df.loc[mask]
+    def getperiod(self,since,until):  ####column for twitter
+        self.formatdatetime('Time')
+        dff = self.df
+        dff.sort_values(by=['Time','Keyword'],inplace=True)
+        if since == None and until != None:
+            mask = (dff['Time']<=until)
+        elif since != None and until == None:
+            mask = (dff['Time']>=since)
+        elif since != None and until != None:
+            mask = (dff['Time']>=since) & (dff['Time']<=until)
+        else:
+            return dff
+        return dff.loc[mask]
+
+    def getrowwithkeys(self,keys):              #type keys -> list
+        df = self.df
+        return df.loc[df['Keyword'].isin(keys)]
+
+    def collectwords(self,dataframe):
+        nltk.download('stopwords')          #important
+        en_stops = set(stopwords.words('english'))
+        word = {}
+        for i in dataframe['Tweet']:    #only tweet
+            if langdetect.detect(i) != 'th':
+                allwords = i.split()
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+            else:
+                allwords = word_tokenize(i, engine='newmm')
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+        del word['RT']
+        del word[' ']   #for thai language
+        sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
+        return sortword     #tuple in list

@@ -1,8 +1,9 @@
 from ast import keyword
+from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 import pandas as pd
 import os
 import sqlite3
@@ -10,20 +11,11 @@ from os.path import dirname, realpath, join
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox
 import numpy as np
 from datetime import datetime
-from textblob import TextBlob 
-from datetime import datetime
-import tweepy as tw
-import requests
-import re
-import glob
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
-
-import DataManager
-import twitter_scrap
-
+import importWin as windo 
 #class SearchKeyTweet() :
 #class SearchLinkWeb() :
 
@@ -34,7 +26,128 @@ import twitter_scrap
         
         
 
+class ImportWindow(QtWidgets.QMainWindow):
+    scriptDir = dirname(realpath(__file__))
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.path = ""
+        self.df = ""
+        self.textLabel = str
+        
 
+    def openWindow(self):
+        self.window = QtWidgets.QMainWindow() 
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
+
+    def showQues(self):
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Are you sure to select this file?")
+        msgBox.setWindowTitle("Warning")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        #msgBox.buttonClicked.connect(msgButtonClick)
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes: #If press yes
+            self.hide()
+            self.openWindow()
+        if returnValue == QMessageBox.No:
+            print("No")
+    ''' def addPathList(self,path) :
+        if len(path) != 0 :
+            self.textLabel = self.path
+            return self.textLabel
+        else :
+            self.textLabel = "None"
+            return self.textLabel
+            
+            
+    def OpenFile(self):
+        #try:
+        path = QFileDialog.getOpenFileName(self, 'Open CSV', os.getenv('HOME'), 'CSV(*.csv)')[0]
+        print(path)
+        self.path = path
+        self.readFile(path)'''
+        #self.addPathList(self.path)
+        #return self.path
+            #print(self.all_data)
+        #except:
+            
+            #self.Close()
+    '''def readFile(self) :
+        self.df = pd.read_csv(self.path, encoding='utf8')
+        print(self.df)
+
+    def readFile(self,path):
+        isdir = os.path.isdir(path)
+        if isdir == False:
+            fileExtension = path.split(".")
+            # print(fileExtension[-1])
+            if fileExtension[-1] == "csv":
+                df = pd.read_csv(path, encoding='windows-1252')
+            else:
+                print("Excel ",path)
+                #print(fileExtension[-1])
+                df = pd.read_excel(path, engine = "openpyxl")
+            return df
+
+    def addFile(self):
+        self.label2.setText(self.path)'''
+        
+
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(385, 120)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(90, 60, 93, 28))
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton.clicked.connect(win.OpenFile)
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(190, 60, 93, 28))
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(20, 30, 55, 16))
+        self.label.setObjectName("label")
+        self.label2 = QtWidgets.QLabel(self.centralwidget)
+        self.label2.setGeometry(QtCore.QRect(90, 30, 191, 16))
+        self.label2.setObjectName("label2")
+        
+        #checkNew = functools.partial(self.addPathList,self.path)
+        #.label2.setText(self,self.addFile)
+
+        self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_3.setGeometry(QtCore.QRect(290, 20, 81, 28))
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.clicked.connect(self.showQues)
+
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 385, 26))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi2(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi2(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.pushButton.setText(_translate("MainWindow", "Import file"))
+        self.pushButton_2.setText(_translate("MainWindow", "Exit"))
+        self.pushButton_3.setText(_translate("MainWindow", "Confirm"))
+        self.label.setText(_translate("MainWindow", "File name"))
+        self.label2.setText(_translate("MainWindow", "None"))
+
+    def Close(self):
+        MainWindow.close()
+        
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -63,14 +176,35 @@ class Ui_MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QtWidgets.QTableView()
-        self.data = dm.unionfile(['tweet_data_2432022.csv','tweet_data_2532022.csv'])
-        #self.data = dm.unionfile(glob.glob("*.csv"))
-        self.model = TableModel(self.data)
+        self.df = win.readFile(win.path)
+        #self.data = win.OpenFile()
+        #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
+        self.earliest = None
+        self.lasted = None
+        self.getDataDate1 = None
+        self.getDataDate2 = None
+        self.model = TableModel(self.df)
         self.table.setModel(self.model)
         self.table = QtWidgets.QTableView()
         #self.maxDate()
         #self.setDate()
-        self.keywords = list(set(self.data['Keyword'].tolist()))
+        self.keywords = ['bl anime','anime comedy','anime romance','ต่างโลก','anime','animation','shounen','pixar',
+        'harem','fantasy anime','sport anime','from manga','disney animation','animation studio',
+        'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
+    
+    def readFile(self,path):
+        #path = win.path
+        isdir = os.path.isdir(path)
+        if isdir == False:
+            fileExtension = path.split(".")
+            # print(fileExtension[-1])
+            if fileExtension[-1] == "csv":
+                df = pd.read_csv(path, encoding='windows-1252')
+            else:
+                print("Excel ",path)
+                #print(fileExtension[-1])
+                df = pd.read_excel(path, engine = "openpyxl")
+            return df
 
     def showDialog(self,keys):
         msgBox = QMessageBox()
@@ -94,16 +228,40 @@ class Ui_MainWindow(QWidget):
             print("OK")
 
     '''def setDate(self) :
+        #self.d = QDate(self.data['Time'].min())
+        #self.f = QDate(self.data['Time'].max())
         self.data['Time'] = pd.to_datetime(self.data['Time']).dt.date
         self.data['Time'] = pd.to_datetime(self.data['Time']).dt.strftime('%d/%m/%Y')
+        self.rangeDate()
+        #self.minDate()
+        #(type(self.d))
+        #return self.data, self.d, self.f
 
     def maxDate(self) :
-        self.setDate()
-        print(self.data['Time'].min(), self.data['Time'].max())
-
+        self.earliest = (self.data['Time'].max()).toPyDate()
+        return self.earliest
+    def minDate(self) :
+        self.lasted = (self.data['Time'].min()).toPyDate()
+        return self.lasted
+        #print(type(self.lasted))
     def rangeDate(self) :
-        self.d = QDate(self.data['Time'].min())'''
-        
+        #self.maxDate()
+        #self.minDate()
+        start_date = self.earliest
+        end_date = self.lasted
+        mask = (self.data['Time'] > start_date) & (self.data['Time'] <= end_date)
+        print(mask)
+
+    def getDate1(self,getDate) :
+        #self.getDataDate1 = self.dateEdit.date().toPyDate()
+        self.getDataDate1 = getDate
+        print(self.getDataDate1)
+        return self.getDataDate1 
+    def getDate2(self,getDate) :
+        #self.getDataDate1 = self.dateEdit.date().toPyDate()
+        self.getDataDate2 = getDate
+        print(self.getDataDate2)
+        return self.getDataDate2 '''
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -129,13 +287,14 @@ class Ui_MainWindow(QWidget):
         self.PushButton1.setGeometry(QtCore.QRect(515, 70, 93, 28))
         self.PushButton1.setObjectName("PushButton1") #search button in tweet
         #print(self.checkInput(self.SearchBox1.text()))
-        checkNew = functools.partial(self.checkInput,self.SearchBox1.text())
+        checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         
-        self.PushButton1.clicked.connect(checkNew)
+        self.PushButton1.clicked.connect(checkNew1)
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setGeometry(QtCore.QRect(625, 70, 93, 28))
         self.PushButton_2.setObjectName("PushButton_2")
+        
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setGeometry(QtCore.QRect(40, 130, 711, 331))
@@ -147,12 +306,23 @@ class Ui_MainWindow(QWidget):
         self.dateEdit = QtWidgets.QDateEdit(self.tab)
         self.dateEdit.setGeometry(QtCore.QRect(40, 10, 110, 22))
         self.dateEdit.setObjectName("dateEdit")
+        #checkNew2 = functools.partial(self.getDate1,self.dateEdit.date().toPyDate())
+        #print(self.dateEdit.date().toPyDate())
+        #self.PushButton_2.clicked.connect(checkNew2)
+        #self.dateEdit.setMinimumDate(QDate(1, 1, 1900))
+        
+        #self.dateEdit.dateTime(self.lasted , '%d %b %Y')
         #self.dateEdit.setDate(self.d)
 
         self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_2.setGeometry(QtCore.QRect(180, 10, 110, 22))
         self.dateEdit_2.setObjectName("dateEdit_2")
         self.label_3 = QtWidgets.QLabel(self.tab)
+        #checkNew3 = functools.partial(self.getDate2,self.dateEdit_2.date().toPyDate())
+        #print(self.dateEdit.date().toPyDate())
+        #self.PushButton_2.clicked.connect(checkNew3)
+
+
         self.label_3.setGeometry(QtCore.QRect(160, 10, 16, 21))
         self.label_3.setObjectName("label_3")
         self.tabWidget.addTab(self.tab, "")
@@ -194,10 +364,13 @@ class Ui_MainWindow(QWidget):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        #print(type(self.data))
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        #print(self.getDataDate1)
+        #return self.getDataDate1
         #self.tableV.horizontalHeader().sectionClicked.connect(self.on_header_doubleClicked)
 
     def retranslateUi(self, MainWindow):
@@ -217,11 +390,10 @@ class Ui_MainWindow(QWidget):
     #def clickMethod(self):
 
 if __name__ == "__main__":
-    dm = DataManager.DataManager()
-    twSc = twitter_scrap.Twitter_Scrap()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
+    win = windo.scrapingManager()
+    ui = ImportWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
