@@ -1,5 +1,9 @@
 from textblob import TextBlob 
 from datetime import datetime
+from pythainlp import word_tokenize
+from nltk.corpus import stopwords
+import nltk
+import langdetect
 import tweepy as tw
 import pandas as pd
 import re
@@ -21,9 +25,6 @@ class DataManager:
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         self._api = tw.API(auth, wait_on_rate_limit=True)
-
-        self._url = "https://api.aiforthai.in.th/ssense"                     
-        self._headers = {'Apikey': "0kFkiFLdf4TAyY3JeUT9WVnB5naP6SjW"}
 
         self.keys = []
         self.df = None
@@ -55,7 +56,7 @@ class DataManager:
         self.df.sort_values(by=columns,inplace=True)
         return self.df
         
-    # def searchkeys(self,keyword):
+    # def searchkeys(self,keyword):     #it on GUI
     #     self.keys = self.df['Keyword'].tolist()
     #     self.keys = list(set(self.keys))
     #     keyword = keyword.lower()
@@ -81,8 +82,51 @@ class DataManager:
                 self.df = df1
                 self._start += 1
         return self.df
+    
+    def setnewdf(self,dataframe):
+        self.df = dataframe
+        return self.df
 
     def getperiod(self,since,until):  ####column for twitter
-        self.df.sort_values(by=['Time','Keyword'],inplace=True)
-        mask = (self.df['Time']>=since) & (self.df['Time']<=until)
-        return self.df.loc[mask]
+        self.formatdatetime('Time')
+        dff = self.df
+        dff.sort_values(by=['Time','Keyword'],inplace=True)
+        if since == None and until != None:
+            mask = (dff['Time']<=until)
+        elif since != None and until == None:
+            mask = (dff['Time']>=since)
+        elif since != None and until != None:
+            mask = (dff['Time']>=since) & (dff['Time']<=until)
+        else:
+            return dff
+        return dff.loc[mask]
+
+    def getrowwithkeys(self,keys):              #type keys -> list
+        df = self.df
+        return df.loc[df['Keyword'].isin(keys)]
+
+    def collectwords(self,dataframe):
+        nltk.download('stopwords')          #important
+        en_stops = set(stopwords.words('english'))
+        word = {}
+        for i in dataframe['Tweet']:    #only tweet
+            if langdetect.detect(i) != 'th':
+                allwords = i.split()
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+            else:
+                allwords = word_tokenize(i, engine='newmm')
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+        del word['RT']
+        del word[' ']   #for thai language
+        sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
+        return sortword     #tuple in list

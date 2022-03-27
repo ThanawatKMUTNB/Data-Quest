@@ -131,19 +131,19 @@ class Twitter_Scrap:
         current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
-    def searchkeys(self,keyword):
-        keyword = keyword.lower()
-        if keyword in self.keys:
-            return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
-        else:
-            print(f'{keyword} not in Database. Do you want to search?')
-            Ans = str(input()).lower()
-            if Ans == 'yes':
-                self.keys.append(keyword)
-                self.savedata()
-                return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
-            else:
-                pass
+    # def searchkeys(self,keyword):
+    #     keyword = keyword.lower()
+    #     if keyword in self.keys:
+    #         return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
+    #     else:
+    #         print(f'{keyword} not in Database. Do you want to search?')
+    #         Ans = str(input()).lower()
+    #         if Ans == 'yes':
+    #             self.keys.append(keyword)
+    #             self.savedata()
+    #             return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
+    #         else:
+    #             pass
             
 
 
