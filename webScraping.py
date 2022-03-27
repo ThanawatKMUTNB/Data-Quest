@@ -31,7 +31,7 @@ class webScraping():
         #             ]
         
         # self.web = ["https://www.animenewsnetwork.com/"]    
-        self.SaveFileName = 'WebScrapingData24.csv'
+        self.SaveFileName = "_WebJsonData.json"
         self.soupList = []
         self.dfdict = {"Page Title": [] ,"Page Date":[],"Page Data":[],"Page Image":[],"Page Link":[]}
         self.df = pd.DataFrame.from_dict(self.dfdict)
@@ -48,7 +48,7 @@ class webScraping():
     def getPath(self):
         path = "WebData"
         # path = "C:\\Users\\tongu\\Desktop\\Web-Scraping\\WebScraping\\Web-Scraping\\WebData"
-        fileJsonName = "_WebJsonData.json"
+        fileJsonName = self.SaveFileName
         path = os.path.join(path,(str(self.getTodayDate())+fileJsonName))
         print(path)
         return path
@@ -122,23 +122,29 @@ class webScraping():
     #         else:
     #             print("\n\n---------None Soup -----------",i)
     
-    # def getTitle(self,soup):
-    #     # for t in self.soupList:
-    #     if soup != None:
-    #         for i in soup.find_all('title'):            
-    #             return i.text.strip()
-    #     else:
-    #         return "None Title"
+    def getTitle(self,soup):
+        # for t in self.soupList:
+        if soup != None:
+            for i in soup.find_all('title'):            
+                return i.text.strip()
+        else:
+            return "None Title"
     
     def makeSoup(self,link):
         # for link in self.web:
-        req = requests.get(link)
-        if req.status_code == 200:
-            # print("in")
-            req.encoding = "utf-8"
-            soup = BeautifulSoup(req.text,"html.parser")
-            self.soupList.append(soup)
-            return soup
+        # print("makeSoup",link)
+        try:
+            req = requests.get(link)
+            if req.status_code == 200:
+                # print("in")
+                req.encoding = "utf-8"
+                soup = BeautifulSoup(req.text,"html.parser")
+                self.soupList.append(soup)
+                return soup
+        except :
+            print("makeSoup",link)
+            print(req)
+            pass
         # print(self.soupList)
         # else: return None
         
@@ -195,59 +201,78 @@ class webScraping():
         
     def getFullLink(self,href):
         if urlparse(href).netloc == self.MainDomain:
-            return str(href)
+            return 'https://'+str(href)
         elif urlparse(href).netloc == "":
             # if self.getStatus(self.MainDomain + link['href']):
-            return self.MainDomain + str(href)
+            return 'https://'+self.MainDomain + str(href)
         else:
             return ""
-    
+        
+    def getDataList(self,soup):
+        Data = []
+        content = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p'])
+        # print(link,len(content))
+        n=0
+        for tag in content:
+            wrapTag = tag.previous_element.previous_element
+            if tag.name == "p":
+                Data.append(["ParaGraph "+str(n) , tag.text.strip().replace("\n"," ")])
+                n+=1
+            else: #"h1", "h2", "h3", "h4", "h5", "h6"
+                Data.append([tag.text.strip(),wrapTag.text.strip().replace(tag.text.strip(),"").replace("\n"," ")])
+        return Data
+        
     def getSubLink(self,tag):
         Alink = tag.find_all('a', href = True)
         wrapTag = tag.previous_element.previous_element
-        FullLink = {}
+        dictForJson = {}
         for ListAlink in Alink:
-            FullLink[self.getFullLink(ListAlink['href'])] = []
-        return FullLink
-            # dictForJson.update({FullLink:""})
-            # print(ListAlink['href'])
-            
+            try:
+                soup = self.makeSoup(self.getFullLink(ListAlink['href']))
+                if self.getFullLink(ListAlink['href']) not in dictForJson.keys():
+                    dictForJson.update({self.getFullLink(ListAlink['href']):{'Lang': self.getLang(soup),
+                                                                        'Title' : self.getTitle(soup),
+                                                                        'Ref' : 0,
+                                                                        'Data' : self.getDataList(soup)
+                                                                        }})
+                else:
+                    # print("Dub")
+                    dictForJson[self.getFullLink(ListAlink['href'])]['Ref'] += 1
+            except :
+                pass
+        return dictForJson
+    
     def getDataByLink(self,link):
-        dictForJson = {link : []}
         soup = self.makeSoup(link)
+        dictForJson = {}
         self.MainDomain = self.getDomain(link)
         content = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p'])
-        # print(link,len(content))
-        n = 1
+        countN = len(content)
         for tag in content:
-            # tag = 
-            # print("\n"+tag.name+ ' ' + tag.text.strip())
-            wrapTag = tag.previous_element.previous_element
-            # print(wrapTag.text.strip())
-            # print(wrapTag)
+            print(countN," ",tag)
+            countN -= 1
             if tag.name == "p":
                 Alink = tag.find_all('a', href = True)
                 if Alink != []:
                     subLink = self.getSubLink(tag)
+                    
+                    for ssl in list(subLink.keys()):
+                        if ssl in list(dictForJson.keys()):
+                            dictForJson[ssl]["Ref"] += 1
+                            del subLink[ssl]
+                    
                     dictForJson.update(subLink)
-                try:  
-                    dictForJson[link].append(["ParaGraph "+str(n) , tag.text.strip().replace("\n"," ")])
-                    n+=1
-                except :
-                    pass
-                    # print("\n"+tag.name+ ' ' + tag.text.strip())
-                    
-                    # print("------------- ",dictForJson[link]," ",link)
-                    
             else: #"h1", "h2", "h3", "h4", "h5", "h6"
                 Alink = tag.find_all('a', href = True)
                 if Alink != []:
                     subLink = self.getSubLink(tag)
+                    for ssl in list(subLink.keys()):
+                        if ssl in list(dictForJson.keys()):
+                            dictForJson[ssl]["Ref"] += 1
+                            del subLink[ssl]
                     dictForJson.update(subLink)
-                    
-                dictForJson[link].append([tag.name+ ' ' + tag.text.strip(),wrapTag.text.strip().replace(tag.text.strip(),"").replace("\n"," ")])
-        
         return dictForJson
+    
     
     def writeJson(self,dictForWrite):
             #Over write
@@ -264,19 +289,42 @@ class webScraping():
         return data
     
     def startScraping(self):
-        dictForJson = {}
-        dictForJson[self.getTodayDate()] = {}
-        for link in self.web:
-            # soup = ex.makeSoup(link)
-            dictForJson[self.getTodayDate()].update({link : self.getDataByLink(link)})
-            # print("\n\n",list(dictForJson[self.getTodayDate()][link].keys()))
         
+        countWeb = len(self.web)
+        for link in self.web[:-1]:
+            dictForJson = {}
+            dictForJson[self.getTodayDate()] = {}
+            self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
+            countWeb -= 1
+            soup = self.makeSoup(link)
+            dictForJson[self.getTodayDate()].update({ link : {'Lang': self.getLang(soup),
+                                                'Title' : self.getTitle(soup),
+                                                'Data' : self.getDataList(soup)
+                                                }
+                                                })
+            print("-----Main Link",link)
+            # soup = ex.makeSoup(link)
+            self.writeJson(dictForJson)
+            dictForJson[self.getTodayDate()].update({link : self.getDataByLink(link)})
+            self.writeJson(dictForJson)
+            for ssl in list(dictForJson[self.getTodayDate()][link].keys())[1:]:
+                self.writeJson(dictForJson)
+                print("Current Size : ",len(dictForJson[self.getTodayDate()][link]))
+                dictSsl = self.getDataByLink(ssl)
+                for sslLink in list(dictSsl.keys()):
+                    if sslLink in list(dictForJson[self.getTodayDate()][link].keys()):
+                        dictForJson[self.getTodayDate()][link][sslLink]["Ref"] += 1
+                        del dictSsl[sslLink]
+                dictForJson[self.getTodayDate()][link].update(dictSsl)
+        # print("Current Size : ",len(dictForJson[self.getTodayDate()][link]))
+        # dictForJson[self.getTodayDate()].update({link : self.getDataByLink(ssl)})
+        # print(json.dumps(self.getDataByLink(ssl), indent=4, sort_keys=True))
         # print(json.dumps(dictForJson, indent=4, sort_keys=True))
         self.writeJson(dictForJson)
-        # print(dictForJson)
+        
 ex = webScraping()
-# link = 'https://www.animenewsnetwork.com/news/2022-03-22/crunchyroll-announces-release-schedule-for-spring-2022-anime-season/.183884'
 ex.startScraping()
-    
+# r = ex.readJson()
+# print(r)
 # ex.creatDataframe()
 # ex.search("anime")

@@ -165,46 +165,20 @@ def recursive_items(dictionary):
         else:
             yield (key, value)
             
-ex = web.webScraping()
-# linkMain = "https://www.animenewsnetwork.com/"
-# s = ex.makeSoup(linkMain)
+# ex = web.webScraping()
+# # linkMain = "https://www.animenewsnetwork.com/"
+# # s = ex.makeSoup(linkMain)
 
-tm = timedelta(1)
-yd = timedelta(-1)
+# tm = timedelta(1)
+# yd = timedelta(-1)
 
-# jsonDict = { str(date.today() + yd) : "4774",
-#              str(date.today()) : "2",
-#              str(date.today() + tm) : "3"}
+# # jsonDict = { str(date.today() + yd) : "4774",
+# #              str(date.today()) : "2",
+# #              str(date.today() + tm) : "3"}
 
-jsonDict = {}
-jsonDict[str(ex.getTodayDate())] = {}
+# jsonDict = {}
+# jsonDict[str(ex.getTodayDate())] = {}
 print("\n\n ----------------- Start")
-for i in ex.web[:1]:
-    # k = ex.makeSoup(i)
-    # soup = ex.makeSoup('https://www.animenewsnetwork.com/news/2022-03-22/crunchyroll-announces-release-schedule-for-spring-2022-anime-season/.183884')
-    print(type(i))
-    print(i)
-    
-    soup = ex.makeSoup(i)
-    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6",'p']):
-        print("\n"+heading.name + ' ' + heading.text.strip())
-        # print("\n"+heading.name)
-        # if heading.find('a', href=True):
-        #     print(heading.previous_element.previous_element.text)
-            # print(len(heading.find('a', href=True)['href']))
-            # print(len(heading.find('a', href=True)))
-    
-    # for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
-    #     print("\n"+heading.name + ' ' + heading.text.strip())
-    #     print(heading)
-    #     if heading.find('a', href=True):
-    #         print("----- "+heading.find('a', href=True)['href'])
-            # print(heading.find('a', href=True))
-    # allA = k.find_all('a', href=True)
-    
-# s = updateDict(jsonDict)
-# # print(s)
 
-# writeJson(s)
-# r = readJson()
-# print(r)
+# ex.web = ["https://www.animenewsnetwork.com/"]
+# ex.startScraping()
