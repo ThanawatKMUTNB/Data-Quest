@@ -39,18 +39,24 @@ class webScraping():
         self.currentLink = ""
         self.subLink = []
 
-    def setCurLink(self,Link):
-        self.currentLink = Link
+    # def setCurLink(self,Link):
+    #     self.currentLink = Link
     
-    def getCurLink(self):
-        return self.currentLink
+    # def getCurLink(self):
+    #     return self.currentLink
+    
+    def setFileName(self,newName):
+        self.SaveFileName = newName
         
-    def getPath(self):
-        path = "WebData"
+    def getFileName(self):
+        return self.SaveFileName
+    
+    def getPath(self,path,fileName):
+        # path = "WebData"
         # path = "C:\\Users\\tongu\\Desktop\\Web-Scraping\\WebScraping\\Web-Scraping\\WebData"
-        fileJsonName = self.SaveFileName
+        fileJsonName = fileName #self.SaveFileName
         path = os.path.join(path,(str(self.getTodayDate())+fileJsonName))
-        print(path)
+        # print(path)
         return path
     
     def setMainDomain(self,link):
@@ -69,7 +75,7 @@ class webScraping():
             return False
         
     # def setSubLink(self,soup):
-    #     href = [self.currentLink]
+    #     href = []
     #     # print(type(soup))   
     #     for link in soup.find_all('a', href=True):
     #         if urlparse(link['href']).netloc == self.MainDomain:
@@ -79,10 +85,7 @@ class webScraping():
     #             href.append(self.MainDomain + link['href'])
     #     # print("Href Type : ",type(href[0]))
     #     self.subLink = list(set(href))
-        
-    # def getSubLink(self):
-    #     # print(self.subLink)
-    #     return sorted(self.subLink)
+    #     return list(set(href))
     
     def getLang(self,soup):
         for link in soup.find_all('html', lang=True):
@@ -151,6 +154,11 @@ class webScraping():
     # def creatDataframe(self):
     #     self.setTodayData()
     #     self.writeCSV()
+    
+    # def writeCSV(self,df):
+    #     file = open('try.csv', encoding="utf8")
+    #     df.to_csv('try.csv',index=True)
+    #     file.close()
         
     # def writeCSV(self):
     #     file = open(self.SaveFileName, encoding="utf8")
@@ -175,25 +183,25 @@ class webScraping():
     #         self.df.to_csv(self.SaveFileName)
     #     file.close()
 
-    def search(self,word):
-        file = open(self.SaveFileName, encoding="utf8")
-        # print(type(file))
-        if len(file.readlines()) != 0:
-            # print("Read not 0")
-            print("Search : ",word)
-            oldDf = pd.read_csv(self.SaveFileName,index_col=0)
-            searchDict = {"Word Count": [] ,"Page Title": [] ,"Page Date":[],"Page Link":[]}
-            searchDf = pd.DataFrame.from_dict(searchDict)
-            for i in range(len(oldDf)):
-                text = oldDf.iloc[i]["Page Data"]
-                wordCount = text.count(word.lower())+text.count(word.upper())
-                searchDf = searchDf.append({"Word Count": wordCount ,"Page Title": oldDf.iloc[i]["Page Data"] 
-                                            ,"Page Date":oldDf.iloc[i]["Page Date"],"Page Link":oldDf.iloc[i]["Page Link"]}
-                                           ,ignore_index=True)
-            sorted_df = searchDf.sort_values(by=['Word Count'], ascending=False)
-            print(sorted_df)
+    # def search(self,word):
+    #     file = open(self.SaveFileName, encoding="utf8")
+    #     # print(type(file))
+    #     if len(file.readlines()) != 0:
+    #         # print("Read not 0")
+    #         print("Search : ",word)
+    #         oldDf = pd.read_csv(self.SaveFileName,index_col=0)
+    #         searchDict = {"Word Count": [] ,"Page Title": [] ,"Page Date":[],"Page Link":[]}
+    #         searchDf = pd.DataFrame.from_dict(searchDict)
+    #         for i in range(len(oldDf)):
+    #             text = oldDf.iloc[i]["Page Data"]
+    #             wordCount = text.count(word.lower())+text.count(word.upper())
+    #             searchDf = searchDf.append({"Word Count": wordCount ,"Page Title": oldDf.iloc[i]["Page Data"] 
+    #                                         ,"Page Date":oldDf.iloc[i]["Page Date"],"Page Link":oldDf.iloc[i]["Page Link"]}
+    #                                        ,ignore_index=True)
+    #         sorted_df = searchDf.sort_values(by=['Word Count'], ascending=False)
+    #         print(sorted_df)
             
-        file.close()
+    #     file.close()
     
     def getDomain(self,link):
         domain = urlparse(link).netloc
@@ -274,22 +282,22 @@ class webScraping():
         return dictForJson
     
     
-    def writeJson(self,dictForWrite):
-            #Over write
-        with open(self.getPath(),"w") as f:
-            json.dump(dictForWrite,f)
-        f.close()
+    # def writeJson(self,dictForWrite):
+    #         #Over write
+    #     with open(self.getPath(),"w") as f:
+    #         json.dump(dictForWrite,f)
+    #     f.close()
         
-    def readJson(self):
-        with open(self.getPath(),encoding = "utf-8") as f:
-            data = json.load(f)
-        # print(data)
-        f.close()
-        # data = json.dumps(data, indent=4)
-        return data
+    # def readJson(self):
+    #     # with open(self.getPath(),encoding = "utf-8") as f:
+    #     with open("WebData\\27-03-2022_20_WebJsonData.json",encoding = "utf-8") as f:
+    #         data = json.load(f)
+    #     # print(data)
+    #     f.close()
+    #     # data = json.dumps(data, indent=4)
+    #     return data
     
     def startScraping(self):
-        
         countWeb = len(self.web)
         for link in self.web[:-1]:
             dictForJson = {}
@@ -316,15 +324,5 @@ class webScraping():
                         dictForJson[self.getTodayDate()][link][sslLink]["Ref"] += 1
                         del dictSsl[sslLink]
                 dictForJson[self.getTodayDate()][link].update(dictSsl)
-        # print("Current Size : ",len(dictForJson[self.getTodayDate()][link]))
-        # dictForJson[self.getTodayDate()].update({link : self.getDataByLink(ssl)})
-        # print(json.dumps(self.getDataByLink(ssl), indent=4, sort_keys=True))
-        # print(json.dumps(dictForJson, indent=4, sort_keys=True))
-        self.writeJson(dictForJson)
         
-ex = webScraping()
-ex.startScraping()
-# r = ex.readJson()
-# print(r)
-# ex.creatDataframe()
-# ex.search("anime")
+        # self.writeJson(dictForJson)

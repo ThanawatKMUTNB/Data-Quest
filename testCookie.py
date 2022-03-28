@@ -5,8 +5,10 @@ import json
 import re
 from urllib.parse import urlparse
 import webScraping as web
+import DataManager as data
 from io import StringIO
 import os
+import ast
 def writePaintext():
     s = ex.makeSoup("https://www.animenewsnetwork.com/")
     # file = open("MyFileText.txt","w")
@@ -165,20 +167,24 @@ def recursive_items(dictionary):
         else:
             yield (key, value)
             
-# ex = web.webScraping()
-# # linkMain = "https://www.animenewsnetwork.com/"
-# # s = ex.makeSoup(linkMain)
+ex = web.webScraping()
+dm = data.DataManager()
+link = "https://www.animenewsnetwork.com/"
+# ex.setMainDomain(link)
+# s = ex.makeSoup(link)
 
-# tm = timedelta(1)
-# yd = timedelta(-1)
+path = dm.getPath('','try.csv')
+df = dm.readCsvToDf(path)
+# print(df.head)
+# print(type(df['Data'][0]))
+# dataL = dm.strOfListToList(df['Data'][0])
 
-# # jsonDict = { str(date.today() + yd) : "4774",
-# #              str(date.today()) : "2",
-# #              str(date.today() + tm) : "3"}
 
-# jsonDict = {}
-# jsonDict[str(ex.getTodayDate())] = {}
-print("\n\n ----------------- Start")
+# print(len(df))
+# print(df.columns)
 
-# ex.web = ["https://www.animenewsnetwork.com/"]
-# ex.startScraping()
+searchDf = dm.search(df,['Anime',"Manga"])
+dm.writeCsvByDf("100searchTable.csv",searchDf)
+# dm.convertToSearch(['Revisiting', 'G', 'no', 'Reconguista,', 'And', 'Looking', 'Back', 'On', "'Happy", "Tomino'", '', '', '', 'Nov', '26,', '22:00'])
+# sl = ex.setSubLink(s)
+# print(len(sl))
