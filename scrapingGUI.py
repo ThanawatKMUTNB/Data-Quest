@@ -1,8 +1,9 @@
 from ast import keyword
+import encodings
+from msilib.schema import ListView
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QDate
 import pandas as pd
 import os
@@ -11,7 +12,6 @@ from os.path import dirname, realpath, join
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox
 import numpy as np
 from datetime import datetime
-
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
@@ -26,7 +26,7 @@ import importWin as windo
         
         
 
-class ImportWindow(QtWidgets.QMainWindow):
+'''class ImportWindow(QtWidgets.QMainWindow):
     scriptDir = dirname(realpath(__file__))
     def __init__(self):
         super().__init__()
@@ -55,48 +55,7 @@ class ImportWindow(QtWidgets.QMainWindow):
             self.openWindow()
         if returnValue == QMessageBox.No:
             print("No")
-    ''' def addPathList(self,path) :
-        if len(path) != 0 :
-            self.textLabel = self.path
-            return self.textLabel
-        else :
-            self.textLabel = "None"
-            return self.textLabel
-            
-            
-    def OpenFile(self):
-        #try:
-        path = QFileDialog.getOpenFileName(self, 'Open CSV', os.getenv('HOME'), 'CSV(*.csv)')[0]
-        print(path)
-        self.path = path
-        self.readFile(path)'''
-        #self.addPathList(self.path)
-        #return self.path
-            #print(self.all_data)
-        #except:
-            
-            #self.Close()
-    '''def readFile(self) :
-        self.df = pd.read_csv(self.path, encoding='utf8')
-        print(self.df)
-
-    def readFile(self,path):
-        isdir = os.path.isdir(path)
-        if isdir == False:
-            fileExtension = path.split(".")
-            # print(fileExtension[-1])
-            if fileExtension[-1] == "csv":
-                df = pd.read_csv(path, encoding='windows-1252')
-            else:
-                print("Excel ",path)
-                #print(fileExtension[-1])
-                df = pd.read_excel(path, engine = "openpyxl")
-            return df
-
-    def addFile(self):
-        self.label2.setText(self.path)'''
         
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(385, 120)
@@ -147,6 +106,7 @@ class ImportWindow(QtWidgets.QMainWindow):
 
     def Close(self):
         MainWindow.close()
+'''
         
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
@@ -169,29 +129,46 @@ class TableModel(QtCore.QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
-    
-    
+
 class Ui_MainWindow(QWidget):
     
     def __init__(self):
         super().__init__()
         self.table = QtWidgets.QTableView()
-        self.df = win.readFile(win.path)
+        self.df = pd.read_csv("tweet_data_2732022.csv", encoding='utf8',index_col=False) #win.readFile(win.path) save tweet file
+        
         #self.data = win.OpenFile()
         #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
+        self.getSince = str
+        self.getUntil = str
         self.earliest = None
         self.lasted = None
         self.getDataDate1 = None
         self.getDataDate2 = None
         self.model = TableModel(self.df)
-        self.table.setModel(self.model)
         self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        
+
         #self.maxDate()
         #self.setDate()
         self.keywords = ['bl anime','anime comedy','anime romance','ต่างโลก','anime','animation','shounen','pixar',
         'harem','fantasy anime','sport anime','from manga','disney animation','animation studio',
         'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
-    
+
+
+    def showSecondFile(self,fileName) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
+        self.dt = pd.read_csv(fileName , encoding='utf8')
+        self.model = TableModel(self.dt) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+
+    def addKeywordToList(self,listName) : #วน add keywords 
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords)
+            listName.addItem(item[i])
+
     def readFile(self,path):
         #path = win.path
         isdir = os.path.isdir(path)
@@ -227,17 +204,15 @@ class Ui_MainWindow(QWidget):
         else :
             print("OK")
 
-    '''def setDate(self) :
-        #self.d = QDate(self.data['Time'].min())
-        #self.f = QDate(self.data['Time'].max())
-        self.data['Time'] = pd.to_datetime(self.data['Time']).dt.date
-        self.data['Time'] = pd.to_datetime(self.data['Time']).dt.strftime('%d/%m/%Y')
-        self.rangeDate()
+    def setDate(self) :
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.date
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y-%m-%d')
+        #self.rangeDate()
         #self.minDate()
         #(type(self.d))
         #return self.data, self.d, self.f
 
-    def maxDate(self) :
+    '''def maxDate(self) :
         self.earliest = (self.data['Time'].max()).toPyDate()
         return self.earliest
     def minDate(self) :
@@ -274,7 +249,7 @@ class Ui_MainWindow(QWidget):
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.label1 = QtWidgets.QLabel(self.tab)
-        self.label1.setGeometry(QtCore.QRect(309, 20, 91, 20))
+        self.label1.setGeometry(QtCore.QRect(290, 40, 151, 20))
         self.label1.setObjectName("label1")
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
         self.SearchBox1.setGeometry(QtCore.QRect(145, 70, 351, 31))
@@ -297,12 +272,22 @@ class Ui_MainWindow(QWidget):
         
 
         self.tableView = QtWidgets.QTableView(self.tab)
-        self.tableView.setGeometry(QtCore.QRect(40, 130, 711, 331))
+        self.tableView.setGeometry(QtCore.QRect(190, 140, 561, 331))
         self.tableView.setObjectName("tableView")
 
-        #self.setDate()
+        self.setDate()
         self.tableView.setModel(self.model) #show table in pyqt5
+        #############################
+        self.showSecondFile("WebScrapingData24.csv") 
 
+
+        self.listView = QtWidgets.QListWidget(self.tab)
+        self.listView.setGeometry(QtCore.QRect(20, 140, 151, 331))
+        self.listView.setObjectName("listView")
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView.addItem(item)
+        
         self.dateEdit = QtWidgets.QDateEdit(self.tab)
         self.dateEdit.setGeometry(QtCore.QRect(40, 10, 110, 22))
         self.dateEdit.setObjectName("dateEdit")
@@ -340,9 +325,13 @@ class Ui_MainWindow(QWidget):
         self.label = QtWidgets.QLabel(self.tab_2)
         self.label.setGeometry(QtCore.QRect(50, 80, 101, 16))
         self.label.setObjectName("label")
-        self.listView = QtWidgets.QListView(self.tab_2)
-        self.listView.setGeometry(QtCore.QRect(40, 130, 681, 361))
-        self.listView.setObjectName("listView")
+
+        self.tableView2 = QtWidgets.QTableView(self.tab_2)
+        self.tableView2.setGeometry(QtCore.QRect(40, 130, 681, 361))
+        self.tableView2.setObjectName("tableView2")
+
+        #self.tableView2.setModel(self.model2)
+
         self.label_2 = QtWidgets.QLabel(self.tab_2)
         self.label_2.setGeometry(QtCore.QRect(300, 20, 151, 20))
         self.label_2.setObjectName("label_2")
@@ -381,11 +370,15 @@ class Ui_MainWindow(QWidget):
         self.PushButton1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Refresh"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.pushButton_2.setText(_translate("MainWindow", "PushButton"))
+        self.pushButton.setText(_translate("MainWindow", "Search"))
+        self.pushButton_2.setText(_translate("MainWindow", "Refresh"))
         self.label.setText(_translate("MainWindow", "TextLabel"))
         self.label_2.setText(_translate("MainWindow", "Web scraping"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
+        self.dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
 
     #def clickMethod(self):
 
@@ -393,7 +386,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     win = windo.scrapingManager()
-    ui = ImportWindow()
+    ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
