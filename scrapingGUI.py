@@ -136,7 +136,7 @@ class Ui_MainWindow(QWidget):
         super().__init__()
         self.table = QtWidgets.QTableView()
         self.df = pd.read_csv("tweet_data_2732022.csv", encoding='utf8',index_col=False) #win.readFile(win.path) save tweet file
-        self.dt = pd.read_csv("WebScrapingData24.csv", encoding='utf8',index_col=False)
+        
         #self.data = win.OpenFile()
         #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
         self.getSince = str
@@ -157,11 +157,12 @@ class Ui_MainWindow(QWidget):
         'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
 
 
-    def showSecondFile(self) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
-        self.model2 = TableModel(self.dt) # อยากได้ไฟล์ไหนไปใส่ในตาราง แทนที่ self.dt เลย
-        self.table2 = QtWidgets.QTableView()
-        self.table2.setModel(self.model2) #เอา df แปลงเป็นตารางเรียบร้อย
-        self.tableView.setModel(self.model2) #เอาตารางไปโชว์เลย
+    def showSecondFile(self,fileName) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
+        self.dt = pd.read_csv(fileName , encoding='utf8')
+        self.model = TableModel(self.dt) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
 
     def addKeywordToList(self,listName) : #วน add keywords 
         for i in range(len(self.keywords)) :
@@ -277,7 +278,7 @@ class Ui_MainWindow(QWidget):
         self.setDate()
         self.tableView.setModel(self.model) #show table in pyqt5
         #############################
-        #self.showSecondFile() 
+        self.showSecondFile("WebScrapingData24.csv") 
 
 
         self.listView = QtWidgets.QListWidget(self.tab)
