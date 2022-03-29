@@ -9,19 +9,28 @@ import re
 import pandas as pd
 from urllib.parse import urlparse
 import json
-
+import urllib.robotparser
 # from testCookie import write, writeJson
 class webScraping():
     def __init__(self):
-        self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/category/anime-news/",
-                    "https://myanimelist.net/","https://otakumode.com/news/anime",
-                    "https://news.dexclub.com/","https://my-best.in.th/49872",
-                    "https://www.anime-japan.jp/2021/en/news/","https://the-japan-news.com/news/manga&anime/",
-                    "https://anime-news.tokyo/","https://manga.tokyo/news/",
-                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime","https://www.independent.co.uk/topic/anime",
-                    "https://soranews24.com/tag/anime/","https://anitrendz.net/news/",
-                    "https://thebestjapan.com/the-best-of-japan/anime-fans/","https://wiki.anime-os.com/chart/all-2020/",
-                    "https://kwaamsuk.net/10-anime-netflix/","https://www.online-station.net/anime/326294/",
+        self.web = ["https://www.animenewsnetwork.com/",
+                    "https://www.cbr.com/category/anime-news/",
+                    "https://myanimelist.net/",
+                    "https://otakumode.com/news/anime",
+                    "https://news.dexclub.com/",
+                    "https://my-best.in.th/49872",
+                    "https://www.anime-japan.jp/2021/en/news/",
+                    "https://todayanimenews.com",
+                    "https://anime-news.tokyo/" ,
+                    "https://manga.tokyo/news/",
+                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
+                    "https://www.independent.co.uk/topic/anime",
+                    "https://soranews24.com/tag/anime/",
+                    "https://anitrendz.net/news/",
+                    "https://thebestjapan.com/the-best-of-japan/anime-fans/",
+                    "https://wiki.anime-os.com/chart/all-2020/",
+                    "https://kwaamsuk.net/10-anime-netflix/",
+                    "https://www.online-station.net/anime/326294/",
                     "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
                     "https://www.metalbridges.com/cool-anime-songs/"
                     ] 
@@ -38,7 +47,7 @@ class webScraping():
         self.MainDomain = ""
         self.currentLink = ""
         self.subLink = []
-
+        self.refLink = []
     # def setCurLink(self,Link):
     #     self.currentLink = Link
     
@@ -73,20 +82,39 @@ class webScraping():
             return True
         else:
             return False
-        
-    # def setSubLink(self,soup):
-    #     href = []
-    #     # print(type(soup))   
-    #     for link in soup.find_all('a', href=True):
-    #         if urlparse(link['href']).netloc == self.MainDomain:
-    #             href.append(link['href'])
-    #         if urlparse(link['href']).netloc == "":
-    #             # if self.getStatus(self.MainDomain + link['href']):
-    #             href.append(self.MainDomain + link['href'])
-    #     # print("Href Type : ",type(href[0]))
-    #     self.subLink = list(set(href))
-    #     return list(set(href))
     
+    def canFetch(self,link): # False - can
+        rp = urllib.robotparser.RobotFileParser()
+        result = rp.can_fetch("*", link)
+        return result
+    
+    def setSubLink(self,soup):
+        refl = []
+        subl = []
+        # print(type(soup))   
+        for link in soup.find_all('a', href=True):
+            if urlparse(link['href']).netloc == self.MainDomain:
+                if self.canFetch(link['href']) == False:
+                    subl.append(link['href'])
+                # print(link['href'])
+            elif urlparse(link['href']).netloc == "":
+                if self.getStatus(self.MainDomain + link['href']):
+                    subl.append(self.MainDomain + link['href'])
+                # print(self.MainDomain + link['href'])
+            else:
+                if self.canFetch(link['href']) == False:
+                    refl.append(link['href'])
+                # print(link['href'])
+        # print("Href Type : ",type(href[0]))
+        self.subLink = list(set(subl))
+        self.refLink = list(set(refl))
+    
+    def getAllSubLink(self):
+        return self.subLink
+    
+    def getAllRefLink(self):
+        return self.refLink
+        
     def getLang(self,soup):
         for link in soup.find_all('html', lang=True):
             # print(link['lang'])
@@ -298,12 +326,14 @@ class webScraping():
     #     return data
     
     def startScraping(self):
-        countWeb = len(self.web)
-        for link in self.web[:-1]:
+        # countWeb = len(self.web)
+        countWeb = 1
+        for link in self.web[:1]:
             dictForJson = {}
             dictForJson[self.getTodayDate()] = {}
             self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
-            countWeb -= 1
+            # countWeb -= 1
+            countWeb += 1
             soup = self.makeSoup(link)
             dictForJson[self.getTodayDate()].update({ link : {'Lang': self.getLang(soup),
                                                 'Title' : self.getTitle(soup),
@@ -326,3 +356,5 @@ class webScraping():
                 dictForJson[self.getTodayDate()][link].update(dictSsl)
         
         # self.writeJson(dictForJson)
+        
+    

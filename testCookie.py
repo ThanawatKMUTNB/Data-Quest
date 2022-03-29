@@ -173,8 +173,9 @@ link = "https://www.animenewsnetwork.com/"
 # ex.setMainDomain(link)
 # s = ex.makeSoup(link)
 
-path = dm.getPath('','try.csv')
-df = dm.readCsvToDf(path)
+# path = dm.getPath('','try.csv')
+# df = dm.readCsvToDf(path)
+
 # print(df.head)
 # print(type(df['Data'][0]))
 # dataL = dm.strOfListToList(df['Data'][0])
@@ -183,8 +184,20 @@ df = dm.readCsvToDf(path)
 # print(len(df))
 # print(df.columns)
 
-searchDf = dm.search(df,['Anime',"Manga"])
-dm.writeCsvByDf("100searchTable.csv",searchDf)
+# searchDf = dm.search(df,['Anime',"Manga"])
+# dm.writeCsvByDf("100searchTable.csv",searchDf)
+
 # dm.convertToSearch(['Revisiting', 'G', 'no', 'Reconguista,', 'And', 'Looking', 'Back', 'On', "'Happy", "Tomino'", '', '', '', 'Nov', '26,', '22:00'])
 # sl = ex.setSubLink(s)
 # print(len(sl))
+
+for i in ex.web:
+    # i = ex.web[7]
+    ex.currentLink = i
+    soup = ex.makeSoup(i)
+    ex.setSubLink(soup)
+    sub = ex.getAllSubLink()
+    ref = ex.getAllRefLink()
+    print(len(sub),len(ref))
+    # print(i)
+    # print(dm.canFetch(i))

@@ -14,6 +14,7 @@ import os
 import schedule
 import time
 import requests
+import urllib.robotparser
 
 class DataManager:
     def __init__(self):
@@ -233,3 +234,8 @@ class DataManager:
                         resultdf = pd.concat([resultdf,pd.DataFrame(defaltDict,index=[0])], ignore_index=True)
         # print(resultdf)
         return resultdf
+    
+    def canFetch(self,link): # False - can
+        rp = urllib.robotparser.RobotFileParser()
+        result = rp.can_fetch("*", link)
+        return result
