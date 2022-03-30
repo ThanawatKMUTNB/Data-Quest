@@ -11,103 +11,16 @@ import sqlite3
 from os.path import dirname, realpath, join
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
 import importWin as windo 
 #class SearchKeyTweet() :
 #class SearchLinkWeb() :
-
-    
-
     #def getDate(self) :
         #Ui_MainWindow().__init__()
-        
-        
-
-'''class ImportWindow(QtWidgets.QMainWindow):
-    scriptDir = dirname(realpath(__file__))
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.path = ""
-        self.df = ""
-        self.textLabel = str
-        
-
-    def openWindow(self):
-        self.window = QtWidgets.QMainWindow() 
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
-
-    def showQues(self):
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText("Are you sure to select this file?")
-        msgBox.setWindowTitle("Warning")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        #msgBox.buttonClicked.connect(msgButtonClick)
-        returnValue = msgBox.exec()
-        if returnValue == QMessageBox.Yes: #If press yes
-            self.hide()
-            self.openWindow()
-        if returnValue == QMessageBox.No:
-            print("No")
-        
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(385, 120)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(90, 60, 93, 28))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(win.OpenFile)
-        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(190, 60, 93, 28))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(20, 30, 55, 16))
-        self.label.setObjectName("label")
-        self.label2 = QtWidgets.QLabel(self.centralwidget)
-        self.label2.setGeometry(QtCore.QRect(90, 30, 191, 16))
-        self.label2.setObjectName("label2")
-        
-        #checkNew = functools.partial(self.addPathList,self.path)
-        #.label2.setText(self,self.addFile)
-
-        self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_3.setGeometry(QtCore.QRect(290, 20, 81, 28))
-        self.pushButton_3.setObjectName("pushButton_3")
-        self.pushButton_3.clicked.connect(self.showQues)
-
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 385, 26))
-        self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-
-        self.retranslateUi2(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi2(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.pushButton.setText(_translate("MainWindow", "Import file"))
-        self.pushButton_2.setText(_translate("MainWindow", "Exit"))
-        self.pushButton_3.setText(_translate("MainWindow", "Confirm"))
-        self.label.setText(_translate("MainWindow", "File name"))
-        self.label2.setText(_translate("MainWindow", "None"))
-
-    def Close(self):
-        MainWindow.close()
-'''
-        
+        #       
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -156,6 +69,30 @@ class Ui_MainWindow(QWidget):
         'harem','fantasy anime','sport anime','from manga','disney animation','animation studio',
         'shounen ai','shoujo','อนิเมะ','2d animation','อนิเมะแนะนำ','japan animation']
 
+    def dateSet(self) :
+        date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        self.dateEdit.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+        date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        self.dateEdit_2.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_2.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+    def dateSinceReturn(self) :
+        self.getSince = self.dateEdit.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        print(self.getSince)
+        return self.getSince
+
+    def dateUntilReturn(self) :
+        self.getUntil = self.dateEdit_2.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        print(self.getUntil)
+        return self.getUntil
+
+    def showDefaultFile(self) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
 
     def showSecondFile(self,fileName) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
         self.dt = pd.read_csv(fileName , encoding='utf8')
@@ -204,30 +141,8 @@ class Ui_MainWindow(QWidget):
         else :
             print("OK")
 
-    def setDate(self) :
-        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.date
-        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y-%m-%d')
-        #self.rangeDate()
-        #self.minDate()
-        #(type(self.d))
-        #return self.data, self.d, self.f
 
-    '''def maxDate(self) :
-        self.earliest = (self.data['Time'].max()).toPyDate()
-        return self.earliest
-    def minDate(self) :
-        self.lasted = (self.data['Time'].min()).toPyDate()
-        return self.lasted
-        #print(type(self.lasted))
-    def rangeDate(self) :
-        #self.maxDate()
-        #self.minDate()
-        start_date = self.earliest
-        end_date = self.lasted
-        mask = (self.data['Time'] > start_date) & (self.data['Time'] <= end_date)
-        print(mask)
-
-    def getDate1(self,getDate) :
+    '''def getDate1(self,getDate) :
         #self.getDataDate1 = self.dateEdit.date().toPyDate()
         self.getDataDate1 = getDate
         print(self.getDataDate1)
@@ -262,24 +177,26 @@ class Ui_MainWindow(QWidget):
         self.PushButton1.setGeometry(QtCore.QRect(515, 70, 93, 28))
         self.PushButton1.setObjectName("PushButton1") #search button in tweet
         #print(self.checkInput(self.SearchBox1.text()))
-        checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         
-        self.PushButton1.clicked.connect(checkNew1)
+
+        #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
+        checkNew = functools.partial(self.showSecondFile,"WebScrapingData24.csv")   
+        self.PushButton1.clicked.connect(checkNew)
+
+        #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())   
+        #self.PushButton1.clicked.connect(self.PushButton1.clicked.connect(checkNew1)
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setGeometry(QtCore.QRect(625, 70, 93, 28))
         self.PushButton_2.setObjectName("PushButton_2")
-        
+        self.PushButton_2.clicked.connect(self.showDefaultFile)
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setGeometry(QtCore.QRect(190, 140, 561, 331))
         self.tableView.setObjectName("tableView")
-
-        self.setDate()
         self.tableView.setModel(self.model) #show table in pyqt5
-        #############################
-        self.showSecondFile("WebScrapingData24.csv") 
-
 
         self.listView = QtWidgets.QListWidget(self.tab)
         self.listView.setGeometry(QtCore.QRect(20, 140, 151, 331))
@@ -291,23 +208,14 @@ class Ui_MainWindow(QWidget):
         self.dateEdit = QtWidgets.QDateEdit(self.tab)
         self.dateEdit.setGeometry(QtCore.QRect(40, 10, 110, 22))
         self.dateEdit.setObjectName("dateEdit")
-        #checkNew2 = functools.partial(self.getDate1,self.dateEdit.date().toPyDate())
-        #print(self.dateEdit.date().toPyDate())
-        #self.PushButton_2.clicked.connect(checkNew2)
-        #self.dateEdit.setMinimumDate(QDate(1, 1, 1900))
-        
-        #self.dateEdit.dateTime(self.lasted , '%d %b %Y')
-        #self.dateEdit.setDate(self.d)
 
+         #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
         self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_2.setGeometry(QtCore.QRect(180, 10, 110, 22))
         self.dateEdit_2.setObjectName("dateEdit_2")
+        self.dateSet()
+
         self.label_3 = QtWidgets.QLabel(self.tab)
-        #checkNew3 = functools.partial(self.getDate2,self.dateEdit_2.date().toPyDate())
-        #print(self.dateEdit.date().toPyDate())
-        #self.PushButton_2.clicked.connect(checkNew3)
-
-
         self.label_3.setGeometry(QtCore.QRect(160, 10, 16, 21))
         self.label_3.setObjectName("label_3")
         self.tabWidget.addTab(self.tab, "")
@@ -353,14 +261,9 @@ class Ui_MainWindow(QWidget):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        #print(type(self.data))
-
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        #print(self.getDataDate1)
-        #return self.getDataDate1
-        #self.tableV.horizontalHeader().sectionClicked.connect(self.on_header_doubleClicked)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -368,7 +271,7 @@ class Ui_MainWindow(QWidget):
         self.label1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label2.setText(_translate("MainWindow", "Keyword"))
         self.PushButton1.setText(_translate("MainWindow", "Search"))
-        self.PushButton_2.setText(_translate("MainWindow", "Refresh"))
+        self.PushButton_2.setText(_translate("MainWindow", "Default"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
         self.pushButton.setText(_translate("MainWindow", "Search"))
         self.pushButton_2.setText(_translate("MainWindow", "Refresh"))
