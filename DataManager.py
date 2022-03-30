@@ -32,6 +32,7 @@ class DataManager:
         self.keys = []
         self.df = None
         self._start = 0
+        self.filenames = []
 
     def getSentimentENG(self,text):
         if TextBlob(text).sentiment.polarity > 0:
@@ -74,8 +75,12 @@ class DataManager:
     #             # return self.df.loc[self.df['Keyword']==keyword]
     #         else:
     #             pass
+    def printtest(self):
+        print('eiei')
 
     def unionfile(self,filenames):              #type filename -> list
+        self.filenames = filenames
+        self._start = 0
         for file in filenames:
             df1 = pd.read_csv(file)
             if self._start != 0:
@@ -88,6 +93,10 @@ class DataManager:
     
     def setnewdf(self,dataframe):
         self.df = dataframe
+        return self.df
+    
+    def setdefaultDF(self):
+        self.df = self.unionfile(self.filenames)
         return self.df
 
     def getperiod(self,since,until):  ####column for twitter
@@ -141,6 +150,7 @@ class DataManager:
                            for k in jsonDict[i][j].keys()},
                        orient='index')
         return df
+    
     
     def readJson(self,path):
         with open(path,encoding = "utf-8") as f:
