@@ -74,7 +74,7 @@ class Twitter_Scrap:
         for tweet in tw.Cursor(self._api.search_tweets,
                                 q=key_word,
                                 tweet_mode="extended",
-                                include_entities=True).items(5):
+                                include_entities=True).items(10):
                                 
             if(tweet.lang == 'en' or tweet.lang == 'th'):
                 twitter_users.append(tweet.user.screen_name)
@@ -105,6 +105,9 @@ class Twitter_Scrap:
 
         self.df = pd.DataFrame({'Keyword':tweet_keyword,'User':twitter_users,'Tweet': tweet_string,'Language':tweet_language, 'Time': tweet_time,'User Location':twitter_users_location,
                             'Hashtag':tweet_hashtag,'Polarity':tweet_polarity,'Likes':tweet_fav,'Retweet':tweet_countRT,'Sentiment':tweet_sentiment})
+
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y/%m/%d')
+        #self.df['Time'] = pd.to_datetime(self.df['Time'])
 
         return self.df
 

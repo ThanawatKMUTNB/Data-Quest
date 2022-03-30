@@ -11,7 +11,6 @@ import pandas as pd
 import re
 import glob
 import os
-import schedule
 import time
 import requests
 import urllib.robotparser
@@ -75,8 +74,6 @@ class DataManager:
     #             # return self.df.loc[self.df['Keyword']==keyword]
     #         else:
     #             pass
-    def printtest(self):
-        print('eiei')
 
     def unionfile(self,filenames):              #type filename -> list
         self.filenames = filenames
@@ -93,6 +90,13 @@ class DataManager:
     
     def setnewdf(self,dataframe):
         self.df = dataframe
+        return self.df
+    
+    def concatfile(self,dataframe):
+        self.df = pd.concat([self.df,dataframe])
+        self.df.drop_duplicates(keep='last',inplace=True)
+        self.df.sort_values(by=['Keyword'],inplace=True)
+        self.formatdatetime('Time')
         return self.df
     
     def setdefaultDF(self):

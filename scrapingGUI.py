@@ -93,31 +93,41 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil
 
-    def showDefaultFile(self) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
-        self.df = dm.unionfile(self.filename)
-        print(len(self.df.index))
-        self.model = TableModel(self.df) 
-        self.table = QtWidgets.QTableView()
-        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
-
-    def button1(self) : #ถ้าเรียกฟังก์ชั่นนี้ จะแทนที่ตารางอันเก่าที่ใช้คำสั่งว่า self.tableView.setModel(self.model)
-        #tw.setdataframe(self.df)
-        print("\n\n")
-        print(self.dateSinceReturn(),self.dateUntilReturn())
+    def showDefaultFile(self) :
+        self.df = dm.setdefaultDF()
+        #self.df = dm.unionfile(self.filename)
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        tw.setdataframe(self.df)
-        keyword = self.SearchBox1.text()
-        if not(keyword == None or keyword == ""):
-            self.dateSet()
-            self.df = tw.searchkeys(keyword)
-        #self.df = tw.df
-        print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+
+    def button1(self) :
+        print("\n\n")
+        print(len(self.df.index))
+        print(self.dateSinceReturn(),self.dateUntilReturn())
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        
+        tw.setdataframe(self.df)
+        keyword = self.SearchBox1.text()
+        if not(keyword == None or keyword == ""):
+            self.dateSet()
+            self.df = tw.searchkeys(keyword)
+            dm.concatfile(self.df)
+            if (keyword not in self.keywords):
+                #dm.concatfile(self.df)
+                print(len(self.df.index))
+                print(len(dm.df.index))
+                self.keywords.append(keyword)
+                self.addlist()
+            tw.setdataframe(self.df)
+        #print(self.SearchBox1.text())
+        print(len(self.df.index),tw.keys)
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView.setModel(self.model)
 
     def addKeywordToList(self,listName) : #วน add keywords 
         for i in range(len(self.keywords)) :
@@ -158,6 +168,12 @@ class Ui_MainWindow(QWidget):
             return keys
         else :
             print("OK")
+    
+    def addlist(self):
+        print(self.keywords)
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView.addItem(item)
 
 
     '''def getDate1(self,getDate) :
@@ -220,9 +236,7 @@ class Ui_MainWindow(QWidget):
         self.listView = QtWidgets.QListWidget(self.tab)
         self.listView.setGeometry(QtCore.QRect(20, 140, 151, 331))
         self.listView.setObjectName("listView")
-        for i in range(len(self.keywords)) :
-            item = QtWidgets.QListWidgetItem(self.keywords[i])
-            self.listView.addItem(item)
+        self.addlist()
         
         self.dateEdit = QtWidgets.QDateEdit(self.tab)
         self.dateEdit.setGeometry(QtCore.QRect(40, 10, 110, 22))
