@@ -10,6 +10,7 @@ import pandas as pd
 from urllib.parse import urlparse
 import json
 import urllib.robotparser
+from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
     def __init__(self):
@@ -89,16 +90,19 @@ class webScraping():
         return result
     
     def setSubLink(self,soup):
+        # print("in")
         refl = []
         subl = []
-        # print(type(soup))   
+        # n = len(soup.find_all('a', href=True))
         for link in soup.find_all('a', href=True):
+            # print(n)
+            # n-=1
             if urlparse(link['href']).netloc == self.MainDomain:
                 if self.canFetch(link['href']) == False:
                     subl.append(link['href'])
                 # print(link['href'])
             elif urlparse(link['href']).netloc == "":
-                if self.getStatus(self.MainDomain + link['href']):
+                if self.canFetch(self.MainDomain + link['href']) == False:
                     subl.append(self.MainDomain + link['href'])
                 # print(self.MainDomain + link['href'])
             else:
@@ -107,7 +111,7 @@ class webScraping():
                 # print(link['href'])
         # print("Href Type : ",type(href[0]))
         self.subLink = list(set(subl))
-        self.refLink = list(set(refl))
+        self.refLink = list(refl)
     
     def getAllSubLink(self):
         return self.subLink
@@ -329,31 +333,65 @@ class webScraping():
         # countWeb = len(self.web)
         countWeb = 1
         for link in self.web[:1]:
+            print(link)
             dictForJson = {}
-            dictForJson[self.getTodayDate()] = {}
-            self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
-            # countWeb -= 1
-            countWeb += 1
             soup = self.makeSoup(link)
-            dictForJson[self.getTodayDate()].update({ link : {'Lang': self.getLang(soup),
-                                                'Title' : self.getTitle(soup),
-                                                'Data' : self.getDataList(soup)
+            self.setMainDomain(link)
+            self.setSubLink(soup)
+            dictForJson[self.getTodayDate()] = { link : {'Lang' : self.getLang(soup),
+                                                        'Title' : self.getTitle(soup),
+                                                        # 'Sub' : len(self.getAllSubLink()),
+                                                        'Ref' : Counter(self.getAllRefLink()),
+                                                        'Data' : 'self.getDataList(soup)'
+                                                        }
                                                 }
-                                                })
-            print("-----Main Link",link)
-            # soup = ex.makeSoup(link)
-            self.writeJson(dictForJson)
-            dictForJson[self.getTodayDate()].update({link : self.getDataByLink(link)})
-            self.writeJson(dictForJson)
-            for ssl in list(dictForJson[self.getTodayDate()][link].keys())[1:]:
-                self.writeJson(dictForJson)
-                print("Current Size : ",len(dictForJson[self.getTodayDate()][link]))
-                dictSsl = self.getDataByLink(ssl)
-                for sslLink in list(dictSsl.keys()):
-                    if sslLink in list(dictForJson[self.getTodayDate()][link].keys()):
-                        dictForJson[self.getTodayDate()][link][sslLink]["Ref"] += 1
-                        del dictSsl[sslLink]
-                dictForJson[self.getTodayDate()][link].update(dictSsl)
+            # self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
+            # countWeb += 1
+            sl = self.getAllSubLink()
+            n = len(sl)
+            for i in sl[:3]:
+                print("\t",n)
+                n-=1
+                soup = self.makeSoup(i)
+                self.setSubLink(soup)
+                dictForJson[self.getTodayDate()].update({ i : {'Lang': self.getLang(soup),
+                                        'Title' : self.getTitle(soup),
+                                        # 'Sub' : len(self.getAllSubLink()),
+                                        'Ref' : Counter(self.getAllRefLink()),
+                                        'Data' : "self.getDataList(soup)"
+                                        }
+                                        })
+                for j in self.getAllSubLink()[:3]:
+                    soup = self.makeSoup(j)
+                    self.setSubLink(soup)
+                    dictForJson[self.getTodayDate()].update({ j : {'Lang': self.getLang(soup),
+                                            'Title' : self.getTitle(soup),
+                                            # 'Sub' : len(self.getAllSubLink()),
+                                            'Ref' : Counter(self.getAllRefLink()),
+                                            'Data' : "self.getDataList(soup)"
+                                            }
+                                            })
+            print(json.dumps(dictForJson, indent=4))
+            # print(dictForJson)
+            # dictForJson[self.getTodayDate()].update({ link : {'Lang': self.getLang(soup),
+            #                                     'Title' : self.getTitle(soup),
+            #                                     'Data' : self.getDataList(soup)
+            #                                     }
+            #                                     })
+            # print("-----Main Link",link)
+            # # soup = ex.makeSoup(link)
+            # self.writeJson(dictForJson)
+            # dictForJson[self.getTodayDate()].update({link : self.getDataByLink(link)})
+            # self.writeJson(dictForJson)
+            # for ssl in list(dictForJson[self.getTodayDate()][link].keys())[1:]:
+            #     self.writeJson(dictForJson)
+            #     print("Current Size : ",len(dictForJson[self.getTodayDate()][link]))
+            #     dictSsl = self.getDataByLink(ssl)
+            #     for sslLink in list(dictSsl.keys()):
+            #         if sslLink in list(dictForJson[self.getTodayDate()][link].keys()):
+            #             dictForJson[self.getTodayDate()][link][sslLink]["Ref"] += 1
+            #             del dictSsl[sslLink]
+            #     dictForJson[self.getTodayDate()][link].update(dictSsl)
         
         # self.writeJson(dictForJson)
         
