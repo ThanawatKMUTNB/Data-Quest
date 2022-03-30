@@ -55,7 +55,7 @@ class Twitter_Scrap:
 
         return " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", txt).split())
     
-    def remove_url_th(txt):
+    def remove_url_th(self,txt):
         return " ".join(re.sub("([^\u0E00-\u0E7Fa-zA-Z' ]|^'|'$|''|(\w+:\/\/\S+))", "", txt).split())
 
     def get_related_tweets(self,key_word):
@@ -74,7 +74,7 @@ class Twitter_Scrap:
         for tweet in tw.Cursor(self._api.search_tweets,
                                 q=key_word,
                                 tweet_mode="extended",
-                                include_entities=True).items(30):
+                                include_entities=True).items(5):
                                 
             if(tweet.lang == 'en' or tweet.lang == 'th'):
                 twitter_users.append(tweet.user.screen_name)
@@ -115,35 +115,38 @@ class Twitter_Scrap:
         today = datetime.today()
         filename = str("tweet_data_"+str(today.day)+str(today.month)+str(today.year)+".csv")
 
-        if filename not in glob.glob("*.csv"):
-            self.df = pd.DataFrame(columns=['Keyword','User','Tweet','Language','Time','User Location','Hashtag','Polarity','Likes','Retweet','Sentiment'])
-        else:
-            self.df = pd.read_csv(filename)
+        # if filename not in glob.glob("*.csv"):
+        #     self.df = pd.DataFrame(columns=['Keyword','User','Tweet','Language','Time','User Location','Hashtag','Polarity','Likes','Retweet','Sentiment'])
+        # else:
+        #     self.df = pd.read_csv(filename)
 
         for keyword in self.keys:
             self.df = pd.concat([self.df,self.get_related_tweets(keyword)])
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
-        if filename in glob.glob("*.csv"):
-            os.remove(filename)
-        self.df.to_csv(filename,encoding='utf-8',index=False)
+        # if filename in glob.glob("*.csv"):
+        #     os.remove(filename)
+        # self.df.to_csv(filename,encoding='utf-8',index=False)
         current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
-    # def searchkeys(self,keyword):
-    #     keyword = keyword.lower()
-    #     if keyword in self.keys:
-    #         return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
-    #     else:
-    #         print(f'{keyword} not in Database. Do you want to search?')
-    #         Ans = str(input()).lower()
-    #         if Ans == 'yes':
-    #             self.keys.append(keyword)
-    #             self.savedata()
-    #             return self.df.loc[self.df['Keyword']==keyword,['Tweet','Polarity']]
-    #         else:
-    #             pass
+    def searchkeys(self,keyword):
+        keyword = keyword.lower()
+        if keyword == None or keyword == "":
+            return self.df
+        if keyword in self.keys:
+            return self.df.loc[self.df['Keyword']==keyword]
+        else:
+            # print(f'{keyword} not in Database. Do you want to search?')
+            # Ans = str(input()).lower()
+            # if Ans == 'yes':
+                self.keys.append(keyword)
+                self.savedata()
+                return self.df.loc[self.df['Keyword']==keyword]
+            # else:
+                # print('You select NO')
+                # return self.df
             
 
 
