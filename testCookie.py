@@ -191,13 +191,15 @@ link = "https://www.animenewsnetwork.com/"
 # sl = ex.setSubLink(s)
 # print(len(sl))
 
-for i in ex.web:
-    # i = ex.web[7]
-    ex.currentLink = i
-    soup = ex.makeSoup(i)
-    ex.setSubLink(soup)
-    sub = ex.getAllSubLink()
-    ref = ex.getAllRefLink()
-    print(len(sub),len(ref))
-    # print(i)
-    # print(dm.canFetch(i))
+# for i in ex.web:
+#     # i = ex.web[7]
+#     ex.currentLink = i
+#     soup = ex.makeSoup(i)
+#     ex.setSubLink(soup)
+#     sub = ex.getAllSubLink()
+#     ref = ex.getAllRefLink()
+#     print(len(sub),len(ref))
+#     # print(i)
+#     # print(dm.canFetch(i))
+
+ex.startScraping()
