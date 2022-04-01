@@ -19,7 +19,7 @@ import functools
 import importWin as windo 
 
 import DataManager
-import twitter_scrap
+import twitter_scrap 
 #class SearchKeyTweet() :
 #class SearchLinkWeb() :
     #def getDate(self) :
@@ -148,19 +148,20 @@ class Ui_MainWindow(QWidget):
                 df = pd.read_excel(path, engine = "openpyxl")
             return df
 
-    def showDialog(self,keys):
+    def showDialog(self,keys): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText("Are you sure?")
-        msgBox.setWindowTitle("Warning")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        #msgBox.buttonClicked.connect(msgButtonClick)
+        msgBox.setText("Are you sure?") #แสดงข้อความ
+        msgBox.setWindowTitle("Warning") #Title
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
+        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
+        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
         returnValue = msgBox.exec()
-        if returnValue == QMessageBox.Yes: #If press yes
+        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
             self.keywords.append(keys)
-            print(self.keywords)
+            print(keys)
             return self.keywords
-        #if returnValue == QMessageBox.No: #If press no
+        #if returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
 
     def checkInput(self,keys) :
         if keys not in self.keywords :
@@ -168,50 +169,67 @@ class Ui_MainWindow(QWidget):
             return keys
         else :
             print("OK")
-    
+
     def addlist(self):
         print(self.keywords)
         for i in range(len(self.keywords)) :
             item = QtWidgets.QListWidgetItem(self.keywords[i])
             self.listView.addItem(item)
-
-
-    '''def getDate1(self,getDate) :
-        #self.getDataDate1 = self.dateEdit.date().toPyDate()
-        self.getDataDate1 = getDate
-        print(self.getDataDate1)
-        return self.getDataDate1 
-    def getDate2(self,getDate) :
-        #self.getDataDate1 = self.dateEdit.date().toPyDate()
-        self.getDataDate2 = getDate
-        print(self.getDataDate2)
-        return self.getDataDate2 '''
-
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.setWindowModality(QtCore.Qt.NonModal)
+        MainWindow.resize(812, 589)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(0, 20, 791, 551))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
+        self.tabWidget.setSizePolicy(sizePolicy)
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
-        self.label1 = QtWidgets.QLabel(self.tab)
-        self.label1.setGeometry(QtCore.QRect(290, 40, 151, 20))
-        self.label1.setObjectName("label1")
-        self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
-        self.SearchBox1.setGeometry(QtCore.QRect(145, 70, 351, 31))
-        self.SearchBox1.setObjectName("SearchBox1")
-        #self.SearchBox1.QInputDialog.getText(self.checkInput)
-        
+        self.gridLayout = QtWidgets.QGridLayout(self.tab)
+        self.gridLayout.setObjectName("gridLayout")
+        self.label_3 = QtWidgets.QLabel(self.tab)
+        self.label_3.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 0, 1, 1, 1)
+        self.dateEdit = QtWidgets.QDateEdit(self.tab)
+        self.dateEdit.setObjectName("dateEdit")
+        self.gridLayout.addWidget(self.dateEdit, 0, 0, 1, 1)
+        self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
+        self.dateEdit_2.setObjectName("dateEdit_2")
+        self.gridLayout.addWidget(self.dateEdit_2, 0, 2, 1, 1)
+
+        self.tableView = QtWidgets.QTableView(self.tab)
+        self.tableView.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tableView.sizePolicy().hasHeightForWidth())
+        self.tableView.setSizePolicy(sizePolicy)
+        self.tableView.setObjectName("tableView")
+        self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
+        self.tableView.setModel(self.model) #show table in pyqt5
+
         self.label2 = QtWidgets.QLabel(self.tab)
-        self.label2.setGeometry(QtCore.QRect(45, 80, 81, 20))
+        self.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.label2.setObjectName("label2")
+        self.gridLayout.addWidget(self.label2, 2, 0, 1, 1)
+
+        self.PushButton_2 = QtWidgets.QPushButton(self.tab)
+        self.PushButton_2.setObjectName("PushButton_2")
+        self.PushButton_2.clicked.connect(self.showDefaultFile)
+
+        self.gridLayout.addWidget(self.PushButton_2, 2, 5, 1, 1)
         self.PushButton1 = QtWidgets.QPushButton(self.tab)
-        self.PushButton1.setGeometry(QtCore.QRect(515, 70, 93, 28))
-        self.PushButton1.setObjectName("PushButton1")           #search button in tweet
-        #print(self.checkInput(self.SearchBox1.text()))
+        self.PushButton1.setObjectName("PushButton1")
+        self.gridLayout.addWidget(self.PushButton1, 2, 4, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -220,61 +238,65 @@ class Ui_MainWindow(QWidget):
         btm1 = functools.partial(self.button1)   
         self.PushButton1.clicked.connect(btm1)
 
-        #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())   
-        #self.PushButton1.clicked.connect(self.PushButton1.clicked.connect(checkNew1)
-
-        self.PushButton_2 = QtWidgets.QPushButton(self.tab)
-        self.PushButton_2.setGeometry(QtCore.QRect(625, 70, 93, 28))
-        self.PushButton_2.setObjectName("PushButton_2")
-        self.PushButton_2.clicked.connect(self.showDefaultFile)
-
-        self.tableView = QtWidgets.QTableView(self.tab)
-        self.tableView.setGeometry(QtCore.QRect(190, 140, 561, 331))
-        self.tableView.setObjectName("tableView")
-        self.tableView.setModel(self.model) #show table in pyqt5
-
         self.listView = QtWidgets.QListWidget(self.tab)
-        self.listView.setGeometry(QtCore.QRect(20, 140, 151, 331))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.listView.sizePolicy().hasHeightForWidth())
+        self.listView.setSizePolicy(sizePolicy)
+        self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
+        self.gridLayout.addWidget(self.listView, 3, 0, 1, 1)
         self.addlist()
         
-        self.dateEdit = QtWidgets.QDateEdit(self.tab)
-        self.dateEdit.setGeometry(QtCore.QRect(40, 10, 110, 22))
-        self.dateEdit.setObjectName("dateEdit")
+        self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
+        self.SearchBox1.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.SearchBox1.sizePolicy().hasHeightForWidth())
+        self.SearchBox1.setSizePolicy(sizePolicy)
+        self.SearchBox1.setObjectName("SearchBox1")
+        self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 3)
+        test = self.SearchBox1.text() 
+        checkNew1 = functools.partial(self.checkInput,test)
+        self.PushButton1.clicked.connect(checkNew1)
 
-         #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
-        self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
-        self.dateEdit_2.setGeometry(QtCore.QRect(180, 10, 110, 22))
-        self.dateEdit_2.setObjectName("dateEdit_2")
-        self.dateSet()
-
-        self.label_3 = QtWidgets.QLabel(self.tab)
-        self.label_3.setGeometry(QtCore.QRect(160, 10, 16, 21))
-        self.label_3.setObjectName("label_3")
+        self.label1 = QtWidgets.QLabel(self.tab)
+        self.label1.setAlignment(QtCore.Qt.AlignCenter)
+        self.label1.setObjectName("label1")
+        self.gridLayout.addWidget(self.label1, 1, 0, 1, 6)
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.textEdit = QtWidgets.QTextEdit(self.tab_2)
-        self.textEdit.setGeometry(QtCore.QRect(150, 70, 341, 31))
+        self.textEdit.setGeometry(QtCore.QRect(140, 100, 391, 28))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
+        self.textEdit.setSizePolicy(sizePolicy)
         self.textEdit.setObjectName("textEdit")
         self.pushButton = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton.setGeometry(QtCore.QRect(520, 70, 93, 28))
+        self.pushButton.setGeometry(QtCore.QRect(550, 100, 93, 28))
         self.pushButton.setObjectName("pushButton")
         self.pushButton_2 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_2.setGeometry(QtCore.QRect(630, 70, 93, 28))
+        self.pushButton_2.setGeometry(QtCore.QRect(660, 100, 93, 28))
         self.pushButton_2.setObjectName("pushButton_2")
         self.label = QtWidgets.QLabel(self.tab_2)
-        self.label.setGeometry(QtCore.QRect(50, 80, 101, 16))
+        self.label.setGeometry(QtCore.QRect(40, 110, 71, 16))
         self.label.setObjectName("label")
 
-        self.tableView2 = QtWidgets.QTableView(self.tab_2)
-        self.tableView2.setGeometry(QtCore.QRect(40, 130, 681, 361))
-        self.tableView2.setObjectName("tableView2")
-
-        #self.tableView2.setModel(self.model2)
+        self.listView_2 = QtWidgets.QListWidget(self.tab_2)
+        self.listView_2.setGeometry(QtCore.QRect(20, 140, 151, 331))
+        self.listView_2.setObjectName("listView_2")
+        #วน add keywords ท้ังหมดเข้าไปในตารางของ GUI
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView_2.addItem(item)
 
         self.label_2 = QtWidgets.QLabel(self.tab_2)
-        self.label_2.setGeometry(QtCore.QRect(300, 20, 151, 20))
+        self.label_2.setGeometry(QtCore.QRect(290, 60, 151, 20))
         self.label_2.setObjectName("label_2")
         self.dateEdit_3 = QtWidgets.QDateEdit(self.tab_2)
         self.dateEdit_3.setGeometry(QtCore.QRect(40, 10, 110, 22))
@@ -285,15 +307,31 @@ class Ui_MainWindow(QWidget):
         self.dateEdit_4 = QtWidgets.QDateEdit(self.tab_2)
         self.dateEdit_4.setGeometry(QtCore.QRect(180, 10, 110, 22))
         self.dateEdit_4.setObjectName("dateEdit_4")
+        self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
+        self.listWidget = QtWidgets.QListWidget(self.tab_2)
+        self.listWidget.setGeometry(QtCore.QRect(20, 160, 151, 331))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
+        self.listWidget.setSizePolicy(sizePolicy)
+        self.listWidget.setObjectName("listWidget")
         self.tabWidget.addTab(self.tab_2, "")
+        self.horizontalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 812, 26))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.menubar.sizePolicy().hasHeightForWidth())
+        self.menubar.setSizePolicy(sizePolicy)
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -311,21 +349,18 @@ class Ui_MainWindow(QWidget):
         self.label.setText(_translate("MainWindow", "TextLabel"))
         self.label_2.setText(_translate("MainWindow", "Web scraping"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
-        self.dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy/M/d")) #format ของวันที่ที่แสดง
         self.dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
 
-    #def clickMethod(self):
 
 if __name__ == "__main__":
     dm = DataManager.DataManager()
     tw = twitter_scrap.Twitter_Scrap()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    win = windo.scrapingManager()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-    
