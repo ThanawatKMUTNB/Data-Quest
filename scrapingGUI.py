@@ -75,11 +75,16 @@ class Ui_MainWindow(QWidget):
         self.keywords = list(set(self.keywords))
 
     def dateSet(self) :
-        date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        dm.formatdatetime('Time')
+        since = dm.df['Time'].min().strftime('%Y/%m/%d')
+        date = (datetime.strptime(since,'%Y/%m/%d')).date()
         self.dateEdit.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
-        date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        until = dm.df['Time'].max().strftime('%Y/%m/%d')
+        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
         self.dateEdit_2.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_2.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
@@ -93,7 +98,7 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil
 
-    def showDefaultFile(self) :
+    def showDefaultFile(self) : #from file
         self.df = dm.setdefaultDF()
         #self.df = dm.unionfile(self.filename)
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
@@ -105,22 +110,34 @@ class Ui_MainWindow(QWidget):
 
     def button1(self) :
         print("\n\n")
-        print(len(self.df.index))
+        print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
+        if self.dateSinceReturn()>self.dateUntilReturn():
+            self.showErrorDialog()
+            return
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        
+        #print(list(set(self.df['Keyword'].tolist())))
         tw.setdataframe(self.df)
-        keyword = self.SearchBox1.text()
+        keyword = self.SearchBox1.text().lower()
         if not(keyword == None or keyword == ""):
             self.dateSet()
-            self.df = tw.searchkeys(keyword)
-            dm.concatfile(self.df)
+            
             if (keyword not in self.keywords):
+                print('check dialog')
                 #dm.concatfile(self.df)
                 print(len(self.df.index))
-                print(len(dm.df.index))
-                self.keywords.append(keyword)
-                self.addlist()
+                if self.showDialog(keyword) == 'Yes':
+                    self.keywords.append(keyword)
+                    self.df = tw.searchkeys(keyword,'yes')
+                    dm.concatfile(self.df)
+                    #print(list(set(dm.df['Keyword'].tolist())))
+                    self.addlist()
+                else:
+                    self.df = tw.searchkeys(keyword,'no')
+                    #dm.concatfile(self.df)
+            else:
+                self.df = tw.searchkeys(keyword,'no')
+                #dm.concatfile(self.df)
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
@@ -148,27 +165,42 @@ class Ui_MainWindow(QWidget):
                 df = pd.read_excel(path, engine = "openpyxl")
             return df
 
-    def showDialog(self,keys): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+    def showDialog(self,keyword): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText("Are you sure?") #แสดงข้อความ
+        msgBox.setText(f"{keyword} not in Datafram \nDo you want to search?") #แสดงข้อความ
         msgBox.setWindowTitle("Warning") #Title
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
         #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
         #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
         returnValue = msgBox.exec()
         if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
-            self.keywords.append(keys)
-            print(keys)
-            return self.keywords
-        #if returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            print('Yes')
+            return 'Yes'
+            # self.keywords.append(keys)
+            # print(keys)
+            # return self.keywords
+        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            print('No')
+            return 'No'
 
-    def checkInput(self,keys) :
-        if keys not in self.keywords :
-            self.showDialog(self.SearchBox1.text())
-            return keys
-        else :
-            print("OK")
+    def showErrorDialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("Since date less than Until date")
+        #msg.setInformativeText('More information')
+        msg.setWindowTitle("Period time Error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
+    # def checkInput(self,keys) :
+    #     print('\n\ncheckinput',keys,self.keywords)
+    #     if keys not in self.keywords :
+    #         print(keys)
+    #         #self.showDialog(self.SearchBox1.text())
+    #         return keys
+    #     else :
+    #         print("OK")
 
     def addlist(self):
         print(self.keywords)
@@ -258,9 +290,9 @@ class Ui_MainWindow(QWidget):
         self.SearchBox1.setSizePolicy(sizePolicy)
         self.SearchBox1.setObjectName("SearchBox1")
         self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 3)
-        test = self.SearchBox1.text() 
-        checkNew1 = functools.partial(self.checkInput,test)
-        self.PushButton1.clicked.connect(checkNew1)
+        #test = self.SearchBox1.text() #text
+        #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
+        #self.PushButton1.clicked.connect(checkNew1)
 
         self.label1 = QtWidgets.QLabel(self.tab)
         self.label1.setAlignment(QtCore.Qt.AlignCenter)

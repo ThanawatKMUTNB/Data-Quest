@@ -134,8 +134,9 @@ class Twitter_Scrap:
         current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
-    def searchkeys(self,keyword):
+    def searchkeys(self,keyword,Ans):
         keyword = keyword.lower()
+        #print('keyword',keyword,'\nkeys',self.keys,'\nkeyword in keys?',keyword in self.keys)
         if keyword == None or keyword == "":
             return self.df
         if keyword in self.keys:
@@ -143,13 +144,13 @@ class Twitter_Scrap:
         else:
             # print(f'{keyword} not in Database. Do you want to search?')
             # Ans = str(input()).lower()
-            # if Ans == 'yes':
+            if Ans == 'yes':
                 self.keys.append(keyword)
                 self.savedata()
                 return self.df.loc[self.df['Keyword']==keyword]
-            # else:
-                # print('You select NO')
-                # return self.df
+            else:
+                print('You select NO')
+                return self.df.loc[self.df['Keyword']==keyword]
             
 
 

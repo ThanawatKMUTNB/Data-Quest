@@ -52,7 +52,7 @@ class DataManager:
         return polarity
 
     def formatdatetime(self,column):
-        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d') #dmY ทีหลัง
+        self.df[column] = pd.to_datetime(self.df[column]).dt.strftime('%Y/%m/%d')
         self.df[column] = pd.to_datetime(self.df[column])
     
     def sortdf(self,columns):
