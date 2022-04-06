@@ -24,7 +24,9 @@ import twitter_scrap
 #class SearchLinkWeb() :
     #def getDate(self) :
         #Ui_MainWindow().__init__()
-        #       
+        #
+        
+#ยังไม่แก้ช่วงวันที่ที่เลือกได้ใน tab 2 และ 3
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -60,6 +62,10 @@ class Ui_MainWindow(QWidget):
         #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
         self.getSince = str
         self.getUntil = str
+        '''self.getSince_2 = str
+        self.getUntil_2 = str
+        self.getSince_3 = str
+        self.getUntil_3 = 'str'''
         self.earliest = None
         self.lasted = None
         self.getDataDate1 = None
@@ -79,8 +85,8 @@ class Ui_MainWindow(QWidget):
         dm.formatdatetime('Time')
         since = dm.df['Time'].min().strftime('%Y/%m/%d')
         date = (datetime.strptime(since,'%Y/%m/%d')).date()
-        self.dateEdit.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        self.dateEdit_1.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_1.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
         until = dm.df['Time'].max().strftime('%Y/%m/%d')
@@ -88,8 +94,36 @@ class Ui_MainWindow(QWidget):
         self.dateEdit_2.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_2.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
+    def dateSet_2(self) :
+        #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        dm.formatdatetime('Time')
+        since = dm.df['Time'].min().strftime('%Y/%m/%d')
+        date = (datetime.strptime(since,'%Y/%m/%d')).date()
+        self.dateEdit_3.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_3.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+        #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        until = dm.df['Time'].max().strftime('%Y/%m/%d')
+        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
+        self.dateEdit_4.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_4.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+    def dateSet_3(self) :
+        #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        dm.formatdatetime('Time')
+        since = dm.df['Time'].min().strftime('%Y/%m/%d')
+        date = (datetime.strptime(since,'%Y/%m/%d')).date()
+        self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_5.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+        #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        until = dm.df['Time'].max().strftime('%Y/%m/%d')
+        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
+        self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_6.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
     def dateSinceReturn(self) :
-        self.getSince = self.dateEdit.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        self.getSince = self.dateEdit_1.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getSince)
         return self.getSince
 
@@ -108,6 +142,16 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
 
+    def showDefaultFileTweetW(self) : #from file
+        self.df = dm.setdefaultDF()
+        #self.df = dm.unionfile(self.filename)
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        print(len(self.df.index),tw.keys)
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
+
     def button1(self) :
         print("\n\n")
         print(len(self.df.index),'rows')
@@ -121,6 +165,8 @@ class Ui_MainWindow(QWidget):
         keyword = self.SearchBox1.text().lower()
         if not(keyword == None or keyword == ""):
             self.dateSet()
+            #self.dateSet_2()
+            #self.dateSet_3()
             
             if (keyword not in self.keywords):
                 print('check dialog')
@@ -145,6 +191,16 @@ class Ui_MainWindow(QWidget):
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView.setModel(self.model)
+        self.tableView_2.setModel(self.model) #จะให้โชว์ตารางตามที่ใส่ keyword ในหน้า tweet
+        self.labelShowKeywords() 
+        
+
+
+    def labelShowKeywords(self) :  #เอาไว้โชว์ label ตาม keyword ที่ใส่เข้าไปในตัว entry
+        keywordShow = self.SearchBox1.text().lower()
+        _translate = QtCore.QCoreApplication.translate
+        self.labelShow.setText(_translate("MainWindow", keywordShow)) #ให้โชว์ข้อความ
+        
 
     def addKeywordToList(self,listName) : #วน add keywords 
         for i in range(len(self.keywords)) :
@@ -202,11 +258,22 @@ class Ui_MainWindow(QWidget):
     #     else :
     #         print("OK")
 
-    def addlist(self):
+    def addlist(self): #ของ tab Tweet
         print(self.keywords)
         for i in range(len(self.keywords)) :
             item = QtWidgets.QListWidgetItem(self.keywords[i])
             self.listView.addItem(item)
+
+    def addlist_2(self): #ไว้ add ค่าลงในตารางทางซ้าย (ที่ไว้โชว์ keyword) ของ tab TweetW
+        for i in range(10) :
+            #item = str(QtWidgets.QListWidgetItem(i))
+            self.listView_2.addItem(str(i))
+
+    def addlist_3(self): #ของ tab Web scraping
+        print(self.keywords)
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView_3.addItem(item)                
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -231,9 +298,9 @@ class Ui_MainWindow(QWidget):
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
         self.gridLayout.addWidget(self.label_3, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
-        self.dateEdit = QtWidgets.QDateEdit(self.tab)
-        self.dateEdit.setObjectName("dateEdit")
-        self.gridLayout.addWidget(self.dateEdit, 0, 3, 1, 1)
+        self.dateEdit_1 = QtWidgets.QDateEdit(self.tab)
+        self.dateEdit_1.setObjectName("dateEdit_1")
+        self.gridLayout.addWidget(self.dateEdit_1, 0, 3, 1, 1)
         self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_2.setObjectName("dateEdit_2")
         self.gridLayout.addWidget(self.dateEdit_2, 0, 5, 1, 1)
@@ -249,10 +316,10 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
         self.tableView.setModel(self.model) #show table in pyqt5
 
-        self.label2 = QtWidgets.QLabel(self.tab)
-        self.label2.setAlignment(QtCore.Qt.AlignCenter)
-        self.label2.setObjectName("label2")
-        self.gridLayout.addWidget(self.label2, 2, 0, 1, 1)
+        self.label_2 = QtWidgets.QLabel(self.tab)
+        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
@@ -294,61 +361,170 @@ class Ui_MainWindow(QWidget):
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         #self.PushButton1.clicked.connect(checkNew1)
 
-        self.label1 = QtWidgets.QLabel(self.tab)
-        self.label1.setAlignment(QtCore.Qt.AlignCenter)
-        self.label1.setObjectName("label1")
-        self.gridLayout.addWidget(self.label1, 1, 0, 1, 6)
+        self.label_1 = QtWidgets.QLabel(self.tab)
+        self.label_1.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_1.setObjectName("label_1")
+        self.gridLayout.addWidget(self.label_1, 1, 0, 1, 6)
         self.tabWidget.addTab(self.tab, "")
+        
+        #tab2 
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
-        self.textEdit = QtWidgets.QTextEdit(self.tab_2)
-        self.textEdit.setGeometry(QtCore.QRect(140, 100, 391, 28))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.gridLayout = QtWidgets.QGridLayout(self.tab_2)
+        self.gridLayout.setObjectName("gridLayout")
+        
+        self.dateEdit_3 = QtWidgets.QDateEdit(self.tab_2)
+        self.dateEdit_3.setObjectName("dateEdit_3")
+        self.gridLayout.addWidget(self.dateEdit_3, 0, 3, 1, 1)
+        self.dateEdit_4 = QtWidgets.QDateEdit(self.tab_2)
+        self.dateEdit_4.setObjectName("dateEdit_4")
+        self.gridLayout.addWidget(self.dateEdit_4, 0, 5, 1, 1)
+
+        self.tableView_2 = QtWidgets.QTableView(self.tab_2)
+        self.tableView_2.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
-        self.textEdit.setSizePolicy(sizePolicy)
-        self.textEdit.setObjectName("textEdit")
-        self.pushButton = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton.setGeometry(QtCore.QRect(550, 100, 93, 28))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_2.setGeometry(QtCore.QRect(660, 100, 93, 28))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.label = QtWidgets.QLabel(self.tab_2)
-        self.label.setGeometry(QtCore.QRect(40, 110, 71, 16))
-        self.label.setObjectName("label")
+        sizePolicy.setHeightForWidth(self.tableView_2.sizePolicy().hasHeightForWidth())
+        self.tableView_2.setSizePolicy(sizePolicy)
+        self.tableView_2.setObjectName("tableView_2")
+        self.gridLayout.addWidget(self.tableView_2, 3, 1, 1, 5)
+        self.tableView_2.setModel(self.model) #show table in pyqt5
+
+        self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
+        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_4.setObjectName("label1")
+        self.gridLayout.addWidget(self.label_4, 1, 0, 1, 6)
+        self.label_5 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Keyword"
+        self.label_5.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_5.setObjectName("label2")
+        self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
+        self.label_6 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "to"
+        self.label_6.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout.addWidget(self.label_6, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
+
+        self.PushButton_4 = QtWidgets.QPushButton(self.tab_2)
+        self.PushButton_4.setObjectName("PushButton_4")
+        self.PushButton_4.clicked.connect(self.showDefaultFileTweetW)
+
+        self.gridLayout.addWidget(self.PushButton_4, 2, 5, 1, 1)
+        self.PushButton_3 = QtWidgets.QPushButton(self.tab_2)
+        self.PushButton_3.setObjectName("PushButton_3")
+        self.gridLayout.addWidget(self.PushButton_3, 2, 4, 1, 1)
+        
+
+        #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
+        #btm1 = functools.partial(self.button1)   
+        #self.PushButton_4.clicked.connect(btm1)
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
-        self.listView_2.setGeometry(QtCore.QRect(20, 140, 151, 331))
-        self.listView_2.setObjectName("listView_2")
-        #วน add keywords ท้ังหมดเข้าไปในตารางของ GUI
-        for i in range(len(self.keywords)) :
-            item = QtWidgets.QListWidgetItem(self.keywords[i])
-            self.listView_2.addItem(item)
-
-        self.label_2 = QtWidgets.QLabel(self.tab_2)
-        self.label_2.setGeometry(QtCore.QRect(290, 60, 151, 20))
-        self.label_2.setObjectName("label_2")
-        self.dateEdit_3 = QtWidgets.QDateEdit(self.tab_2)
-        self.dateEdit_3.setGeometry(QtCore.QRect(40, 10, 110, 22))
-        self.dateEdit_3.setObjectName("dateEdit_3")
-        self.label_4 = QtWidgets.QLabel(self.tab_2)
-        self.label_4.setGeometry(QtCore.QRect(160, 10, 16, 21))
-        self.label_4.setObjectName("label_4")
-        self.dateEdit_4 = QtWidgets.QDateEdit(self.tab_2)
-        self.dateEdit_4.setGeometry(QtCore.QRect(180, 10, 110, 22))
-        self.dateEdit_4.setObjectName("dateEdit_4")
-        self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
-        self.listWidget = QtWidgets.QListWidget(self.tab_2)
-        self.listWidget.setGeometry(QtCore.QRect(20, 160, 151, 331))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
-        self.listWidget.setSizePolicy(sizePolicy)
-        self.listWidget.setObjectName("listWidget")
+        sizePolicy.setHeightForWidth(self.listView_2.sizePolicy().hasHeightForWidth())
+        self.listView_2.setSizePolicy(sizePolicy)
+        self.listView_2.setMidLineWidth(0)
+        self.listView_2.setObjectName("listView_2")
+        self.gridLayout.addWidget(self.listView_2, 3, 0, 1, 1)
+        self.addlist_2()
+        
+        self.labelShow = QtWidgets.QLabel(self.tab_2)
+        self.labelShow.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.labelShow.sizePolicy().hasHeightForWidth())
+        self.labelShow.setSizePolicy(sizePolicy)
+        self.labelShow.setObjectName("labelShow")
+        self.gridLayout.addWidget(self.labelShow, 2, 1, 1, 3, QtCore.Qt.AlignHCenter)
+        #test = self.SearchBox1.text() #text
+        #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
+        #self.PushButton1.clicked.connect(checkNew1)
         self.tabWidget.addTab(self.tab_2, "")
+
+
+        #tab3 
+        self.tab_3 = QtWidgets.QWidget()
+        self.tab_3.setObjectName("tab_3")
+        self.gridLayout = QtWidgets.QGridLayout(self.tab_3)
+        self.gridLayout.setObjectName("gridLayout")
+        self.label_9 = QtWidgets.QLabel(self.tab_3)
+        self.label_9.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_9.setObjectName("label_9")
+        self.gridLayout.addWidget(self.label_9, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
+        self.dateEdit_5 = QtWidgets.QDateEdit(self.tab_3)
+        self.dateEdit_5.setObjectName("dateEdit_5")
+        self.gridLayout.addWidget(self.dateEdit_5, 0, 3, 1, 1)
+        self.dateEdit_6 = QtWidgets.QDateEdit(self.tab_3)
+        self.dateEdit_6.setObjectName("dateEdit_6")
+        self.gridLayout.addWidget(self.dateEdit_6, 0, 5, 1, 1)
+
+        self.tableView_3 = QtWidgets.QTableView(self.tab_3)
+        self.tableView_3.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tableView_3.sizePolicy().hasHeightForWidth())
+        self.tableView_3.setSizePolicy(sizePolicy)
+        self.tableView_3.setObjectName("tableView_3")
+        self.gridLayout.addWidget(self.tableView_3, 3, 1, 1, 5)
+        self.tableView_3.setModel(self.model) #show table in pyqt5
+
+        self.label_8 = QtWidgets.QLabel(self.tab_3)
+        self.label_8.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_8.setObjectName("label2")
+        self.gridLayout.addWidget(self.label_8, 2, 0, 1, 1)
+
+        self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
+        self.PushButton_6.setObjectName("PushButton_6")
+        self.PushButton_6.clicked.connect(self.showDefaultFile)
+
+        self.gridLayout.addWidget(self.PushButton_6, 2, 5, 1, 1)
+        self.PushButton_5 = QtWidgets.QPushButton(self.tab_3)
+        self.PushButton_5.setObjectName("PushButton_5")
+        self.gridLayout.addWidget(self.PushButton_5, 2, 4, 1, 1)
+        
+
+        #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
+        #btm1 = functools.partial(self.button1)   
+        #self.PushButton_6.clicked.connect(btm1)
+
+        self.listView_3 = QtWidgets.QListWidget(self.tab_3)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.listView_3.sizePolicy().hasHeightForWidth())
+        self.listView_3.setSizePolicy(sizePolicy)
+        self.listView_3.setMidLineWidth(0)
+        self.listView_3.setObjectName("listView_3")
+        self.gridLayout.addWidget(self.listView_3, 3, 0, 1, 1)
+        self.addlist_3()
+        
+        self.SearchBox_3 = QtWidgets.QLineEdit(self.tab_3)
+        self.SearchBox_3.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.SearchBox_3.sizePolicy().hasHeightForWidth())
+        self.SearchBox_3.setSizePolicy(sizePolicy)
+        self.SearchBox_3.setObjectName("SearchBox1")
+        self.gridLayout.addWidget(self.SearchBox_3, 2, 1, 1, 3)
+        #test = self.SearchBox1.text() #text
+        #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
+        #self.PushButton1.clicked.connect(checkNew1)
+
+        self.label_7 = QtWidgets.QLabel(self.tab_3)
+        self.label_7.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_7.setObjectName("label1")
+        self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
+        self.tabWidget.addTab(self.tab_3, "")
+
+
         self.horizontalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -370,22 +546,34 @@ class Ui_MainWindow(QWidget):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label1.setText(_translate("MainWindow", "Twitter keyword"))
-        self.label2.setText(_translate("MainWindow", "Keyword"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Main"))
+        self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
+        self.label_2.setText(_translate("MainWindow", "Keyword"))
+        self.label_3.setText(_translate("MainWindow", "to"))
         self.PushButton1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Default"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
-        self.pushButton.setText(_translate("MainWindow", "Search"))
-        self.pushButton_2.setText(_translate("MainWindow", "Refresh"))
-        self.label.setText(_translate("MainWindow", "TextLabel"))
-        self.label_2.setText(_translate("MainWindow", "Web scraping"))
-        self.label_3.setText(_translate("MainWindow", "to"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
-        self.dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy/M/d")) #format ของวันที่ที่แสดง
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
+
+        self.PushButton_3.setText(_translate("MainWindow", "Search"))
+        self.PushButton_4.setText(_translate("MainWindow", "Default"))
+        self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
+        self.label_5.setText(_translate("MainWindow", "Keyword"))
+        self.label_6.setText(_translate("MainWindow", "to"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "TweetW"))
+
+        self.PushButton_5.setText(_translate("MainWindow", "Search"))
+        self.PushButton_6.setText(_translate("MainWindow", "Default"))
+        self.label_7.setText(_translate("MainWindow", "Web scraping"))
+        self.label_8.setText(_translate("MainWindow", "Keyword"))
+        self.label_9.setText(_translate("MainWindow", "to"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Webscraping"))
+
+        self.dateEdit_1.setDisplayFormat(_translate("MainWindow", "yyyy/M/d")) #format ของวันที่ที่แสดง
         self.dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit_5.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        self.dateEdit_6.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
 
 
 if __name__ == "__main__":
