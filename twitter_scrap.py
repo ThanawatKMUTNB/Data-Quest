@@ -74,9 +74,9 @@ class Twitter_Scrap:
         for tweet in tw.Cursor(self._api.search_tweets,
                                 q=key_word,
                                 tweet_mode="extended",
-                                include_entities=True).items(10):
+                                include_entities=True).items(5):
                                 
-            if(tweet.lang == 'en' or tweet.lang == 'th'):
+            if(tweet.lang == 'en'or tweet.lang == 'th'):
                 twitter_users.append(tweet.user.screen_name)
                 twitter_users_location.append(tweet.user.location)
                 tweet_time.append(tweet.created_at)
@@ -111,20 +111,20 @@ class Twitter_Scrap:
 
         return self.df
 
-    def savedata(self):
+    def savedata(self,keyword): #keyword is list
 
         current_time = datetime.now().strftime("%H:%M:%S")
         print('\nstart saving @',current_time)
-        today = datetime.today()
-        filename = str("tweet_data_"+str(today.day)+str(today.month)+str(today.year)+".csv")
+        #today = datetime.today()
+        #filename = str("tweet_data_"+str(today.day)+str(today.month)+str(today.year)+".csv")
 
         # if filename not in glob.glob("*.csv"):
         #     self.df = pd.DataFrame(columns=['Keyword','User','Tweet','Language','Time','User Location','Hashtag','Polarity','Likes','Retweet','Sentiment'])
         # else:
         #     self.df = pd.read_csv(filename)
 
-        for keyword in self.keys:
-            self.df = pd.concat([self.df,self.get_related_tweets(keyword)])
+        for kw in keyword:
+            self.df = pd.concat([self.df,self.get_related_tweets(kw)])
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
@@ -134,27 +134,42 @@ class Twitter_Scrap:
         current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
-    def searchkeys(self,keyword,Ans):
-        keyword = keyword.lower()
+    def searchkeys(self,keyword,Ans):   #keyword's type is list
         #print('keyword',keyword,'\nkeys',self.keys,'\nkeyword in keys?',keyword in self.keys)
-        if keyword == None or keyword == "":
-            return self.df
-        if keyword in self.keys:
-            return self.df.loc[self.df['Keyword']==keyword]
+        # if "" in keyword:
+        #     return self.df
+        
+        if len(keyword) > 1:
+            dhave = []
+            for key in keyword:
+                if key not in self.keys:
+                    dhave.append(key)
+            print(keyword)
+            print(dhave)
+            if len(dhave) > 0:
+                self.keys.extend(dhave)
+                self.savedata(dhave)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            else:
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        elif keyword[0] in self.keys:
+            return self.df.loc[self.df['Keyword']==keyword[0]]
         else:
             # print(f'{keyword} not in Database. Do you want to search?')
             # Ans = str(input()).lower()
             if Ans == 'yes':
-                self.keys.append(keyword)
-                self.savedata()
-                return self.df.loc[self.df['Keyword']==keyword]
+                self.keys.extend(keyword)
+                self.savedata(keyword)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 print('You select NO')
-                return self.df.loc[self.df['Keyword']==keyword]
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             
 
 
-# df = pd.read_csv('tweet_data_2432022.csv')
+# df = pd.read_csv('tweet_data_742022.csv')
 # twsc = Twitter_Scrap()
 # twsc.setdataframe(df)
-# print(twsc.searchkeys('spy x family'))
+# print(set(twsc.df['Keyword'].tolist()))
+# print(twsc.searchkeys('spy x family','yes'))
+# print(set(twsc.df['Keyword'].tolist()))

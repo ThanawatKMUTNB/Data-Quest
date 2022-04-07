@@ -79,6 +79,7 @@ class Ui_MainWindow(QWidget):
         #self.setDate()
         self.keywords = self.df['Keyword'].tolist()
         self.keywords = list(set(self.keywords))
+        self.tw_worddf = None
 
     def dateSet(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
@@ -152,7 +153,7 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
-    def button1(self) :
+    def button1(self) : #เพิ่มค่า search ว่างด้วย
         print("\n\n")
         print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
@@ -162,73 +163,76 @@ class Ui_MainWindow(QWidget):
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
         #print(list(set(self.df['Keyword'].tolist())))
         tw.setdataframe(self.df)
-        keyword = self.SearchBox1.text().lower()
-        if not(keyword == None or keyword == ""):
+        keywords = self.SearchBox1.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        if "" not in keywords:
+            print(len(keywords),keywords)
             self.dateSet()
             #self.dateSet_2()
             #self.dateSet_3()
-            
-            if (keyword not in self.keywords):
-                print('check dialog')
-                #dm.concatfile(self.df)
-                print(len(self.df.index))
-                if self.showDialog(keyword) == 'Yes':
-                    self.keywords.append(keyword)
-                    self.df = tw.searchkeys(keyword,'yes')
+            dhave = []
+            for keyword in keywords:
+                if keyword not in self.keywords:
+                    dhave.append(keyword)
+            if len(dhave) > 0:
+                if self.showDialog() == 'Yes':
+                    self.keywords.extend(dhave)
+                    self.df = tw.searchkeys(keywords,'yes')
                     dm.concatfile(self.df)
                     #print(list(set(dm.df['Keyword'].tolist())))
                     self.addlist()
                 else:
-                    self.df = tw.searchkeys(keyword,'no')
-                    #dm.concatfile(self.df)
-            else:
-                self.df = tw.searchkeys(keyword,'no')
+                    self.df = tw.searchkeys(keywords,'no')
                 #dm.concatfile(self.df)
+            else:
+                self.df = tw.searchkeys(keywords,'no')
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
+
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView.setModel(self.model)
-        self.tableView_2.setModel(self.model) #จะให้โชว์ตารางตามที่ใส่ keyword ในหน้า tweet
+
+        self.tw_worddf = dm.collectwords(self.df)
+        print(self.tw_worddf)
+        self.addlist_2()
+        self.model = TableModel(self.tw_worddf) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView_2.setModel(self.model)
+
         self.labelShowKeywords() 
         
-    def button2(self) :
-        print("\n\n")
-        print(len(self.df.index),'rows')
-        print(self.dateSinceReturn(),self.dateUntilReturn())
-        if self.dateSinceReturn()>self.dateUntilReturn():
-            self.showErrorDialog()
-            return
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        #print(list(set(self.df['Keyword'].tolist())))
-        tw.setdataframe(self.df)
-        keyword = self.SearchBox1.text().lower()
-        if not(keyword == None or keyword == ""):
+    def button2(self) : #for seach collect word[:10]
+        # if self.tw_worddf == None:
+        #     return
+        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
+        tenwords = list(map(lambda x: x.lower(), tenwords))
+        if self.showDialog() == 'Yes':
+            self.keywords.extend(tenwords)
             self.dateSet()
-            #self.dateSet_2()
-            #self.dateSet_3()
-            
-            if (keyword not in self.keywords):
-                print('check dialog')
-                #dm.concatfile(self.df)
-                print(len(self.df.index))
-                if self.showDialog(keyword) == 'Yes':
-                    self.keywords.append(keyword)
-                    self.df = tw.searchkeys(keyword,'yes')
-                    dm.concatfile(self.df)
-                    #print(list(set(dm.df['Keyword'].tolist())))
-                    self.addlist()
-                else:
-                    self.df = tw.searchkeys(keyword,'no')
-                    #dm.concatfile(self.df)
+            dhave = []
+            for keyword in tenwords:
+                if keyword not in self.keywords:
+                    dhave.append(keyword)
+            if len(dhave) > 0:
+                self.keywords.extend(dhave)
+                self.df = tw.searchkeys(tenwords,'yes')
+                dm.concatfile(self.df)
+                
             else:
-                self.df = tw.searchkeys(keyword,'no')
-                #dm.concatfile(self.df)
-            tw.setdataframe(self.df)
-        #print(self.SearchBox1.text())
-        print(len(self.df.index),tw.keys)
+                self.df = tw.searchkeys(tenwords,'no')
+            # self.df = tw.savedata(tenwords)
+            # print(self.df)
+            # dm.concatfile(self.df)
+            # self.addlist()
+        else:
+            return
+        #self.addlist_2()    
+        self.addlist() 
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -259,23 +263,18 @@ class Ui_MainWindow(QWidget):
                 df = pd.read_excel(path, engine = "openpyxl")
             return df
 
-    def showDialog(self,keyword): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+    def showDialog(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText(f"{keyword} not in Datafram \nDo you want to search?") #แสดงข้อความ
+        msgBox.setText("Do you want to search?") #แสดงข้อความ
         msgBox.setWindowTitle("Warning") #Title
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
         #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
         #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
         returnValue = msgBox.exec()
         if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
-            print('Yes')
             return 'Yes'
-            # self.keywords.append(keys)
-            # print(keys)
-            # return self.keywords
         elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
-            print('No')
             return 'No'
 
     def showErrorDialog(self):
@@ -295,23 +294,30 @@ class Ui_MainWindow(QWidget):
     #         return keys
     #     else :
     #         print("OK")
+    
 
     def addlist(self): #ของ tab Tweet
+        self.listView.clear()
+        self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :
             item = QtWidgets.QListWidgetItem(self.keywords[i])
             self.listView.addItem(item)
 
     def addlist_2(self): #ไว้ add ค่าลงในตารางทางซ้าย (ที่ไว้โชว์ keyword) ของ tab TweetW
-        for i in range(10) :
-            #item = str(QtWidgets.QListWidgetItem(i))
-            self.listView_2.addItem(str(i))
+        self.listView_2.clear()
+        words = self.tw_worddf['Word'].tolist()
+        for i in words:
+            self.listView_2.addItem(i)
+        # for i in range(len(self.keywords)) :
+        #     item = QtWidgets.QListWidgetItem(self.keywords[i])
+        #     self.listView_2.addItem(item)
 
     def addlist_3(self): #ของ tab Web scraping
-        print(self.keywords)
-        for i in range(len(self.keywords)) :
-            item = QtWidgets.QListWidgetItem(self.keywords[i])
-            self.listView_3.addItem(item)                
+        print('eiei')
+        # for i in range(len(self.keywords)) :
+        #     item = QtWidgets.QListWidgetItem(self.keywords[i])
+        #     self.listView_3.addItem(item)                
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -470,7 +476,7 @@ class Ui_MainWindow(QWidget):
         self.listView_2.setMidLineWidth(0)
         self.listView_2.setObjectName("listView_2")
         self.gridLayout.addWidget(self.listView_2, 3, 0, 1, 1)
-        self.addlist_2()
+        #self.addlist_2()
         
         self.labelShow = QtWidgets.QLabel(self.tab_2)
         self.labelShow.setEnabled(True)
