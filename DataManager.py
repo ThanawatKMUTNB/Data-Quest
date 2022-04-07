@@ -1,7 +1,7 @@
 import ast
 import json
 from textblob import TextBlob 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pythainlp import word_tokenize
 from nltk.corpus import stopwords
 import nltk
@@ -123,20 +123,11 @@ class DataManager:
 
     def collectwords(self,dataframe):
         nltk.download('stopwords')          #important
-        dataframe = dataframe.reset_index()
         en_stops = set(stopwords.words('english'))
         word = {}
-        for index,row in dataframe.iterrows():    #only tweet
-            if row['Language'] == 'eng':
-                allwords = row['Tweet'].split()
-                for w in allwords: 
-                    if w not in en_stops:
-                        if w in word:
-                            word[w] += 1
-                        else:
-                            word[w] = 1
-            elif row['Language'] == 'th':
-                allwords = word_tokenize(row['Tweet'], engine='newmm')
+        for i in dataframe['Tweet']:    #only tweet
+            if langdetect.detect(i) != 'th':
+                allwords = i.split()
                 for w in allwords: 
                     if w not in en_stops:
                         if w in word:
@@ -144,15 +135,17 @@ class DataManager:
                         else:
                             word[w] = 1
             else:
-                pass
-        if 'RT' in word:
-            del word['RT']  #for twitter
-        if ' ' in word:
-            del word[' ']   #for thai language
+                allwords = word_tokenize(i, engine='newmm')
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+        del word['RT']
+        del word[' ']   #for thai language
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
-        worddf = pd.DataFrame(sortword,columns=['Word','Count'])
-        return worddf   #word dataframe
-        #return sortword     #tuple in list
+        return sortword     #tuple in list
     
     def convertJsonToDataframe(self,jsonDict):
         df = pd.DataFrame.from_dict({(i,j,k): jsonDict[i][j][k] 
@@ -162,15 +155,21 @@ class DataManager:
                        orient='index')
         return df
     
+    def getReadByDateList(self,Sdate):
+        DList = []
+        for root, dirs, files in os.walk(r'WebData'):
+            for name in files:
+                if Sdate in str(name): 
+                    # DList.append(name)
+                    DList.append(os.path.abspath(os.path.join(root, name)))
+                    # print(os.path.abspath(os.path.join(root, name)))
+        return DList
     
     def readJson(self,path):
-        with open(path,encoding = "utf-8") as f:
-            # with open("WebData\\27-03-2022_20_WebJsonData.json",encoding = "utf-8") as f:
-            data = json.load(f)
-        # print(data)
-        f.close()
+        with open(path, 'r') as f:
+            contents = json.loads(f.read())
         # data = json.dumps(data, indent=4)
-        return data
+        return contents
     
     def writeCsvByDf(self,path,df):
         with open(path, 'w') as f:
@@ -183,13 +182,20 @@ class DataManager:
             json.dump(dictForWrite,f)
         f.close()
     
-    def getPathToday(self,path,fileName):
-        # path = "WebData"
-        # path = "C:\\Users\\tongu\\Desktop\\Web-Scraping\\WebScraping\\Web-Scraping\\WebData"
-        fileJsonName = fileName #self.SaveFileName
-        path = os.path.join(path,(str(self.getTodayDate())+fileJsonName))
-        # print(path)
-        return path
+    # def getPathToday(self,path,fileName):
+    #     # path = "WebData"
+    #     # path = "C:\\Users\\tongu\\Desktop\\Web-Scraping\\WebScraping\\Web-Scraping\\WebData"
+    #     fileJsonName = fileName #self.SaveFileName
+    #     path = os.path.join(path,(str(self.getTodayDate())+fileJsonName))
+    #     # print(path)
+    #     return path
+    
+    def setDataForSearch(self,path,dict):
+        # path = os.path.join("web search",fileName+".json")
+        with open(path, 'w') as f:
+            json.dump(dict,f)
+        f.close()
+        return 0
     
     def getPath(self,path,fileName):
         # path = "WebData"
@@ -210,53 +216,157 @@ class DataManager:
     def searchtDF(self,df):
         df[df["Data"].str.contains('foo', regex=False)]
         
-    def convertToSearch(self,dataList):
-        dataList = " ".join(dataList)
-        dataList = dataList.split(" ")
-        resalt = []
-        for i in dataList:
-            # keep only letters
-            res = re.sub(r'[^a-zA-Z]', '', i)
-            if res != "":
-                resalt.append(res)
-            # print(resalt)
-        return resalt
+    # def convertToSearch(self,dataList):
+    #     dataList = " ".join(dataList)
+    #     dataList = dataList.split(" ")
+    #     resalt = []
+    #     for i in dataList:
+    #         # keep only letters
+    #         res = re.sub(r'[^a-zA-Z]', '', i)
+    #         if res != "":
+    #             resalt.append(res)
+    #         # print(resalt)
+    #     return resalt
         
-    def search(self,df,listOfWord):
-        result = {}
-        for i in listOfWord:
-            result.update({str(i)+" Word Count" : 0})
-        defaltDict = {'Referent' : 0, "Link" : "","Detail":"", "Sentiment" : ""}
-        result.update(defaltDict)
-        # defaltDict = result.copy()
-        # print(defaltDict,result)
-        resultdf = pd.DataFrame()
-        # for i in range(len(df)):
-        for i in range(100):
-            defaltDict = result.copy()
-            Data =self.strOfListToList(df['Data'][i])
-            # print(Data)
-            # checkList = self.convertToSearch(df['Data'][i])
-            # print(type(df['Unnamed: 2'][i]))
-            defaltDict['Referent'] = df['Ref'][i]
-            defaltDict['Link'] = df['Unnamed: 2'][i]
-            for j in listOfWord:
-                for d in Data:
-                    checkList = self.convertToSearch(d)
-                    n = 1
-                    # print(d)
-                    # print(checkList)
-                    if j in checkList:
-                        defaltDict[str(j)+" Word Count"] = checkList.count(j)
-                        defaltDict["Detail"] = d[0]+" : "+d[1]
-                        defaltDict["Sentiment"] = self.getSentimentENG(' '.join(d))
-                        n+=1
-                        # print(defaltDict["Link"])
-                        resultdf = pd.concat([resultdf,pd.DataFrame(defaltDict,index=[0])], ignore_index=True)
-        # print(resultdf)
-        return resultdf
+    # def search(self,df,listOfWord):
+    #     result = {}
+    #     for i in listOfWord:
+    #         result.update({str(i)+" Word Count" : 0})
+    #     defaltDict = {'Referent' : 0, "Link" : "","Detail":"", "Sentiment" : ""}
+    #     result.update(defaltDict)
+    #     # defaltDict = result.copy()
+    #     # print(defaltDict,result)
+    #     resultdf = pd.DataFrame()
+    #     # for i in range(len(df)):
+    #     for i in range(100):
+    #         defaltDict = result.copy()
+    #         Data =self.strOfListToList(df['Data'][i])
+    #         # print(Data)
+    #         # checkList = self.convertToSearch(df['Data'][i])
+    #         # print(type(df['Unnamed: 2'][i]))
+    #         defaltDict['Referent'] = df['Ref'][i]
+    #         defaltDict['Link'] = df['Unnamed: 2'][i]
+    #         for j in listOfWord:
+    #             for d in Data:
+    #                 checkList = self.convertToSearch(d)
+    #                 n = 1
+    #                 # print(d)
+    #                 # print(checkList)
+    #                 if j in checkList:
+    #                     defaltDict[str(j)+" Word Count"] = checkList.count(j)
+    #                     defaltDict["Detail"] = d[0]+" : "+d[1]
+    #                     defaltDict["Sentiment"] = self.getSentimentENG(' '.join(d))
+    #                     n+=1
+    #                     # print(defaltDict["Link"])
+    #                     resultdf = pd.concat([resultdf,pd.DataFrame(defaltDict,index=[0])], ignore_index=True)
+    #     # print(resultdf)
+    #     return resultdf
     
     def canFetch(self,link): # False - can
         rp = urllib.robotparser.RobotFileParser()
         result = rp.can_fetch("*", link)
         return result
+    
+    def date_range(self,start, end):
+        print(start, end)
+        dateS = datetime.strptime(start,'%d-%m-%Y')
+        dateE = datetime.strptime(end,'%d-%m-%Y')
+        delta = dateE - dateS  # as timedelta
+        days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
+        resualt = [] 
+        for i in days:
+            resualt.append(str(i.day).zfill(2)+"-"+str(i.month).zfill(2)+"-"+str(i.year))
+        # print(resualt)
+        return resualt
+
+    # start_date = datetime(2008, 8, 1)
+    # end_date = datetime(2008, 8, 3)
+    
+    def paragraphToList (self,paragraph):
+        nltk.download('stopwords')          #important
+        en_stops = set(stopwords.words('english'))
+        word = {}
+        if langdetect.detect(paragraph) != 'th':
+                allwords = paragraph.split()
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+        else:
+            allwords = word_tokenize(paragraph, engine='newmm')
+            for w in allwords: 
+                if w not in en_stops:
+                    if w in word:
+                        word[w] += 1
+                    else:
+                        word[w] = 1
+        # del word['RT']
+        # del word[' ']   #for thai language
+        sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
+        return sortword     #tuple in list
+    
+    def startSearch(self,Ldate,LWord):# date []
+        # self.readJson
+        df = {
+                'Date' : [],
+                'Keyword' : [],
+                'Word Count' : [],
+                "Link" : [],
+                "Data" : [],
+                "Sentiment" : [],
+                'Lang' : [],
+                "Ref Link" : []
+                }
+        ListOfDate = self.date_range(Ldate[0],Ldate[1])
+        for j in ListOfDate:
+            FileByDateList = self.getReadByDateList(j)
+            # print(j)
+            # print(FileByDateList)
+            if FileByDateList != []:
+                for i in FileByDateList:
+                    # print("Link : ",i)
+                    # print(type(i))
+                    data = self.readJson(i)
+                    # print(type(data))
+                    # print(i)
+                    # print(data[j].keys())
+                    for d in data.keys():
+                        # print(d)
+                        for l in data[d].keys():
+                            # print(data[d][l]["Data"])
+                            # for w in LWord:
+                            # print(w)
+                            n = 1
+                            for p in data[d][l]["Data"]:
+                                try:
+                                    wc = self.paragraphToList(p)
+                                    # print(n)
+                                    # print(wc)
+                                    for w in LWord:
+                                        for t in wc:
+                                            if t[0].lower() == w.lower():
+                                                # print("-----------------------------------------------------------------")
+                                                countWord = t[1]
+                                                if data[d][l]["Lang"].lower() == 'th':
+                                                    stm = self.getSentimentTH(p)
+                                                else : stm = self.getSentimentENG(p)
+                                                df['Date'].append(d)
+                                                df['Keyword'].append(w)
+                                                df['Word Count'].append(countWord)
+                                                df['Link'].append(l)
+                                                df['Lang'].append(data[d][l]["Lang"])
+                                                df['Ref Link'].append(data[d][l]["Ref"])
+                                                df['Data'].append(p)
+                                                df['Sentiment'].append(stm)
+                                                # print("-----------",df)
+                                                n+=1
+                                                self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
+                                    
+                                except :
+                                    pass
+        
+        # self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
+        
+        return pd.DataFrame.from_dict(df)
