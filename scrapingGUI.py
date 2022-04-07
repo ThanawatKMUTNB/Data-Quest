@@ -373,12 +373,13 @@ class Ui_MainWindow(QWidget):
         self.gridLayout = QtWidgets.QGridLayout(self.tab_2)
         self.gridLayout.setObjectName("gridLayout")
         
-        self.dateEdit_3 = QtWidgets.QDateEdit(self.tab_2)
+        '''self.dateEdit_3 = QtWidgets.QDateEdit(self.tab_2)
         self.dateEdit_3.setObjectName("dateEdit_3")
         self.gridLayout.addWidget(self.dateEdit_3, 0, 3, 1, 1)
         self.dateEdit_4 = QtWidgets.QDateEdit(self.tab_2)
         self.dateEdit_4.setObjectName("dateEdit_4")
-        self.gridLayout.addWidget(self.dateEdit_4, 0, 5, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit_4, 0, 5, 1, 1)'''
+        #เผื่อใช้ เป็นวันที่ของ tab tweetw
 
         self.tableView_2 = QtWidgets.QTableView(self.tab_2)
         self.tableView_2.setEnabled(True)
@@ -399,10 +400,10 @@ class Ui_MainWindow(QWidget):
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName("label2")
         self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "to"
+        '''self.label_6 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "to"
         self.label_6.setAlignment(QtCore.Qt.AlignCenter)
         self.label_6.setObjectName("label_6")
-        self.gridLayout.addWidget(self.label_6, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
+        self.gridLayout.addWidget(self.label_6, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)'''
 
         self.PushButton_4 = QtWidgets.QPushButton(self.tab_2)
         self.PushButton_4.setObjectName("PushButton_4")
@@ -522,6 +523,7 @@ class Ui_MainWindow(QWidget):
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
+        self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
         self.tabWidget.addTab(self.tab_3, "")
 
 
@@ -558,7 +560,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_4.setText(_translate("MainWindow", "Default"))
         self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_5.setText(_translate("MainWindow", "Keyword"))
-        self.label_6.setText(_translate("MainWindow", "to"))
+        #self.label_6.setText(_translate("MainWindow", "to"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "TweetW"))
 
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
@@ -570,8 +572,8 @@ class Ui_MainWindow(QWidget):
 
         self.dateEdit_1.setDisplayFormat(_translate("MainWindow", "yyyy/M/d")) #format ของวันที่ที่แสดง
         self.dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
-        self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
-        self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        #self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
+        #self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_5.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_6.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
 
