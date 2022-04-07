@@ -203,3 +203,5 @@ link = "https://www.animenewsnetwork.com/"
 #     # print(dm.canFetch(i))
 
 ex.startScraping()
+
+#try
