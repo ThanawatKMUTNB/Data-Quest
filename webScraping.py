@@ -14,6 +14,14 @@ from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
     def __init__(self):
+        self.keyword = ['2d animation', 'animation', 'animation studio', 
+                        'anime', 'anime comedy', 'anime romance', 
+                        'attack on titan', 'bl anime', 'disney animation', 
+                        'fantasy anime', 'from manga', 'from novel', 'harem', 
+                        'japan animation', 'mappa', 'pixar', 'school life', 
+                        'school life anime', 'seinen', 'shoujo', 'shounen', 
+                        'shounen ai', 'slice of life anime', 
+                        'sport anime', 'spy x family', 'ต่างโลก', 'อนิเมะ', 'อนิเมะแนะนำ']
         self.web = ["https://www.animenewsnetwork.com/",
                     "https://www.cbr.com/category/anime-news/",
                     "https://myanimelist.net/",
@@ -339,9 +347,10 @@ class webScraping():
         
     def startScraping(self):
         # countWeb = len(self.web)
-        countWeb = 1
+        countWeb = 0
         for link in self.web:
             print(link)
+            countWeb += 1
             dictForJson = {}
             soup = self.makeSoup(link)
             self.setMainDomain(link)
@@ -354,7 +363,7 @@ class webScraping():
                                                         }
                                                 }
             self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
-            countWeb += 1
+            # countWeb += 1
             sl = self.getAllSubLink()
             n = len(sl)
             for i in sl:
