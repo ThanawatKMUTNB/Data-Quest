@@ -194,7 +194,45 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model) #จะให้โชว์ตารางตามที่ใส่ keyword ในหน้า tweet
         self.labelShowKeywords() 
         
-
+    def button2(self) :
+        print("\n\n")
+        print(len(self.df.index),'rows')
+        print(self.dateSinceReturn(),self.dateUntilReturn())
+        if self.dateSinceReturn()>self.dateUntilReturn():
+            self.showErrorDialog()
+            return
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        #print(list(set(self.df['Keyword'].tolist())))
+        tw.setdataframe(self.df)
+        keyword = self.SearchBox1.text().lower()
+        if not(keyword == None or keyword == ""):
+            self.dateSet()
+            #self.dateSet_2()
+            #self.dateSet_3()
+            
+            if (keyword not in self.keywords):
+                print('check dialog')
+                #dm.concatfile(self.df)
+                print(len(self.df.index))
+                if self.showDialog(keyword) == 'Yes':
+                    self.keywords.append(keyword)
+                    self.df = tw.searchkeys(keyword,'yes')
+                    dm.concatfile(self.df)
+                    #print(list(set(dm.df['Keyword'].tolist())))
+                    self.addlist()
+                else:
+                    self.df = tw.searchkeys(keyword,'no')
+                    #dm.concatfile(self.df)
+            else:
+                self.df = tw.searchkeys(keyword,'no')
+                #dm.concatfile(self.df)
+            tw.setdataframe(self.df)
+        #print(self.SearchBox1.text())
+        print(len(self.df.index),tw.keys)
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView_2.setModel(self.model)
 
     def labelShowKeywords(self) :  #เอาไว้โชว์ label ตาม keyword ที่ใส่เข้าไปในตัว entry
         keywordShow = self.SearchBox1.text().lower()
@@ -326,16 +364,16 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2.clicked.connect(self.showDefaultFile)
 
         self.gridLayout.addWidget(self.PushButton_2, 2, 5, 1, 1)
-        self.PushButton1 = QtWidgets.QPushButton(self.tab)
-        self.PushButton1.setObjectName("PushButton1")
-        self.gridLayout.addWidget(self.PushButton1, 2, 4, 1, 1)
+        self.PushButton_1 = QtWidgets.QPushButton(self.tab)
+        self.PushButton_1.setObjectName("PushButton_1")
+        self.gridLayout.addWidget(self.PushButton_1, 2, 4, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
-        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         btm1 = functools.partial(self.button1)   
-        self.PushButton1.clicked.connect(btm1)
+        self.PushButton_1.clicked.connect(btm1)
 
         self.listView = QtWidgets.QListWidget(self.tab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -359,7 +397,7 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 3)
         #test = self.SearchBox1.text() #text
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
-        #self.PushButton1.clicked.connect(checkNew1)
+        #self.PushButton_1.clicked.connect(checkNew1)
 
         self.label_1 = QtWidgets.QLabel(self.tab)
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
@@ -390,7 +428,9 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setSizePolicy(sizePolicy)
         self.tableView_2.setObjectName("tableView_2")
         self.gridLayout.addWidget(self.tableView_2, 3, 1, 1, 5)
+        ################# โชว์ df ใน tab tweetw
         self.tableView_2.setModel(self.model) #show table in pyqt5
+        #################
 
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
@@ -416,10 +456,10 @@ class Ui_MainWindow(QWidget):
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
-        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
-        #btm1 = functools.partial(self.button1)   
-        #self.PushButton_4.clicked.connect(btm1)
+        btm2 = functools.partial(self.button2)   
+        self.PushButton_3.clicked.connect(btm2)
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -443,7 +483,7 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.labelShow, 2, 1, 1, 3, QtCore.Qt.AlignHCenter)
         #test = self.SearchBox1.text() #text
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
-        #self.PushButton1.clicked.connect(checkNew1)
+        #self.PushButton_1.clicked.connect(checkNew1)
         self.tabWidget.addTab(self.tab_2, "")
 
 
@@ -490,7 +530,7 @@ class Ui_MainWindow(QWidget):
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
-        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
+        #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         #btm1 = functools.partial(self.button1)   
         #self.PushButton_6.clicked.connect(btm1)
@@ -517,7 +557,7 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.SearchBox_3, 2, 1, 1, 3)
         #test = self.SearchBox1.text() #text
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
-        #self.PushButton1.clicked.connect(checkNew1)
+        #self.PushButton_1.clicked.connect(checkNew1)
 
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
@@ -552,7 +592,7 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
-        self.PushButton1.setText(_translate("MainWindow", "Search"))
+        self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Default"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
 
