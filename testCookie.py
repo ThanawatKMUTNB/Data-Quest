@@ -41,3 +41,5 @@ for i in rawData:
     # dm.setDataForSearch(i.split("_")[0],d)
 
 # print(dm.readCsvToDf("WebData\\"+rawData[0]))
+
+dm.startSearch(["02-04-2022","02-04-2022"],['Anime','Summer'])
