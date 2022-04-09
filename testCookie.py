@@ -12,26 +12,26 @@ import ast
 ex = web.webScraping()
 dm = data.DataManager()
 link = "https://www.animenewsnetwork.com/"
-path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
-rawData = os.listdir(path)
-# ex.startScraping()
+# path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
+# rawData = os.listdir(path)
+ex.startScraping()
 
-# print(rawData[0].split("_"))
+# # print(rawData[0].split("_"))
 
-for i in rawData:
-    today = i.split("_")[0]
+# for i in rawData:
+#     today = i.split("_")[0]
     
-    newpath = os.path.join('web search',today) 
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
+#     newpath = os.path.join('web search',today) 
+#     if not os.path.exists(newpath):
+#         os.makedirs(newpath)
     
-    d = {}
-    for kw in ex.keyword:
-        dm.setDataForSearch(os.path.join(newpath,kw+".json"),d)
+#     d = {}
+#     for kw in ex.keyword:
+#         dm.setDataForSearch(os.path.join(newpath,kw+".json"),d)
     
-    path = os.path.join("WebData",i)
-    dictForSearch = dm.readJson(path)
-    headDateName = list(dictForSearch.keys())[0]
+#     path = os.path.join("WebData",i)
+#     dictForSearch = dm.readJson(path)
+#     headDateName = list(dictForSearch.keys())[0]
     # print(headDateName)
     
     # for sublink in list(dictForSearch[headDateName].keys()):
@@ -42,4 +42,4 @@ for i in rawData:
 
 # print(dm.readCsvToDf("WebData\\"+rawData[0]))
 
-dm.startSearch(["02-04-2022","02-04-2022"],['Anime','Summer'])
+# dm.startSearch(["02-04-2022","08-04-2022"],['Anime','Summer'])
