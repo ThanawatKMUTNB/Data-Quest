@@ -238,37 +238,12 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
 
-    def refreshButton(self) : #for seach collect word[:10]
-        # if self.tw_worddf == None:
-        #     return
-        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
-        tenwords = list(map(lambda x: x.lower(), tenwords))
-        if self.showDialog() == 'Yes':
-            self.keywords.extend(tenwords)
-            self.dateSet()
-            dhave = []
-            for keyword in tenwords:
-                if keyword not in self.keywords:
-                    dhave.append(keyword)
-            if len(dhave) > 0:
-                self.keywords.extend(dhave)
-                self.df = tw.searchkeys(tenwords,'yes')
-                dm.concatfile(self.df)
-                
-            else:
-                self.df = tw.searchkeys(tenwords,'no')
-            # self.df = tw.savedata(tenwords)
-            # print(self.df)
-            # dm.concatfile(self.df)
-            # self.addlist()
-        else:
-            return
-        #self.addlist_2()    
-        self.addlist() 
-        self.model = TableModel(self.df) 
-        self.table = QtWidgets.QTableView()
-        self.table.setModel(self.model)
-        self.tableView_2.setModel(self.model)
+    def refreshButton_1(self) : 
+        return
+
+    def refreshButton_2(self) : 
+        return
+    
 
     def labelShowKeywords(self) :  #เอาไว้โชว์ label ตาม keyword ที่ใส่เข้าไปในตัว entry
         keywordShow = self.SearchBox1.text().lower()
@@ -414,7 +389,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_1.clicked.connect(btm1)
 
         #สร้างไว้สำหรับรีเฟรช
-        btmRefresh_1 = functools.partial(self.refreshButton)   
+        btmRefresh_1 = functools.partial(self.refreshButton_1)   
         self.PushButton_1.clicked.connect(btmRefresh_1)
         self.PushButtonRefresh = QtWidgets.QPushButton(self.tab)
         self.PushButtonRefresh.setObjectName("PushButtonRefresh")
@@ -513,7 +488,7 @@ class Ui_MainWindow(QWidget):
         self.PushButtonRefresh_2.setObjectName("PushButtonRefresh_2")
         self.PushButtonRefresh_2.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh_2.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
-        btmRefresh_2 = functools.partial(self.refreshButton)   
+        btmRefresh_2 = functools.partial(self.refreshButton_2)   
         self.PushButtonRefresh_2.clicked.connect(btmRefresh_2)
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
@@ -618,7 +593,7 @@ class Ui_MainWindow(QWidget):
         self.PushButtonRefresh_3.setObjectName("PushButtonRefresh_3")
         self.PushButtonRefresh_3.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
-        btmRefresh_2 = functools.partial(self.refreshButton)   
+        #btmRefresh_2 = functools.partial(self.refreshButton)   
         self.PushButtonRefresh_3.clicked.connect(btmRefresh_2)
 
         self.label_7 = QtWidgets.QLabel(self.tab_3)
