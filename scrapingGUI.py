@@ -168,25 +168,26 @@ class Ui_MainWindow(QWidget):
         keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         if "" not in keywords:
             print(len(keywords),keywords)
-            self.dateSet()
-            #self.dateSet_2()
-            #self.dateSet_3()
             dhave = []
             for keyword in keywords:
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                if self.showDialog() == 'Yes':
+                if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+                    self.showErrorDialog2()
+                    return
+                if self.showDialog() == 'Yes':      #search new keyword
                     self.keywords.extend(dhave)
-                    self.df = tw.searchkeys(keywords,'yes')
+                    self.df = tw.searchkeys(keywords,'yes',str(self.dateUntilReturn()))
                     dm.concatfile(self.df)
                     #print(list(set(dm.df['Keyword'].tolist())))
                     self.addlist()
                 else:
-                    self.df = tw.searchkeys(keywords,'no')
+                    self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
                 #dm.concatfile(self.df)
             else:
-                self.df = tw.searchkeys(keywords,'no')
+                self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+            self.dateSet()    
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
@@ -281,6 +282,15 @@ class Ui_MainWindow(QWidget):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText("Since date less than Until date")
+        #msg.setInformativeText('More information')
+        msg.setWindowTitle("Period time Error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+    
+    def showErrorDialog2(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("Can not search new keyword after 7 days")
         #msg.setInformativeText('More information')
         msg.setWindowTitle("Period time Error")
         msg.setStandardButtons(QMessageBox.Ok)

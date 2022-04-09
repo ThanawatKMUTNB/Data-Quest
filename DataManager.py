@@ -58,22 +58,6 @@ class DataManager:
     def sortdf(self,columns):
         self.df.sort_values(by=columns,inplace=True)
         return self.df
-        
-    # def searchkeys(self,keyword):     #it on GUI
-    #     self.keys = self.df['Keyword'].tolist()
-    #     self.keys = list(set(self.keys))
-    #     keyword = keyword.lower()
-    #     if keyword in self.keys:
-    #         return self.df.loc[self.df['Keyword']==keyword]
-    #     else:
-    #         print(f'{keyword} not in Database. Do you want to search?')
-    #         Ans = str(input()).lower()
-    #         if Ans == 'yes':
-    #             self.keys.append(keyword)
-    #             # self.savedata()
-    #             # return self.df.loc[self.df['Keyword']==keyword]
-    #         else:
-    #             pass
 
     def unionfile(self,filenames):              #type filename -> list
         self.filenames = filenames
@@ -122,6 +106,7 @@ class DataManager:
         return df.loc[df['Keyword'].isin(keys)]
 
     def collectwords(self,dataframe):
+        #print(dataframe)
         nltk.download('stopwords')          #important
         dataframe = dataframe.reset_index()
         en_stops = set(stopwords.words('english'))
