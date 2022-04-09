@@ -332,7 +332,7 @@ class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
-        MainWindow.resize(812, 589)
+        MainWindow.resize(1000, 800)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -390,6 +390,13 @@ class Ui_MainWindow(QWidget):
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         btm1 = functools.partial(self.button1)   
         self.PushButton_1.clicked.connect(btm1)
+
+        #สร้างไว้สำหรับรีเฟรช
+        self.PushButtonRefresh = QtWidgets.QPushButton(self.tab)
+        self.PushButtonRefresh.setObjectName("PushButtonRefresh")
+        self.PushButtonRefresh.setGeometry(QtCore.QRect(10, 10, 30, 30))
+        self.PushButtonRefresh.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
+        #self.PushButtonRefresh.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
 
         self.listView = QtWidgets.QListWidget(self.tab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -476,6 +483,13 @@ class Ui_MainWindow(QWidget):
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         btm2 = functools.partial(self.button2)   
         self.PushButton_3.clicked.connect(btm2)
+
+        #สร้างไว้สำหรับรีเฟรช
+        self.PushButtonRefresh_2 = QtWidgets.QPushButton(self.tab_2)
+        self.PushButtonRefresh_2.setObjectName("PushButtonRefresh_2")
+        self.PushButtonRefresh_2.setGeometry(QtCore.QRect(10, 10, 30, 30))
+        self.PushButtonRefresh_2.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
+        #self.PushButtonRefresh_2.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -575,6 +589,13 @@ class Ui_MainWindow(QWidget):
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         #self.PushButton_1.clicked.connect(checkNew1)
 
+        #สร้างไว้สำหรับรีเฟรช
+        self.PushButtonRefresh_3 = QtWidgets.QPushButton(self.tab_3)
+        self.PushButtonRefresh_3.setObjectName("PushButtonRefresh_3")
+        self.PushButtonRefresh_3.setGeometry(QtCore.QRect(10, 10, 30, 30))
+        self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png'))#ไว้เชือมรูป
+        #self.PushButtonRefresh_3.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
+
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
@@ -610,10 +631,12 @@ class Ui_MainWindow(QWidget):
         self.label_3.setText(_translate("MainWindow", "to"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Default"))
+        self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
 
         self.PushButton_3.setText(_translate("MainWindow", "Search"))
         self.PushButton_4.setText(_translate("MainWindow", "Default"))
+        self.PushButtonRefresh_2.setText(_translate("MainWindow", ""))
         self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_5.setText(_translate("MainWindow", "Keyword"))
         #self.label_6.setText(_translate("MainWindow", "to"))
@@ -621,6 +644,7 @@ class Ui_MainWindow(QWidget):
 
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
         self.PushButton_6.setText(_translate("MainWindow", "Default"))
+        self.PushButtonRefresh_3.setText(_translate("MainWindow", ""))
         self.label_7.setText(_translate("MainWindow", "Web scraping"))
         self.label_8.setText(_translate("MainWindow", "Keyword"))
         self.label_9.setText(_translate("MainWindow", "to"))
