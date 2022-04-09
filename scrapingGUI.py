@@ -168,26 +168,25 @@ class Ui_MainWindow(QWidget):
         keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         if "" not in keywords:
             print(len(keywords),keywords)
+            self.dateSet()
+            #self.dateSet_2()
+            #self.dateSet_3()
             dhave = []
             for keyword in keywords:
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
-                    self.showErrorDialog2()
-                    return
-                if self.showDialog() == 'Yes':      #search new keyword
+                if self.showDialog() == 'Yes':
                     self.keywords.extend(dhave)
-                    self.df = tw.searchkeys(keywords,'yes',str(self.dateUntilReturn()))
+                    self.df = tw.searchkeys(keywords,'yes')
                     dm.concatfile(self.df)
                     #print(list(set(dm.df['Keyword'].tolist())))
                     self.addlist()
                 else:
-                    self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+                    self.df = tw.searchkeys(keywords,'no')
                 #dm.concatfile(self.df)
             else:
-                self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
-            self.dateSet()    
+                self.df = tw.searchkeys(keywords,'no')
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
@@ -208,6 +207,38 @@ class Ui_MainWindow(QWidget):
         self.labelShowKeywords() 
         
     def button2(self) : #for seach collect word[:10]
+        # if self.tw_worddf == None:
+        #     return
+        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
+        tenwords = list(map(lambda x: x.lower(), tenwords))
+        if self.showDialog() == 'Yes':
+            self.keywords.extend(tenwords)
+            self.dateSet()
+            dhave = []
+            for keyword in tenwords:
+                if keyword not in self.keywords:
+                    dhave.append(keyword)
+            if len(dhave) > 0:
+                self.keywords.extend(dhave)
+                self.df = tw.searchkeys(tenwords,'yes')
+                dm.concatfile(self.df)
+                
+            else:
+                self.df = tw.searchkeys(tenwords,'no')
+            # self.df = tw.savedata(tenwords)
+            # print(self.df)
+            # dm.concatfile(self.df)
+            # self.addlist()
+        else:
+            return
+        #self.addlist_2()    
+        self.addlist() 
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView_2.setModel(self.model)
+
+    def refreshButton(self) : #for seach collect word[:10]
         # if self.tw_worddf == None:
         #     return
         tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
@@ -282,15 +313,6 @@ class Ui_MainWindow(QWidget):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText("Since date less than Until date")
-        #msg.setInformativeText('More information')
-        msg.setWindowTitle("Period time Error")
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
-    
-    def showErrorDialog2(self):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setText("Can not search new keyword after 7 days")
         #msg.setInformativeText('More information')
         msg.setWindowTitle("Period time Error")
         msg.setStandardButtons(QMessageBox.Ok)
@@ -392,11 +414,13 @@ class Ui_MainWindow(QWidget):
         self.PushButton_1.clicked.connect(btm1)
 
         #สร้างไว้สำหรับรีเฟรช
+        btmRefresh_1 = functools.partial(self.refreshButton)   
+        self.PushButton_1.clicked.connect(btmRefresh_1)
         self.PushButtonRefresh = QtWidgets.QPushButton(self.tab)
         self.PushButtonRefresh.setObjectName("PushButtonRefresh")
         self.PushButtonRefresh.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
-        #self.PushButtonRefresh.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
+        self.PushButtonRefresh.clicked.connect(btmRefresh_1) #เชื่อมปุ่มได้แบบปกติเลย
 
         self.listView = QtWidgets.QListWidget(self.tab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -484,12 +508,13 @@ class Ui_MainWindow(QWidget):
         btm2 = functools.partial(self.button2)   
         self.PushButton_3.clicked.connect(btm2)
 
-        #สร้างไว้สำหรับรีเฟรช
+        
         self.PushButtonRefresh_2 = QtWidgets.QPushButton(self.tab_2)
         self.PushButtonRefresh_2.setObjectName("PushButtonRefresh_2")
         self.PushButtonRefresh_2.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh_2.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
-        #self.PushButtonRefresh_2.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
+        btmRefresh_2 = functools.partial(self.refreshButton)   
+        self.PushButtonRefresh_2.clicked.connect(btmRefresh_2)
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -589,12 +614,12 @@ class Ui_MainWindow(QWidget):
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         #self.PushButton_1.clicked.connect(checkNew1)
 
-        #สร้างไว้สำหรับรีเฟรช
         self.PushButtonRefresh_3 = QtWidgets.QPushButton(self.tab_3)
         self.PushButtonRefresh_3.setObjectName("PushButtonRefresh_3")
         self.PushButtonRefresh_3.setGeometry(QtCore.QRect(10, 10, 30, 30))
-        self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png'))#ไว้เชือมรูป
-        #self.PushButtonRefresh_3.clicked.connect(btm1) #เชื่อมปุ่มได้แบบปกติเลย
+        self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
+        btmRefresh_2 = functools.partial(self.refreshButton)   
+        self.PushButtonRefresh_3.clicked.connect(btmRefresh_2)
 
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
