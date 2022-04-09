@@ -108,11 +108,20 @@ class DataManager:
     def collectwords(self,dataframe):
         #print(dataframe)
         nltk.download('stopwords')          #important
+        dataframe = dataframe.reset_index()
         en_stops = set(stopwords.words('english'))
         word = {}
-        for i in dataframe['Tweet']:    #only tweet
-            if langdetect.detect(i) != 'th':
-                allwords = i.split()
+        for index,row in dataframe.iterrows():    #only tweet
+            if row['Language'] == 'eng':
+                allwords = row['Tweet'].split()
+                for w in allwords: 
+                    if w not in en_stops:
+                        if w in word:
+                            word[w] += 1
+                        else:
+                            word[w] = 1
+            elif row['Language'] == 'th':
+                allwords = word_tokenize(row['Tweet'], engine='newmm')
                 for w in allwords: 
                     if w not in en_stops:
                         if w in word:
@@ -120,17 +129,15 @@ class DataManager:
                         else:
                             word[w] = 1
             else:
-                allwords = word_tokenize(i, engine='newmm')
-                for w in allwords: 
-                    if w not in en_stops:
-                        if w in word:
-                            word[w] += 1
-                        else:
-                            word[w] = 1
-        del word['RT']
-        del word[' ']   #for thai language
+                pass
+        if 'RT' in word:
+            del word['RT']  #for twitter
+        if ' ' in word:
+            del word[' ']   #for thai language
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
-        return sortword     #tuple in list
+        worddf = pd.DataFrame(sortword,columns=['Word','Count'])
+        return worddf   #word dataframe
+        #return sortword     #tuple in list
     
     def convertJsonToDataframe(self,jsonDict):
         df = pd.DataFrame.from_dict({(i,j,k): jsonDict[i][j][k] 
