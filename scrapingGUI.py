@@ -133,25 +133,33 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil
 
-    def showDefaultFile(self) : #from file
-        self.df = dm.setdefaultDF()
-        #self.df = dm.unionfile(self.filename)
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        print(len(self.df.index),tw.keys)
-        self.model = TableModel(self.df) 
-        self.table = QtWidgets.QTableView()
-        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+    def showRealtime(self) : #search ol key in this time
+        print('real time')
+        if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+            self.showErrorDialog2()
+            return
+        if self.showDialog() == 'Yes':
+            self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
+            dm.concatfile(self.df)
+            self.addlist()
+            self.model = TableModel(self.df) 
+            self.table = QtWidgets.QTableView()
+            self.table.setModel(self.model)
+            self.tableView.setModel(self.model)
+            #self.dateSet() 
+        else:
+            return
 
     def showDefaultFileTweetW(self) : #from file
-        self.df = dm.setdefaultDF()
-        #self.df = dm.unionfile(self.filename)
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        print(len(self.df.index),tw.keys)
-        self.model = TableModel(self.df) 
-        self.table = QtWidgets.QTableView()
-        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-        self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
+        return
+        # self.df = dm.setdefaultDF()
+        # #self.df = dm.unionfile(self.filename)
+        # self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        # print(len(self.df.index),tw.keys)
+        # self.model = TableModel(self.df) 
+        # self.table = QtWidgets.QTableView()
+        # self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        # self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
     def button1(self) : #เพิ่มค่า search ว่างด้วย
         print("\n\n")
@@ -187,7 +195,7 @@ class Ui_MainWindow(QWidget):
                 #dm.concatfile(self.df)
             else:
                 self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
-            self.dateSet()    
+            #self.dateSet()    
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
@@ -198,7 +206,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model)
 
         self.tw_worddf = dm.collectwords(self.df)
-        print(self.tw_worddf)
+        #print(self.tw_worddf)
         self.addlist_2()
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
@@ -221,11 +229,11 @@ class Ui_MainWindow(QWidget):
                     dhave.append(keyword)
             if len(dhave) > 0:
                 self.keywords.extend(dhave)
-                self.df = tw.searchkeys(tenwords,'yes')
+                self.df = tw.searchkeys(tenwords,'yes',str(self.dateUntilReturn()))
                 dm.concatfile(self.df)
                 
             else:
-                self.df = tw.searchkeys(tenwords,'no')
+                self.df = tw.searchkeys(tenwords,'no',str(self.dateUntilReturn()))
             # self.df = tw.savedata(tenwords)
             # print(self.df)
             # dm.concatfile(self.df)
@@ -239,7 +247,18 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
 
-    def refreshButton_1(self) : 
+    def refreshButton_1(self) :
+        print('refresh')
+        self.SearchBox1.clear()
+        self.dateSet()
+        self.df = dm.setdefaultDF()
+        #self.df = dm.unionfile(self.filename)
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        print(len(self.df.index),tw.keys)
+        self.model = TableModel(self.df) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+        self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
         return
 
     def refreshButton_2(self) : 
@@ -302,15 +321,6 @@ class Ui_MainWindow(QWidget):
         msg.setWindowTitle("Period time Error")
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
-
-    # def checkInput(self,keys) :
-    #     print('\n\ncheckinput',keys,self.keywords)
-    #     if keys not in self.keywords :
-    #         print(keys)
-    #         #self.showDialog(self.SearchBox1.text())
-    #         return keys
-    #     else :
-    #         print("OK")
     
 
     def addlist(self): #ของ tab Tweet
@@ -331,10 +341,7 @@ class Ui_MainWindow(QWidget):
         #     self.listView_2.addItem(item)
 
     def addlist_3(self): #ของ tab Web scraping
-        print('eiei')
-        # for i in range(len(self.keywords)) :
-        #     item = QtWidgets.QListWidgetItem(self.keywords[i])
-        #     self.listView_3.addItem(item)                
+        return              
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -384,7 +391,7 @@ class Ui_MainWindow(QWidget):
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
-        self.PushButton_2.clicked.connect(self.showDefaultFile)
+        self.PushButton_2.clicked.connect(self.showRealtime)
 
         self.gridLayout.addWidget(self.PushButton_2, 2, 5, 1, 1)
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
@@ -400,7 +407,6 @@ class Ui_MainWindow(QWidget):
 
         #สร้างไว้สำหรับรีเฟรช
         btmRefresh_1 = functools.partial(self.refreshButton_1)   
-        self.PushButton_1.clicked.connect(btmRefresh_1)
         self.PushButtonRefresh = QtWidgets.QPushButton(self.tab)
         self.PushButtonRefresh.setObjectName("PushButtonRefresh")
         self.PushButtonRefresh.setGeometry(QtCore.QRect(10, 10, 30, 30))
@@ -561,7 +567,7 @@ class Ui_MainWindow(QWidget):
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
         self.PushButton_6.setObjectName("PushButton_6")
-        self.PushButton_6.clicked.connect(self.showDefaultFile)
+        #self.PushButton_6.clicked.connect(self.showDefaultFile)
 
         self.gridLayout.addWidget(self.PushButton_6, 2, 5, 1, 1)
         self.PushButton_5 = QtWidgets.QPushButton(self.tab_3)
@@ -640,7 +646,7 @@ class Ui_MainWindow(QWidget):
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
-        self.PushButton_2.setText(_translate("MainWindow", "Default"))
+        self.PushButton_2.setText(_translate("MainWindow", "Real time"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
 

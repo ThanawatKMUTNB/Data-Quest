@@ -151,6 +151,9 @@ class Twitter_Scrap:
                 self.keys.extend(dhave)
                 self.savedata(dhave,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            elif Ans == "real":
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
         elif keyword[0] in self.keys:
