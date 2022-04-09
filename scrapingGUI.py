@@ -20,11 +20,7 @@ import importWin as windo
 
 import DataManager
 import twitter_scrap 
-#class SearchKeyTweet() :
-#class SearchLinkWeb() :
-    #def getDate(self) :
-        #Ui_MainWindow().__init__()
-        #
+
         
 #ยังไม่แก้ช่วงวันที่ที่เลือกได้ใน tab 2 และ 3
 class TableModel(QtCore.QAbstractTableModel):
