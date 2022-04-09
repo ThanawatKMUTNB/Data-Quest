@@ -58,7 +58,7 @@ class Twitter_Scrap:
     def remove_url_th(self,txt):
         return " ".join(re.sub("([^\u0E00-\u0E7Fa-zA-Z' ]|^'|'$|''|(\w+:\/\/\S+))", "", txt).split())
 
-    def get_related_tweets(self,key_word):
+    def get_related_tweets(self,key_word,until):
 
         tweet_keyword = []
         twitter_users = []
@@ -74,6 +74,7 @@ class Twitter_Scrap:
         for tweet in tw.Cursor(self._api.search_tweets,
                                 q=key_word,
                                 tweet_mode="extended",
+                                until=until,
                                 include_entities=True).items(5):
                                 
             if(tweet.lang == 'en'or tweet.lang == 'th'):
@@ -111,7 +112,7 @@ class Twitter_Scrap:
 
         return self.df
 
-    def savedata(self,keyword): #keyword is list
+    def savedata(self,keyword,until): #keyword is list
 
         current_time = datetime.now().strftime("%H:%M:%S")
         print('\nstart saving @',current_time)
@@ -124,7 +125,7 @@ class Twitter_Scrap:
         #     self.df = pd.read_csv(filename)
 
         for kw in keyword:
-            self.df = pd.concat([self.df,self.get_related_tweets(kw)])
+            self.df = pd.concat([self.df,self.get_related_tweets(kw,until)])
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
@@ -134,32 +135,35 @@ class Twitter_Scrap:
         current_time = datetime.now().strftime("%H:%M:%S")
         print('save complete @',current_time)
 
-    def searchkeys(self,keyword,Ans):   #keyword's type is list
+    def searchkeys(self,keyword,Ans,until):   #keyword's type is list
         #print('keyword',keyword,'\nkeys',self.keys,'\nkeyword in keys?',keyword in self.keys)
         # if "" in keyword:
         #     return self.df
         
-        if len(keyword) > 1:
+        if len(keyword) > 1:            #>1 keyword
             dhave = []
             for key in keyword:
                 if key not in self.keys:
                     dhave.append(key)
             print(keyword)
             print(dhave)
-            if len(dhave) > 0:
+            if len(dhave) > 0:          #search new keyword
                 self.keys.extend(dhave)
-                self.savedata(dhave)
+                self.savedata(dhave,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            elif Ans == "real":
+                self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
         elif keyword[0] in self.keys:
             return self.df.loc[self.df['Keyword']==keyword[0]]
-        else:
+        else:                           #1keyword
             # print(f'{keyword} not in Database. Do you want to search?')
             # Ans = str(input()).lower()
-            if Ans == 'yes':
+            if Ans == 'yes':            #search new key
                 self.keys.extend(keyword)
-                self.savedata(keyword)
+                self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 print('You select NO')
