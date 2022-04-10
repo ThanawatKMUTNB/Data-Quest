@@ -279,6 +279,27 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
         return
+    
+    def deleteButton_1(self) : #สำหรับปุ่ม delete tab tweet
+        if self.showDeleteDialog() == "Yes":
+            keywords = self.SearchBox1.text()
+            keywords = keywords.split(',')
+            keywords = list(map(lambda x: x.lower(), keywords))
+            if "" not in keywords:
+                self.dateSet()
+                self.SearchBox1.clear()
+                self.df = dm.deletekeyword(keywords)
+                self.keywords = self.df['Keyword'].tolist()
+                self.keywords = list(set(self.keywords))
+                self.addlist()
+                self.model = TableModel(self.df) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+                self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+            else:
+                print('nonKeyword')
+                return
+        return 
 
     def refreshButton_2(self) : 
         return
@@ -313,6 +334,20 @@ class Ui_MainWindow(QWidget):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText("Do you want to search?") #แสดงข้อความ
+        msgBox.setWindowTitle("Warning") #Title
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
+        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
+        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
+            return 'Yes'
+        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            return 'No'
+    
+    def showDeleteDialog(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Are you sure?") #แสดงข้อความ
         msgBox.setWindowTitle("Warning") #Title
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
         #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
@@ -361,9 +396,6 @@ class Ui_MainWindow(QWidget):
 
     def addlist_3(self): #ของ tab Web scraping
         return              
-    
-    def deleteButton_1() : #สำหรับปุ่ม delete tab tweet 
-        return
 
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
         return
