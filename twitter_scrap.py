@@ -75,7 +75,7 @@ class Twitter_Scrap:
                                 q=key_word,
                                 tweet_mode="extended",
                                 until=until,
-                                include_entities=True).items(5):
+                                include_entities=True).items(10):
                                 
             if(tweet.lang == 'en'or tweet.lang == 'th'):
                 twitter_users.append(tweet.user.screen_name)
@@ -156,13 +156,18 @@ class Twitter_Scrap:
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        elif keyword[0] in self.keys:
-            return self.df.loc[self.df['Keyword']==keyword[0]]
-        else:                           #1keyword
-            # print(f'{keyword} not in Database. Do you want to search?')
-            # Ans = str(input()).lower()
+        elif keyword[0] in self.keys:   #seach 1 key
+            if Ans == "real":
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            else:
+                return self.df.loc[self.df['Keyword']==keyword[0]]
+        else:                           #1keyword (new)
             if Ans == 'yes':            #search new key
                 self.keys.extend(keyword)
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            elif Ans == "real":
                 self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:

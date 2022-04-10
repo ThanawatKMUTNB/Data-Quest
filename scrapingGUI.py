@@ -16,6 +16,8 @@ from datetime import datetime, timedelta
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
+
+from requests import delete
 import importWin as windo 
 
 import DataManager
@@ -51,7 +53,8 @@ class Ui_MainWindow(QWidget):
         super().__init__()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
-        self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+        #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+        self.df = dm.newUnion()
         tw.setdataframe(self.df)
         
         #self.data = win.OpenFile()
@@ -129,24 +132,45 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil
 
-    def showRealtime(self) : #search ol key in this time
+    def showRealtime(self) : #search key in this time
         print('real time')
         if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
             self.showErrorDialog2()
             return
-        if self.showDialog() == 'Yes':
-            self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
-            dm.concatfile(self.df)
-            self.addlist()
-            self.model = TableModel(self.df) 
-            self.table = QtWidgets.QTableView()
-            self.table.setModel(self.model)
-            self.tableView.setModel(self.model)
-            #self.dateSet() 
+        keywords = self.SearchBox1.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+
+        if "" not in keywords:
+            if self.showDialog() == 'Yes':
+                self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
+                dm.concatfile(self.df)
+                self.addlist()
+                self.model = TableModel(self.df) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+            else:
+                return
         else:
-            return
+            print('search new all keys')
+            if self.showDialog() == 'Yes':
+                self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
+                dm.concatfile(self.df)
+                self.addlist()
+                self.model = TableModel(self.df) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+                #self.dateSet() 
+            else:
+                return
 
     def showDefaultFileTweetW(self) : #from file
+        self.model = TableModel(self.tw_worddf) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView_2.setModel(self.model)
         return
         # self.df = dm.setdefaultDF()
         # #self.df = dm.unionfile(self.filename)
@@ -157,7 +181,7 @@ class Ui_MainWindow(QWidget):
         # self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         # self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
-    def button1(self) : #เพิ่มค่า search ว่างด้วย
+    def button1(self) : 
         print("\n\n")
         print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
@@ -202,7 +226,6 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model)
 
         self.tw_worddf = dm.collectwords(self.df)
-        #print(self.tw_worddf)
         self.addlist_2()
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
@@ -339,6 +362,12 @@ class Ui_MainWindow(QWidget):
     def addlist_3(self): #ของ tab Web scraping
         return              
     
+    def deleteButton_1() : #สำหรับปุ่ม delete tab tweet 
+        return
+
+    def deleteButton_3() : #สำหรับปุ่ม delete tab web
+        return
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -408,6 +437,12 @@ class Ui_MainWindow(QWidget):
         self.PushButtonRefresh.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
         self.PushButtonRefresh.clicked.connect(btmRefresh_1) #เชื่อมปุ่มได้แบบปกติเลย
+
+        self.PushButtonDelete = QtWidgets.QPushButton(self.tab)
+        self.PushButtonDelete.setObjectName("PushButtonDelete")
+        self.PushButtonDelete.setGeometry(QtCore.QRect(50, 10, 30, 30))
+        self.PushButtonDelete.setIcon(QtGui.QIcon('3481306.png')) #ไว้เชือมรูป
+        self.PushButtonDelete.clicked.connect(self.deleteButton_1) #เชื่อมปุ่มได้แบบปกติเลย
 
         self.listView = QtWidgets.QListWidget(self.tab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -494,14 +529,6 @@ class Ui_MainWindow(QWidget):
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         btm2 = functools.partial(self.button2)   
         self.PushButton_3.clicked.connect(btm2)
-
-        
-        self.PushButtonRefresh_2 = QtWidgets.QPushButton(self.tab_2)
-        self.PushButtonRefresh_2.setObjectName("PushButtonRefresh_2")
-        self.PushButtonRefresh_2.setGeometry(QtCore.QRect(10, 10, 30, 30))
-        self.PushButtonRefresh_2.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
-        btmRefresh_2 = functools.partial(self.refreshButton_2)   
-        self.PushButtonRefresh_2.clicked.connect(btmRefresh_2)
 
         self.listView_2 = QtWidgets.QListWidget(self.tab_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -606,7 +633,13 @@ class Ui_MainWindow(QWidget):
         self.PushButtonRefresh_3.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
         #btmRefresh_2 = functools.partial(self.refreshButton)   
-        self.PushButtonRefresh_3.clicked.connect(btmRefresh_2)
+        #self.PushButtonRefresh_3.clicked.connect(btmRefresh_2)
+
+        self.PushButtonDelete_3 = QtWidgets.QPushButton(self.tab_3)
+        self.PushButtonDelete_3.setObjectName("PushButtonDelete_3")
+        self.PushButtonDelete_3.setGeometry(QtCore.QRect(50, 10, 30, 30))
+        self.PushButtonDelete_3.setIcon(QtGui.QIcon('3481306.png')) #ไว้เชือมรูป
+        self.PushButtonDelete_3.clicked.connect(self.deleteButton_3) 
 
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
@@ -642,13 +675,13 @@ class Ui_MainWindow(QWidget):
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
-        self.PushButton_2.setText(_translate("MainWindow", "Real time"))
+        self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
+        self.PushButtonDelete.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
 
         self.PushButton_3.setText(_translate("MainWindow", "Search"))
         self.PushButton_4.setText(_translate("MainWindow", "Default"))
-        self.PushButtonRefresh_2.setText(_translate("MainWindow", ""))
         self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_5.setText(_translate("MainWindow", "Keyword"))
         #self.label_6.setText(_translate("MainWindow", "to"))
@@ -657,6 +690,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
         self.PushButton_6.setText(_translate("MainWindow", "Default"))
         self.PushButtonRefresh_3.setText(_translate("MainWindow", ""))
+        self.PushButtonDelete_3.setText(_translate("MainWindow", ""))
         self.label_7.setText(_translate("MainWindow", "Web scraping"))
         self.label_8.setText(_translate("MainWindow", "Keyword"))
         self.label_9.setText(_translate("MainWindow", "to"))
