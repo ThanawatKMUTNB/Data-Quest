@@ -133,22 +133,39 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil
 
-    def showRealtime(self) : #search ol key in this time
+    def showRealtime(self) : #search key in this time
         print('real time')
         if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
             self.showErrorDialog2()
             return
-        if self.showDialog() == 'Yes':
-            self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
-            dm.concatfile(self.df)
-            self.addlist()
-            self.model = TableModel(self.df) 
-            self.table = QtWidgets.QTableView()
-            self.table.setModel(self.model)
-            self.tableView.setModel(self.model)
-            #self.dateSet() 
+        keywords = self.SearchBox1.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+
+        if "" not in keywords:
+            if self.showDialog() == 'Yes':
+                self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
+                dm.concatfile(self.df)
+                self.addlist()
+                self.model = TableModel(self.df) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+            else:
+                return
         else:
-            return
+            print('search new all keys')
+            if self.showDialog() == 'Yes':
+                self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
+                dm.concatfile(self.df)
+                self.addlist()
+                self.model = TableModel(self.df) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+                #self.dateSet() 
+            else:
+                return
 
     def showDefaultFileTweetW(self) : #from file
         return
@@ -161,7 +178,7 @@ class Ui_MainWindow(QWidget):
         # self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         # self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
-    def button1(self) : #เพิ่มค่า search ว่างด้วย
+    def button1(self) : 
         print("\n\n")
         print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
@@ -646,7 +663,7 @@ class Ui_MainWindow(QWidget):
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
-        self.PushButton_2.setText(_translate("MainWindow", "Real time"))
+        self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
 

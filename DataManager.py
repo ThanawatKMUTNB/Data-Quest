@@ -86,6 +86,24 @@ class DataManager:
     def setdefaultDF(self):
         self.df = self.unionfile(self.filenames)
         return self.df
+    
+    def collectfile(self):
+        self.df["Time"] = pd.to_datetime(self.df["Time"]).dt.strftime('%Y-%m-%d')
+        keys = list(set(self.df['Keyword'].tolist()))
+        folder = "collectkeys"
+
+        if not os.path.exists(folder):
+            os.mkdir(folder)    
+        for key in keys:
+            path = str(folder+'/'+key)
+            dff = self.df.loc[self.df['Keyword'].isin([key])]
+            days = list(set(dff['Time'].tolist()))
+            if not os.path.exists(path):
+                os.mkdir(path)
+            for d in days:
+                dfff = dff.loc[dff['Time'].isin([d])]
+                dfff.to_csv(path+'/'+key+'_'+d+'.csv',encoding='utf-8',index=False)
+        print('collect complete')
 
     def getperiod(self,since,until):  ####column for twitter
         self.formatdatetime('Time')
