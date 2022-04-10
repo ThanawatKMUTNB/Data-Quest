@@ -12,6 +12,7 @@ import re
 import glob
 import os
 import time
+import shutil
 import requests
 import urllib.robotparser
 
@@ -60,8 +61,8 @@ class DataManager:
         return self.df
 
     def unionfile(self,filenames):              #type filename -> list
-        self.filenames = filenames
         self._start = 0
+        self.filenames = filenames
         for file in filenames:
             df1 = pd.read_csv(file)
             if self._start != 0:
@@ -70,6 +71,27 @@ class DataManager:
             else:
                 self.df = df1
                 self._start += 1
+        self.keys = list(set(self.df['Keyword'].tolist()))
+        self.collectfile()
+        return self.df
+    
+    def newUnion(self):
+        path=os.getcwd()
+        keys = []
+        start = 0
+        for f in glob.glob(path+'/collectkeys/*'):
+            keyname = os.path.split(f)[-1]
+            keys.append(keyname)
+        for k in keys:
+            for file in glob.glob(path+'/collectkeys/'+k+'/*.csv'):
+                if start == 0:
+                    self.df = pd.read_csv(file)
+                    start +=1
+                else:
+                    dff = pd.read_csv(file)
+                    self.df = pd.concat([self.df,dff])
+        self.keys = keys
+        #self.collectfile()
         return self.df
     
     def setnewdf(self,dataframe):
@@ -91,7 +113,6 @@ class DataManager:
         self.df["Time"] = pd.to_datetime(self.df["Time"]).dt.strftime('%Y-%m-%d')
         keys = list(set(self.df['Keyword'].tolist()))
         folder = "collectkeys"
-
         if not os.path.exists(folder):
             os.mkdir(folder)    
         for key in keys:
@@ -156,6 +177,14 @@ class DataManager:
         worddf = pd.DataFrame(sortword,columns=['Word','Count'])
         return worddf   #word dataframe
         #return sortword     #tuple in list
+    
+    def deletekeyword(self,keyword):
+        path=os.getcwd()
+        for k  in keyword:
+            shutil.rmtree(path+'//collectkeys//'+k+'//')
+            self.keys.remove(k)
+            self.df.drop(self.df[self.df['Keyword']==k].index,inplace = True)
+        return self.df
     
     def convertJsonToDataframe(self,jsonDict):
         df = pd.DataFrame.from_dict({(i,j,k): jsonDict[i][j][k] 

@@ -51,7 +51,8 @@ class Ui_MainWindow(QWidget):
         super().__init__()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
-        self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+        #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+        self.df = dm.newUnion()
         tw.setdataframe(self.df)
         
         #self.data = win.OpenFile()
@@ -164,6 +165,10 @@ class Ui_MainWindow(QWidget):
                 return
 
     def showDefaultFileTweetW(self) : #from file
+        self.model = TableModel(self.tw_worddf) 
+        self.table = QtWidgets.QTableView()
+        self.table.setModel(self.model)
+        self.tableView_2.setModel(self.model)
         return
         # self.df = dm.setdefaultDF()
         # #self.df = dm.unionfile(self.filename)
@@ -219,7 +224,6 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model)
 
         self.tw_worddf = dm.collectwords(self.df)
-        #print(self.tw_worddf)
         self.addlist_2()
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
