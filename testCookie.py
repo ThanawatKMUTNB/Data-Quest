@@ -12,9 +12,10 @@ import ast
 ex = web.webScraping()
 dm = data.DataManager()
 link = "https://www.animenewsnetwork.com/"
-# path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
-# rawData = os.listdir(path)
-ex.startScraping()
+path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+rawData = os.listdir(path)
+
+# ex.startScraping()
 
 # # print(rawData[0].split("_"))
 
