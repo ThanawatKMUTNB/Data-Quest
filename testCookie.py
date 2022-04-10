@@ -12,23 +12,36 @@ import ast
 ex = web.webScraping()
 dm = data.DataManager()
 link = "https://www.animenewsnetwork.com/"
-path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+# path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
 rawData = os.listdir(path)
+today = ex.getTodayDate()
+newpath = os.path.join('web search',today)
+
+ex.setDataByKeyword()
+# keyword = dm.keys
+# print(keyword)
+# try:
+#     os.makedirs(newpath)
+# except :
+#     print("Directory")
 
 # ex.startScraping()
 
 # # print(rawData[0].split("_"))
 
 # for i in rawData:
-#     today = i.split("_")[0]
-    
-#     newpath = os.path.join('web search',today) 
+#     todayByFile = i.split("_")[0]
+#     # print(todayByFile)
+#     newpath = os.path.join('web search',todayByFile)
 #     if not os.path.exists(newpath):
 #         os.makedirs(newpath)
+    # else:    
+    #     print("Directory " , newpath ,  " already exists") 
     
 #     d = {}
-#     for kw in ex.keyword:
-#         dm.setDataForSearch(os.path.join(newpath,kw+".json"),d)
+    # for kw in ex.keyword:
+    #     dm.setDataForSearch(os.path.join(newpath,kw+".json"),d)
     
 #     path = os.path.join("WebData",i)
 #     dictForSearch = dm.readJson(path)

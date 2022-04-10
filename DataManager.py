@@ -28,8 +28,7 @@ class DataManager:
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         self._api = tw.API(auth, wait_on_rate_limit=True)
-
-        self.keys = []
+        self.keys = os.listdir("Tweet_Test\collectkeys")
         self.df = None
         self._start = 0
         self.filenames = []
@@ -228,13 +227,6 @@ class DataManager:
     #     path = os.path.join(path,(str(self.getTodayDate())+fileJsonName))
     #     # print(path)
     #     return path
-    
-    def setDataForSearch(self,path,dict):
-        # path = os.path.join("web search",fileName+".json")
-        with open(path, 'w') as f:
-            json.dump(dict,f)
-        f.close()
-        return 0
     
     def getPath(self,path,fileName):
         # path = "WebData"
