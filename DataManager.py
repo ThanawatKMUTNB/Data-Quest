@@ -106,7 +106,8 @@ class DataManager:
         return self.df
     
     def setdefaultDF(self):
-        self.df = self.unionfile(self.filenames)
+        #self.df = self.unionfile(self.filenames)
+        self.df = self.newUnion()
         return self.df
     
     def collectfile(self):
@@ -183,7 +184,8 @@ class DataManager:
         for k  in keyword:
             shutil.rmtree(path+'//collectkeys//'+k+'//')
             self.keys.remove(k)
-            self.df.drop(self.df[self.df['Keyword']==k].index,inplace = True)
+            #self.df.drop(self.df[self.df['Keyword']==k].index,inplace = True)
+            self.df = self.newUnion()
         return self.df
     
     def convertJsonToDataframe(self,jsonDict):
