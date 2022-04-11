@@ -402,23 +402,4 @@ class webScraping():
                 # print(json.dumps(dictForJson, indent=4))
                 self.writeJson(dictForJson)
     
-    def setDataForSearch(self,path,dict):
-        # path = os.path.join("web search",fileName+".json")
-        with open(path, 'w') as f:
-            json.dump(dict,f)
-        f.close()
-        return 0
-        
-    def setDataByKeyword(self):
-        path = "WebData"
-        rawData = os.listdir(path)
-        for i in rawData:
-            todayByFile = i.split("_")[0]
-        # print(todayByFile)
-        newpath = os.path.join('web search',todayByFile)
-        if not os.path.exists(newpath):
-            os.makedirs(newpath)
-        keyword = os.listdir("Tweet_Test\collectkeys")
-        d = {}
-        for kw in keyword:
-            self.setDataForSearch(os.path.join(newpath,kw+".json"),d)
+    

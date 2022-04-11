@@ -1,5 +1,7 @@
 import ast
+from csv import writer
 import json
+from operator import index
 from textblob import TextBlob 
 from datetime import datetime, timedelta
 from pythainlp import word_tokenize
@@ -195,15 +197,15 @@ class DataManager:
                        orient='index')
         return df
     
-    def getReadByDateList(self,Sdate):
-        DList = []
-        for root, dirs, files in os.walk(r'WebData'):
-            for name in files:
-                if Sdate in str(name): 
-                    # DList.append(name)
-                    DList.append(os.path.abspath(os.path.join(root, name)))
-                    # print(os.path.abspath(os.path.join(root, name)))
-        return DList
+    # def getReadByDateList(self,Sdate):
+    #     DList = []
+    #     for root, dirs, files in os.walk(r'WebData'):
+    #         for name in files:
+    #             if Sdate in str(name): 
+    #                 # DList.append(name)
+    #                 DList.append(os.path.abspath(os.path.join(root, name)))
+    #                 # print(os.path.abspath(os.path.join(root, name)))
+    #     return DList
     
     def readJson(self,path):
         with open(path, 'r') as f:
@@ -300,17 +302,17 @@ class DataManager:
         result = rp.can_fetch("*", link)
         return result
     
-    def date_range(self,start, end):
-        print(start, end)
-        dateS = datetime.strptime(start,'%d-%m-%Y')
-        dateE = datetime.strptime(end,'%d-%m-%Y')
-        delta = dateE - dateS  # as timedelta
-        days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
-        resualt = [] 
-        for i in days:
-            resualt.append(str(i.day).zfill(2)+"-"+str(i.month).zfill(2)+"-"+str(i.year))
-        # print(resualt)
-        return resualt
+    # def date_range(self,start, end):
+    #     print(start, end)
+    #     dateS = datetime.strptime(start,'%d-%m-%Y')
+    #     dateE = datetime.strptime(end,'%d-%m-%Y')
+    #     delta = dateE - dateS  # as timedelta
+    #     days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
+    #     resualt = [] 
+    #     for i in days:
+    #         resualt.append(str(i.day).zfill(2)+"-"+str(i.month).zfill(2)+"-"+str(i.year))
+    #     # print(resualt)
+    #     return resualt
 
     # start_date = datetime(2008, 8, 1)
     # end_date = datetime(2008, 8, 3)
@@ -340,66 +342,165 @@ class DataManager:
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         return sortword     #tuple in list
     
-    def startSearch(self,Ldate,LWord):# date []
-        # self.readJson
+    def setStartInfo(self):
         df = {
-                'Date' : [],
-                'Keyword' : [],
-                'Word Count' : [],
-                "Link" : [],
-                "Data" : [],
-                "Sentiment" : [],
-                'Lang' : [],
-                "Ref Link" : []
+                'Date' : '',
+                'Keyword' : '',
+                'Word Count' : '',
+                "Ref" : 0,
+                "Link" : '',
+                "Data" : '',
+                "Sentiment" : '',
+                'Lang' : '',
+                "Ref Link" : ''
                 }
-        ListOfDate = self.date_range(Ldate[0],Ldate[1])
-        for j in ListOfDate:
-            FileByDateList = self.getReadByDateList(j)
-            # print(j)
-            # print(FileByDateList)
-            if FileByDateList != []:
-                for i in FileByDateList:
-                    # print("Link : ",i)
-                    # print(type(i))
-                    data = self.readJson(i)
-                    # print(type(data))
-                    # print(i)
-                    # print(data[j].keys())
-                    for d in data.keys():
-                        # print(d)
-                        for l in data[d].keys():
-                            # print(data[d][l]["Data"])
-                            # for w in LWord:
-                            # print(w)
-                            n = 1
-                            for p in data[d][l]["Data"]:
-                                try:
-                                    wc = self.paragraphToList(p)
-                                    # print(n)
-                                    # print(wc)
-                                    for w in LWord:
-                                        for t in wc:
-                                            if t[0].lower() == w.lower():
-                                                # print("-----------------------------------------------------------------")
-                                                countWord = t[1]
-                                                if data[d][l]["Lang"].lower() == 'th':
-                                                    stm = self.getSentimentTH(p)
-                                                else : stm = self.getSentimentENG(p)
-                                                df['Date'].append(d)
-                                                df['Keyword'].append(w)
-                                                df['Word Count'].append(countWord)
-                                                df['Link'].append(l)
-                                                df['Lang'].append(data[d][l]["Lang"])
-                                                df['Ref Link'].append(data[d][l]["Ref"])
-                                                df['Data'].append(p)
-                                                df['Sentiment'].append(stm)
-                                                # print("-----------",df)
-                                                n+=1
-                                                self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
+        return pd.DataFrame(df, index=[0])
+    
+    def writeCsvByList(self,path,dataList):
+        # Open file in append mode
+        with open(path, 'a+', newline='') as write_obj:
+            # Create a writer object from csv module
+            csv_writer = writer(write_obj)
+            # Add contents of list as last row in the csv file
+            csv_writer.writerow(dataList)
+            print("... Save List to ",path,"  successful.")
+    
+    def setDataInfo(self,keyword,jsonFile):
+        print(keyword,jsonFile)
+        todayByFile = jsonFile.split("_")[0]
+        # df = {
+        #         'Date' : [],
+        #         'Keyword' : [],
+        #         'Word Count' : [],
+        #         "Ref" : [],
+        #         "Link" : [],
+        #         "Data" : [],
+        #         "Sentiment" : [],
+        #         'Lang' : [],
+        #         "Ref Link" : []
+        #         }
+        
+        data = self.readJson(os.path.join("WebData",jsonFile))
+        for d in data.keys():
+            for l in list(data[d].keys()):
+                n = 1
+                for p in data[d][l]["Data"]:
+                    try:
+                        wc = self.paragraphToList(p)
+                        for t in wc:
+                            df = []
+                            if t[0] == keyword:
+                                countWord = t[1]
+                                if data[d][l]["Lang"].lower() == 'th':
+                                    stm = self.getSentimentTH(p)
+                                else : 
+                                    stm = self.getSentimentENG(p)
+                                # df['Date'].append(todayByFile)
+                                # df['Keyword'].append(keyword)
+                                # df['Ref'].append(0)
+                                # df['Word Count'].append(countWord)
+                                # df['Link'].append(l)
+                                # df['Lang'].append(data[d][l]["Lang"])
+                                # df['Ref Link'].append(data[d][l]["Ref"])
+                                # df['Data'].append(p)
+                                # df['Sentiment'].append(stm)
+                                df.append(todayByFile)
+                                df.append(keyword)
+                                df.append(0)
+                                df.append(countWord)
+                                df.append(l)
+                                df.append(data[d][l]["Lang"])
+                                df.append(data[d][l]["Ref"])
+                                df.append(p)
+                                df.append(stm)
+                                self.writeCsvByList(os.path.join("web search",todayByFile,keyword+".csv"))
+                                n+=1
+                                # print(df)
+                    except :
+                        pass
+        # df=oldDf.append(df, ignore_index = True)
+        # return pd.DataFrame.from_dict(df)
+    
+    def setDataByKeyword(self):
+        path = "WebData"
+        rawData = os.listdir(path)
+        for i in rawData:
+            todayByFile = i.split("_")[0]
+            print(todayByFile)
+            newpath = os.path.join('web search',todayByFile)
+            if not os.path.exists(newpath):
+                os.makedirs(newpath)
+                for kw in keyword:
+                    df = self.setStartInfo()
+                    self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
+                
+            keyword = os.listdir("Tweet_Test\collectkeys")
+            for kw in keyword:
+                # df = self.setDataInfo(kw,i)
+                # df = self.setStartInfo()
+                # self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
+                self.setDataInfo(kw,i)
+                
+    # def startSearch(self,Ldate,LWord):# date []
+    #     # self.readJson
+    #     df = {
+    #             'Date' : [],
+    #             'Keyword' : [],
+    #             'Word Count' : [],
+    #             "Link" : [],
+    #             "Data" : [],
+    #             "Sentiment" : [],
+    #             'Lang' : [],
+    #             "Ref Link" : []
+    #             }
+    #     ListOfDate = self.date_range(Ldate[0],Ldate[1])
+    #     for j in ListOfDate:
+    #         FileByDateList = self.getReadByDateList(j)
+    #         # print(j)
+    #         # print(FileByDateList)
+    #         if FileByDateList != []:
+    #             for i in FileByDateList:
+    #                 # print("Link : ",i)
+    #                 # print(type(i))
+    #                 data = self.readJson(i)
+    #                 # print(type(data))
+    #                 # print(i)
+    #                 # print(data[j].keys())
+    #                 for d in data.keys():
+    #                     # print(d)
+    #                     for l in data[d].keys():
+    #                         # print(data[d][l]["Data"])
+    #                         # for w in LWord:
+    #                         # print(w)
+    #                         n = 1
+    #                         for p in data[d][l]["Data"]:
+    #                             try:
+    #                                 wc = self.paragraphToList(p)
+    #                                 # print(n)
+    #                                 # print(wc)
+    #                                 for w in LWord:
+    #                                     for t in wc:
+    #                                         if t[0].lower() == w.lower():
+    #                                             # print("-----------------------------------------------------------------")
+    #                                             countWord = t[1]
+    #                                             if data[d][l]["Lang"].lower() == 'th':
+    #                                                 stm = self.getSentimentTH(p)
+    #                                             else : stm = self.getSentimentENG(p)
+    #                                             df['Date'].append(d)
+    #                                             df['Keyword'].append(w)
+    #                                             df['Word Count'].append(countWord)
+    #                                             df['Link'].append(l)
+    #                                             df['Lang'].append(data[d][l]["Lang"])
+    #                                             df['Ref Link'].append(data[d][l]["Ref"])
+    #                                             df['Data'].append(p)
+    #                                             df['Sentiment'].append(stm)
+    #                                             # print("-----------",df)
+    #                                             n+=1
+    #                                             self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
                                     
-                                except :
-                                    pass
+    #                             except :
+    #                                 pass
         
-        # self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
+    #     # self.writeCsvByDf(os.path.join("WebSearch",'_'.join(Ldate)+"_"+'_'.join(LWord)+".csv"),pd.DataFrame.from_dict(df))
         
-        return pd.DataFrame.from_dict(df)
+    #     return pd.DataFrame.from_dict(df)
