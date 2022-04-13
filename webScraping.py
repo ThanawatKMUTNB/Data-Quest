@@ -10,6 +10,7 @@ import pandas as pd
 from urllib.parse import urlparse
 import json
 import urllib.robotparser
+import DataManager
 from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
@@ -330,12 +331,35 @@ class webScraping():
     #     # data = json.dumps(data, indent=4)
     #     return data
     
+    def setDataByKeyWord(self,soup,data):
+        dm = DataManager.DataManager()
+        today = self.getTodayDate()
+        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+        wc = dm.paragraphToList(data)
+        wcWord = [i[0] for i in wc]
+        for i in self.keyword:
+            if i in wcWord:
+                wcCount = wc[wcWord.index(i)][1]
+                stm = dm.getSentimentTH(data)
+                df = [today,i,0,wcCount,self.currentLink,self.getTitle(soup),
+                      data,stm,self.getLang(soup),
+                      dict(Counter(self.getAllRefLink()))]
+                dm.writeCsvByList(os.path.join("web search",today,i+'.csv'),df)
+                
     def getDataList(self,soup):
         # print(len(soup))
         try:
             divClass = soup.find_all('div')
-            # print(len(divClass))
-            return [ i.text.replace("\n"," ") for i in divClass]
+            n = len(divClass)
+            # return [ i.text.replace("\n"," ") for i in divClass]
+            resualt = []
+            for i in divClass:
+                print("\t\tData List",n)
+                n-=1
+                data = i.text.replace("\n"," ")
+                resualt.append(data)
+                self.setDataByKeyWord(soup,data)        
+            return resualt
         except :
             return []
         
@@ -349,6 +373,7 @@ class webScraping():
             soup = self.makeSoup(link)
             self.setMainDomain(link)
             self.setSubLink(soup)
+            self.currentLink = link
             dictForJson[self.getTodayDate()] = { link : {'Lang' : self.getLang(soup),
                                                         'Title' : self.getTitle(soup),
                                                         # 'Sub' : len(self.getAllSubLink()),
@@ -366,6 +391,7 @@ class webScraping():
                 try:
                     soup = self.makeSoup(i)
                     self.setSubLink(soup)
+                    self.currentLink = i
                     dictForJson[self.getTodayDate()].update({ i : {'Lang': self.getLang(soup),
                                             'Title' : self.getTitle(soup),
                                             # 'Sub' : len(self.getAllSubLink()),
