@@ -1,5 +1,5 @@
 import ast
-from csv import writer
+from csv import DictWriter, writer
 import json
 from operator import index
 from textblob import TextBlob 
@@ -365,9 +365,20 @@ class DataManager:
             csv_writer.writerow(dataList)
             print("... Save List to ",path,"  successful.")
     
-    def setDataInfo(self,keyword,jsonFile):
+    def append_dict_as_row(file_name, dict_of_elem, field_names):
+        # Open file in append mode
+        with open(file_name, 'a+', newline='') as write_obj:
+            # Create a writer object from csv module
+            dict_writer = DictWriter(write_obj, fieldnames=field_names)
+            # Add dictionary as wor in the csv
+            dict_writer.writerow(dict_of_elem)
+            print("... Save Dict to ",file_name,"  successful.")
+            
+    def setDataInfo(self,jsonFile):
+        keyword = self.keys
         print(keyword,jsonFile)
         todayByFile = jsonFile.split("_")[0]
+        field_names = ['Date','Keyword','Word Count','Ref','Link','Data','Sentiment','Lang','Ref Link']
         # df = {
         #         'Date' : [],
         #         'Keyword' : [],
@@ -381,41 +392,43 @@ class DataManager:
         #         }
         
         data = self.readJson(os.path.join("WebData",jsonFile))
+        # print(data)
         for d in data.keys():
             for l in list(data[d].keys()):
-                n = 1
                 for p in data[d][l]["Data"]:
                     try:
                         wc = self.paragraphToList(p)
                         for t in wc:
-                            df = []
-                            if t[0] == keyword:
-                                countWord = t[1]
-                                if data[d][l]["Lang"].lower() == 'th':
-                                    stm = self.getSentimentTH(p)
-                                else : 
-                                    stm = self.getSentimentENG(p)
-                                # df['Date'].append(todayByFile)
-                                # df['Keyword'].append(keyword)
-                                # df['Ref'].append(0)
-                                # df['Word Count'].append(countWord)
-                                # df['Link'].append(l)
-                                # df['Lang'].append(data[d][l]["Lang"])
-                                # df['Ref Link'].append(data[d][l]["Ref"])
-                                # df['Data'].append(p)
-                                # df['Sentiment'].append(stm)
-                                df.append(todayByFile)
-                                df.append(keyword)
-                                df.append(0)
-                                df.append(countWord)
-                                df.append(l)
-                                df.append(data[d][l]["Lang"])
-                                df.append(data[d][l]["Ref"])
-                                df.append(p)
-                                df.append(stm)
-                                self.writeCsvByList(os.path.join("web search",todayByFile,keyword+".csv"))
-                                n+=1
-                                # print(df)
+                            # df = []
+                            for kw in keyword:
+                                if t[0] == kw:
+                                    df = []
+                                    # print(wc)
+                                    print("\n\n",kw)
+                                    countWord = t[1]
+                                    if data[d][l]["Lang"].lower() == 'th':
+                                        stm = self.getSentimentTH(p)
+                                    else : 
+                                        stm = self.getSentimentENG(p)
+                                    # stm = "Good"
+                                    # df = {
+                                    #     'Date' : todayByFile,
+                                    #     'Keyword' : keyword,
+                                    #     'Word Count' : 0,
+                                    #     "Ref" : countWord,
+                                    #     "Link" : l,
+                                    #     "Data" : p,
+                                    #     "Sentiment" : stm,
+                                    #     'Lang' : data[d][l]["Lang"],
+                                    #     "Ref Link" : data[d][l]["Ref"]
+                                    #     }
+                                    df = [todayByFile,kw,0,countWord,l,p,stm,data[d][l]["Lang"],data[d][l]["Ref"]]
+                                    # print(df)
+                                    self.writeCsvByList(os.path.join("web search",todayByFile,kw+'.csv'),df)
+                                    # self.append_dict_as_row(os.path.join("web search",todayByFile,kw+'.csv'), df, field_names)
+                                    break
+                                else:
+                                    os.system("CLS")
                     except :
                         pass
         # df=oldDf.append(df, ignore_index = True)
@@ -435,11 +448,11 @@ class DataManager:
                     self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
                 
             keyword = os.listdir("Tweet_Test\collectkeys")
-            for kw in keyword:
+            # for kw in keyword:
                 # df = self.setDataInfo(kw,i)
                 # df = self.setStartInfo()
                 # self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
-                self.setDataInfo(kw,i)
+            self.setDataInfo(i)
                 
     # def startSearch(self,Ldate,LWord):# date []
     #     # self.readJson

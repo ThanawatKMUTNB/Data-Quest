@@ -14,14 +14,7 @@ from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
     def __init__(self):
-        self.keyword = ['2d animation', 'animation', 'animation studio', 
-                        'anime', 'anime comedy', 'anime romance', 
-                        'attack on titan', 'bl anime', 'disney animation', 
-                        'fantasy anime', 'from manga', 'from novel', 'harem', 
-                        'japan animation', 'mappa', 'pixar', 'school life', 
-                        'school life anime', 'seinen', 'shoujo', 'shounen', 
-                        'shounen ai', 'slice of life anime', 
-                        'sport anime', 'spy x family', 'ต่างโลก', 'อนิเมะ', 'อนิเมะแนะนำ']
+        self.keyword = os.listdir("Tweet_Test\collectkeys")
         self.web = ["https://www.animenewsnetwork.com/",
                     "https://www.cbr.com/category/anime-news/",
                     "https://myanimelist.net/",
@@ -336,6 +329,7 @@ class webScraping():
     #     f.close()
     #     # data = json.dumps(data, indent=4)
     #     return data
+    
     def getDataList(self,soup):
         # print(len(soup))
         try:

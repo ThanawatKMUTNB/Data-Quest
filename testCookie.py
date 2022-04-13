@@ -18,7 +18,12 @@ rawData = os.listdir(path)
 today = ex.getTodayDate()
 newpath = os.path.join('web search',today)
 
-dm.setDataByKeyword()
+# dm.setDataByKeyword()
 
+ex.startScraping()
 # print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
+# ud = ['o','k','l']
+# dm.writeCsvByList(os.path.join("web search","08-04-2022","animation.csv"),ud)
+# print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
+
 # dm.startSearch(["02-04-2022","08-04-2022"],['Anime','Summer'])
