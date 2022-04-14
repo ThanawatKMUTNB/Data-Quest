@@ -9,6 +9,7 @@ import DataManager as data
 from io import StringIO
 import os
 import ast
+from langdetect import detect
 ex = web.webScraping()
 dm = data.DataManager()
 link = "https://www.animenewsnetwork.com/"
@@ -16,11 +17,14 @@ link = "https://www.animenewsnetwork.com/"
 path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
 rawData = os.listdir(path)
 today = ex.getTodayDate()
-newpath = os.path.join('web search',today)
+newpath = os.path.join('web search',today,"anime.csv")
 
+
+# print(dm.getCountCsvLine(newpath))
 # dm.setDataByKeyword()
 
 ex.startScraping()
+
 # print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
 # ud = ['o','k','l']
 # dm.writeCsvByList(os.path.join("web search","08-04-2022","animation.csv"),ud)

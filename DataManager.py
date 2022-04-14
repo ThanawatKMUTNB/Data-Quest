@@ -1,5 +1,6 @@
 import ast
 from csv import DictWriter, writer
+import csv
 import json
 from operator import index
 from textblob import TextBlob 
@@ -341,6 +342,12 @@ class DataManager:
         # del word[' ']   #for thai language
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         return sortword     #tuple in list
+    
+    def getCountCsvLine(self,path):
+        file = open(path)
+        reader = csv.reader(file)
+        lines= len(list(reader))
+        return lines
     
     def setStartInfo(self):
         df = {

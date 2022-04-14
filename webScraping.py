@@ -1,4 +1,8 @@
+from csv import DictWriter, writer
+import csv
 from datetime import date
+import datetime
+from datetime import datetime
 import os
 from textwrap import wrap
 from turtle import ht
@@ -11,6 +15,7 @@ from urllib.parse import urlparse
 import json
 import urllib.robotparser
 import DataManager
+from langdetect import detect
 from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
@@ -330,22 +335,84 @@ class webScraping():
     #     f.close()
     #     # data = json.dumps(data, indent=4)
     #     return data
+    def writeCsvByList(self,path,dataList):
+        # Open file in append mode
+        with open(path, 'a+', newline='') as write_obj:
+            # Create a writer object from csv module
+            csv_writer = writer(write_obj)
+            # Add contents of list as last row in the csv file
+            csv_writer.writerow(dataList)
+            print("... Save List to ",path,"  successful.")
+    
+    def writCsvByDict(self,path,head,dict):
+        print("Dict in write")
+        with open(path, 'a+', newline='') as f:
+            print("Dict in write")
+            dictwriter_object = DictWriter(f, fieldnames=head)
+            dictwriter_object.writerow(dict)
+            print("\n... Save Dict to ",path,"  successful.")
+            f.close()
+    
+    def creatNewSearchFile(self,path):
+        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+        with open(path, 'a+', newline='') as f: 
+            write = csv.writer(f) 
+            write.writerow(field_names)
+            f.close()
     
     def setDataByKeyWord(self,soup,data):
         dm = DataManager.DataManager()
         today = self.getTodayDate()
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         wc = dm.paragraphToList(data)
-        wcWord = [i[0] for i in wc]
+              
         for i in self.keyword:
-            if i in wcWord:
-                wcCount = wc[wcWord.index(i)][1]
-                stm = dm.getSentimentTH(data)
-                df = [today,i,0,wcCount,self.currentLink,self.getTitle(soup),
-                      data,stm,self.getLang(soup),
-                      dict(Counter(self.getAllRefLink()))]
-                dm.writeCsvByList(os.path.join("web search",today,i+'.csv'),df)
-                
+            # if i in wcWord:
+            for tuplew in wc:
+                if i == tuplew[0]:
+                    newpath = os.path.join('web search',today)
+                    if not os.path.exists(newpath):
+                        print("File not exist Taday Folder")
+                        os.makedirs(newpath)
+                        
+                    newpath = os.path.join('web search',today,i+'.csv')
+                    if not os.path.exists(newpath):
+                        print("File not exist File ",i+'.csv')
+                        self.creatNewSearchFile(newpath)    
+                    
+                    wcCount = tuplew[1]
+                    if detect(data) == 'th':
+                        stm = dm.getSentimentTH(data)
+                    elif detect(data) == 'en':
+                        stm = dm.getSentimentENG(data)
+                        
+                    dfdict = {'Date':today,
+                        'Keyword':i,
+                        'Word Count':wcCount,
+                        'Ref':0,'Link':self.currentLink,
+                        'Title':self.getTitle(soup),
+                        'Data':data,
+                        'Sentiment':stm,
+                        'Lang':self.getLang(soup),
+                        'Ref Link':dict(Counter(self.getAllRefLink()))}
+                    # print(data)
+                    print("----------",i,tuplew)
+                    
+                    # print(df)
+                    savePath = os.path.join("web search",today,i+'.csv') 
+                    if dm.getCountCsvLine(savePath) == 1000:
+                        n=1
+                        newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                        while os.path.exists(newname):
+                            n+=1
+                            newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                        self.renameFile(savePath,newname)
+                        self.creatNewSearchFile(savePath)
+                    self.writCsvByDict(savePath,field_names,dfdict)
+    
+    def renameFile(self,oldpath,newpath):
+        os.rename(oldpath, newpath)
+        
     def getDataList(self,soup):
         # print(len(soup))
         try:
@@ -358,12 +425,18 @@ class webScraping():
                 n-=1
                 data = i.text.replace("\n"," ")
                 resualt.append(data)
-                self.setDataByKeyWord(soup,data)        
+                try:
+                    self.setDataByKeyWord(soup,data) 
+                except :
+                    pass
+                # self.setDataByKeyWord(soup,data)        
             return resualt
         except :
             return []
         
     def startScraping(self):
+        now = datetime.now()
+        starttime = now.strftime("%H:%M:%S")
         # countWeb = len(self.web)
         countWeb = 0
         for link in self.web:
@@ -420,6 +493,9 @@ class webScraping():
                 except :
                     pass
                 # print(json.dumps(dictForJson, indent=4))
+                now = datetime.now()
+                Endtime = now.strftime("%H:%M:%S")
+                print(starttime,Endtime)
                 self.writeJson(dictForJson)
     
     
