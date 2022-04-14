@@ -10,7 +10,7 @@ import os
 import sqlite3
 import glob
 from os.path import dirname, realpath, join
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox, QProgressBar
 import numpy as np
 from datetime import datetime, timedelta
 from PyQt5.QtGui import *
@@ -72,7 +72,7 @@ class Ui_MainWindow(QWidget):
         self.model = TableModel(self.df)
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
-        
+        self.processWord = str
 
         #self.maxDate()
         #self.setDate()
@@ -233,6 +233,7 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model)
 
         self.labelShowKeywords() 
+        
         
     def button2(self) : #for seach collect word[:10]
         # if self.tw_worddf == None:
@@ -400,6 +401,10 @@ class Ui_MainWindow(QWidget):
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
         return
     
+    def progressTime(self):
+        self.settime = self.df['Column'].apply(lambda x:x**3)
+        self.progressBar.setValue(self.settime)
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -430,6 +435,28 @@ class Ui_MainWindow(QWidget):
         self.dateEdit_2.setObjectName("dateEdit_2")
         self.gridLayout.addWidget(self.dateEdit_2, 0, 5, 1, 1)
 
+        #self.settime = self.df['Keywords'].apply(lambda x:x**3) #มันเรียกเอา column ทั้งหมดมานับแล้วำนวณเป็นเวลาออกมา
+        self.progressBar = QProgressBar(self.tab)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
+        self.progressBar.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
+        self.progressBar.setSizePolicy(sizePolicy)
+        self.progressBar.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setOrientation(QtCore.Qt.Horizontal)
+        self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.progressBar.setObjectName("progressBar")
+        self.gridLayout.addWidget(self.progressBar, 4, 5, 1, 1) 
+        #self.progressBar.value(self.settime)
+        #self.progressBar.hide()   
+        #timer = QTimer(self.tab)
+        #timer.timeout.connect(self.progressTime)
+        #timer.start(1000)
+
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -440,7 +467,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setObjectName("tableView")
         self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
         self.tableView.setModel(self.model) #show table in pyqt5
-
+        
         self.label_2 = QtWidgets.QLabel(self.tab)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
@@ -487,6 +514,11 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.listView, 3, 0, 1, 1)
         self.addlist()
         
+        self.labelProcess = QtWidgets.QLabel(self.tab)
+        self.labelProcess.setAlignment(QtCore.Qt.AlignLeft )
+        self.labelProcess.setObjectName("labelProcess")
+        self.gridLayout.addWidget(self.labelProcess, 4, 0, 1, 1)
+
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
         self.SearchBox1.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -504,8 +536,10 @@ class Ui_MainWindow(QWidget):
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
         self.label_1.setObjectName("label_1")
         self.gridLayout.addWidget(self.label_1, 1, 0, 1, 6)
+        #self.processBarGUI()
         self.tabWidget.addTab(self.tab, "")
         
+
         #tab2 
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -706,6 +740,7 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
+        self.labelProcess.setText(_translate("MainWindow", ""))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
