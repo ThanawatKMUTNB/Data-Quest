@@ -23,7 +23,7 @@ class DataManager:
     def __init__(self):
         ##-------------------- twitter --------------------##
         self._url = "https://api.aiforthai.in.th/ssense"                     
-        self._headers = {'Apikey': "0kFkiFLdf4TAyY3JeUT9WVnB5naP6SjW"}
+        self._headers = {'Apikey': "kE7s0TJ00spb9kEPZ1BC7w8A16dpy8Cr"}
         consumer_key = "EaFU9nJw2utR0lo2PUmJE3VZy"
         consumer_secret = "DsZuVw0tEl6GHhyK08tunsOE9ICSfwplEhRDMQwB8VIqngZ6i8"
         access_token = "759317188863897600-nuwQmcYfDX8lvdRyw2eCD6fMRMkLzzZ"
