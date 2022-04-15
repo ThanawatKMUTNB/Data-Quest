@@ -16,6 +16,7 @@ import json
 import urllib.robotparser
 import DataManager
 from langdetect import detect
+import langdetect
 from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
@@ -346,7 +347,7 @@ class webScraping():
     
     def writCsvByDict(self,path,head,dict):
         print("Dict in write")
-        with open(path, 'a+', newline='') as f:
+        with open(path, 'a+', newline='', encoding="utf-8") as f:
             print("Dict in write")
             dictwriter_object = DictWriter(f, fieldnames=head)
             dictwriter_object.writerow(dict)
@@ -355,7 +356,7 @@ class webScraping():
     
     def creatNewSearchFile(self,path):
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
-        with open(path, 'a+', newline='') as f: 
+        with open(path, 'a+', newline='', encoding="utf8") as f: 
             write = csv.writer(f) 
             write.writerow(field_names)
             f.close()
@@ -364,12 +365,18 @@ class webScraping():
         dm = DataManager.DataManager()
         today = self.getTodayDate()
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
-        wc = dm.paragraphToList(data)
-              
-        for i in self.keyword:
-            # if i in wcWord:
-            for tuplew in wc:
-                if i == tuplew[0]:
+        # print("Data : ",data)
+        try:
+            wc = dm.paragraphToList(data)
+            # except langdetect.lang_detect_exception.LangDetectException:
+            #     print("Data : ",data)
+
+            # wc = dm.paragraphToList(data)
+            # print("Data : ",data)
+            # print("Data List : ",wc)
+            for i in self.keyword:
+                # if i in wcWord:
+                for tuplew in wc:
                     newpath = os.path.join('web search',today)
                     if not os.path.exists(newpath):
                         print("File not exist Taday Folder")
@@ -380,59 +387,90 @@ class webScraping():
                         print("File not exist File ",i+'.csv')
                         self.creatNewSearchFile(newpath)    
                     
-                    wcCount = tuplew[1]
-                    if detect(data) == 'th':
-                        stm = dm.getSentimentTH(data)
-                    elif detect(data) == 'en':
-                        stm = dm.getSentimentENG(data)
+                    if i == tuplew[0]:
+                        # newpath = os.path.join('web search',today)
+                        # if not os.path.exists(newpath):
+                        #     print("File not exist Taday Folder")
+                        #     os.makedirs(newpath)
+                            
+                        # newpath = os.path.join('web search',today,i+'.csv')
+                        # if not os.path.exists(newpath):
+                        #     print("File not exist File ",i+'.csv')
+                        #     self.creatNewSearchFile(newpath)    
+                        # print("Data : ",data)
+                        stm = ''
+                        wcCount = tuplew[1]
+                        if detect(data) == 'th':
+                            stm = dm.getSentimentTH(data)
+                        elif detect(data) == 'en':
+                            stm = dm.getSentimentENG(data)
                         
-                    dfdict = {'Date':today,
-                        'Keyword':i,
-                        'Word Count':wcCount,
-                        'Ref':0,'Link':self.currentLink,
-                        'Title':self.getTitle(soup),
-                        'Data':data,
-                        'Sentiment':stm,
-                        'Lang':self.getLang(soup),
-                        'Ref Link':dict(Counter(self.getAllRefLink()))}
-                    # print(data)
-                    print("----------",i,tuplew)
+                        # print("Lang : ",detect(data))
+                        if stm != '':
+                            dfdict = {'Date':today,
+                                'Keyword':i,
+                                'Word Count':wcCount,
+                                'Ref':0,'Link':self.currentLink,
+                                'Title':self.getTitle(soup),
+                                'Data':data,
+                                'Sentiment':stm,
+                                'Lang':self.getLang(soup),
+                                'Ref Link':dict(Counter(self.getAllRefLink()))}
+                            # print(data)
+                            print("----------",i,tuplew)
+                            
+                            # print(df)
+                            savePath = os.path.join("web search",today,i+'.csv') 
+                            
+                            # dataraw = pd.read_csv(newpath)
+                            # newdata = dataraw.drop_duplicates()
+                            # newdata.to_csv(savePath, encoding='utf-8', index=False)
+                            
+                            try:
+                                filesize = dm.getCountCsvLine(savePath)
+                            except :
+                                filesize = 1000
+                                pass
+                            if filesize >= 1000:
+                                n=1
+                                newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                                while os.path.exists(newname):
+                                    n+=1
+                                    newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                                self.renameFile(savePath,newname)
+                                self.creatNewSearchFile(savePath)
+                            
+                            self.writCsvByDict(savePath,field_names,dfdict)
+                        
+                        # else:
+                        #     os.system('clear')
+        except langdetect.lang_detect_exception.LangDetectException:
+            print("\n******* Error Data : ",data)
+            pass
                     
-                    # print(df)
-                    savePath = os.path.join("web search",today,i+'.csv') 
-                    if dm.getCountCsvLine(savePath) == 1000:
-                        n=1
-                        newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
-                        while os.path.exists(newname):
-                            n+=1
-                            newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
-                        self.renameFile(savePath,newname)
-                        self.creatNewSearchFile(savePath)
-                    self.writCsvByDict(savePath,field_names,dfdict)
-    
     def renameFile(self,oldpath,newpath):
         os.rename(oldpath, newpath)
         
     def getDataList(self,soup):
         # print(len(soup))
-        try:
-            divClass = soup.find_all('div')
-            n = len(divClass)
-            # return [ i.text.replace("\n"," ") for i in divClass]
-            resualt = []
-            for i in divClass:
-                print("\t\tData List",n)
-                n-=1
-                data = i.text.replace("\n"," ")
-                resualt.append(data)
-                try:
-                    self.setDataByKeyWord(soup,data) 
-                except :
-                    pass
-                # self.setDataByKeyWord(soup,data)        
-            return resualt
-        except :
-            return []
+        # try:
+        divClass = soup.find_all('div')
+        n = len(divClass)
+        # return [ i.text.replace("\n"," ") for i in divClass]
+        resualt = []
+        for i in divClass:
+            print("\t\tData List",n)
+            n-=1
+            data = i.text.replace("\n"," ")
+            resualt.append(data)
+            # try:
+                # self.setDataByKeyWord(soup,data) 
+            # except :
+            #     pass
+            self.setDataByKeyWord(soup,data)        
+        #     return resualt
+        # except :
+        #     return []
         
     def startScraping(self):
         now = datetime.now()

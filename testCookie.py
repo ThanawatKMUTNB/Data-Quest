@@ -4,6 +4,8 @@ from itertools import count
 import json
 import re
 from urllib.parse import urlparse
+
+import pandas as pd
 import webScraping as web
 import DataManager as data
 from io import StringIO
@@ -17,8 +19,7 @@ link = "https://www.animenewsnetwork.com/"
 path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
 rawData = os.listdir(path)
 today = ex.getTodayDate()
-newpath = os.path.join('web search',today,"anime.csv")
-
+newpath = os.path.join('web search',today,"anime(1).csv")
 
 # print(dm.getCountCsvLine(newpath))
 # dm.setDataByKeyword()

@@ -344,7 +344,7 @@ class DataManager:
         return sortword     #tuple in list
     
     def getCountCsvLine(self,path):
-        file = open(path)
+        file = open(path, encoding="utf8")
         reader = csv.reader(file)
         lines= len(list(reader))
         return lines
