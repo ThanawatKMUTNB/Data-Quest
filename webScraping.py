@@ -22,26 +22,30 @@ from collections import Counter
 class webScraping():
     def __init__(self):
         self.keyword = os.listdir("Tweet_Test\collectkeys")
-        self.web = ["https://www.animenewsnetwork.com/",
+        self.web = [
+                    "https://www.animenewsnetwork.com/",
                     "https://www.cbr.com/category/anime-news/",
                     "https://myanimelist.net/",
                     "https://otakumode.com/news/anime",
-                    "https://news.dexclub.com/",
-                    "https://my-best.in.th/49872",
-                    "https://www.anime-japan.jp/2021/en/news/",
-                    "https://todayanimenews.com",
-                    "https://anime-news.tokyo/" ,
-                    "https://manga.tokyo/news/",
-                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
-                    "https://www.independent.co.uk/topic/anime",
-                    "https://soranews24.com/tag/anime/",
-                    "https://anitrendz.net/news/",
-                    "https://thebestjapan.com/the-best-of-japan/anime-fans/",
-                    "https://wiki.anime-os.com/chart/all-2020/",
-                    "https://kwaamsuk.net/10-anime-netflix/",
-                    "https://www.online-station.net/anime/326294/",
-                    "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
-                    "https://www.metalbridges.com/cool-anime-songs/"
+                    
+                    # "https://news.dexclub.com/",
+                    # "https://my-best.in.th/49872",
+                    # "https://www.anime-japan.jp/2021/en/news/",
+                    # "https://todayanimenews.com",
+                    
+                    # "https://anime-news.tokyo/" ,
+                    # "https://manga.tokyo/news/",
+                    
+                    # "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
+                    # "https://www.independent.co.uk/topic/anime",
+                    # "https://soranews24.com/tag/anime/",
+                    # "https://anitrendz.net/news/",
+                    # "https://thebestjapan.com/the-best-of-japan/anime-fans/",
+                    # "https://wiki.anime-os.com/chart/all-2020/",
+                    # "https://kwaamsuk.net/10-anime-netflix/",
+                    # "https://www.online-station.net/anime/326294/",
+                    # "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
+                    # "https://www.metalbridges.com/cool-anime-songs/"
                     ] 
         
         # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/",
@@ -368,82 +372,67 @@ class webScraping():
         # print("Data : ",data)
         try:
             wc = dm.paragraphToList(data)
-            # except langdetect.lang_detect_exception.LangDetectException:
-            #     print("Data : ",data)
-
-            # wc = dm.paragraphToList(data)
-            # print("Data : ",data)
-            # print("Data List : ",wc)
+            
+            stm = ''
+            if detect(data) == 'th':
+                stm = dm.getSentimentTH(data)
+            elif detect(data) == 'en':
+                stm = dm.getSentimentENG(data)
+                
+            newpath = os.path.join('web search',today)
+            if not os.path.exists(newpath):
+                print("File not exist Taday Folder")
+                os.makedirs(newpath)
+            
             for i in self.keyword:
-                # if i in wcWord:
-                for tuplew in wc:
-                    newpath = os.path.join('web search',today)
-                    if not os.path.exists(newpath):
-                        print("File not exist Taday Folder")
-                        os.makedirs(newpath)
-                        
-                    newpath = os.path.join('web search',today,i+'.csv')
-                    if not os.path.exists(newpath):
-                        print("File not exist File ",i+'.csv')
-                        self.creatNewSearchFile(newpath)    
+                newpath = os.path.join('web search',today,i+'.csv')
+                if not os.path.exists(newpath):
+                    print("File not exist File ",i+'.csv')
+                    self.creatNewSearchFile(newpath)
                     
-                    if i == tuplew[0]:
-                        # newpath = os.path.join('web search',today)
-                        # if not os.path.exists(newpath):
-                        #     print("File not exist Taday Folder")
-                        #     os.makedirs(newpath)
-                            
-                        # newpath = os.path.join('web search',today,i+'.csv')
-                        # if not os.path.exists(newpath):
-                        #     print("File not exist File ",i+'.csv')
-                        #     self.creatNewSearchFile(newpath)    
-                        # print("Data : ",data)
-                        stm = ''
-                        wcCount = tuplew[1]
-                        if detect(data) == 'th':
-                            stm = dm.getSentimentTH(data)
-                        elif detect(data) == 'en':
-                            stm = dm.getSentimentENG(data)
+            for tuplew in wc:
+                if tuplew[0] in self.keyword:
+                    i = tuplew[0]
+                    wcCount = tuplew[1]
+                    # print("Lang : ",detect(data))
+                    if stm != '':
+                        dfdict = {'Date':today,
+                            'Keyword':i,
+                            'Word Count':wcCount,
+                            'Ref':0,'Link':self.currentLink,
+                            'Title':self.getTitle(soup),
+                            'Data':data,
+                            'Sentiment':stm,
+                            'Lang':self.getLang(soup),
+                            'Ref Link':dict(Counter(self.getAllRefLink()))}
+                        # print(data)
+                        print("----------",i,tuplew)
                         
-                        # print("Lang : ",detect(data))
-                        if stm != '':
-                            dfdict = {'Date':today,
-                                'Keyword':i,
-                                'Word Count':wcCount,
-                                'Ref':0,'Link':self.currentLink,
-                                'Title':self.getTitle(soup),
-                                'Data':data,
-                                'Sentiment':stm,
-                                'Lang':self.getLang(soup),
-                                'Ref Link':dict(Counter(self.getAllRefLink()))}
-                            # print(data)
-                            print("----------",i,tuplew)
-                            
-                            # print(df)
-                            savePath = os.path.join("web search",today,i+'.csv') 
-                            
-                            # dataraw = pd.read_csv(newpath)
-                            # newdata = dataraw.drop_duplicates()
-                            # newdata.to_csv(savePath, encoding='utf-8', index=False)
-                            
-                            try:
-                                filesize = dm.getCountCsvLine(savePath)
-                            except :
-                                filesize = 1000
-                                pass
-                            if filesize >= 1000:
-                                n=1
+                        # print(df)
+                        savePath = os.path.join("web search",today,i+'.csv') 
+                        
+                        # dataraw = pd.read_csv(newpath)
+                        # newdata = dataraw.drop_duplicates()
+                        # newdata.to_csv(savePath, encoding='utf-8', index=False)
+                        
+                        try:
+                            filesize = dm.getCountCsvLine(savePath)
+                        except :
+                            filesize = 1000
+                            pass
+                        if filesize >= 1000:
+                            n=1
+                            newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                            while os.path.exists(newname):
+                                n+=1
                                 newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
-                                while os.path.exists(newname):
-                                    n+=1
-                                    newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
-                                self.renameFile(savePath,newname)
-                                self.creatNewSearchFile(savePath)
-                            
-                            self.writCsvByDict(savePath,field_names,dfdict)
+                            self.renameFile(savePath,newname)
+                            self.creatNewSearchFile(savePath)
                         
-                        # else:
-                        #     os.system('clear')
+                        self.writCsvByDict(savePath,field_names,dfdict)
+                    
+                    # else:
+                    #     os.system('clear')
         except langdetect.lang_detect_exception.LangDetectException:
             print("\n******* Error Data : ",data)
             pass
@@ -463,20 +452,13 @@ class webScraping():
             n-=1
             data = i.text.replace("\n"," ")
             resualt.append(data)
-            # try:
-                # self.setDataByKeyWord(soup,data) 
-            # except :
-            #     pass
-            self.setDataByKeyWord(soup,data)        
-        #     return resualt
-        # except :
-        #     return []
+            # self.setDataByKeyWord(soup,data)       
         
     def startScraping(self):
         now = datetime.now()
         starttime = now.strftime("%H:%M:%S")
         # countWeb = len(self.web)
-        countWeb = 0
+        countWeb = 15
         for link in self.web:
             print(link)
             countWeb += 1

@@ -45,13 +45,20 @@ class DataManager:
             return 'negative'
 
     def getSentimentTH(self,text):
+        # print(text)
         text = re.sub(r'[%]',' ',text)
+        # print(text)
         params = {'text':text}
-        response = requests.get(self._url, headers=self._headers, params=params)
+        # print(json.dumps(params, sort_keys=False, indent=4))
         try:
-            polarity = str(response.json()['sentiment']['polarity'])
-        except (KeyError):
-            polarity = 'neutral'
+            response = requests.get(self._url, headers=self._headers, params=params)
+            try:
+                polarity = str(response.json()['sentiment']['polarity'])
+            except (KeyError):
+                polarity = 'neutral'
+        except requests.exceptions.JSONDecodeError:
+            polarity = 'URI too long'
+            pass
         return polarity
 
     def formatdatetime(self,column):
