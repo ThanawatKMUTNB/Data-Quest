@@ -134,7 +134,9 @@ class Ui_MainWindow(QWidget):
 
     def showRealtime(self) : #search key in this time
         print('real time')
-        if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+        if datetime.now().date() <= self.dateUntilReturn():
+            pass
+        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
             self.showErrorDialog2()
             return
         keywords = self.SearchBox1.text()
@@ -201,7 +203,9 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+                if datetime.now().date() <= self.dateUntilReturn():
+                    pass
+                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new keyword
