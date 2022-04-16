@@ -43,7 +43,7 @@ dateList2 =  ['04-04-2022_10_WebJsonData.json', '04-04-2022_11_WebJsonData.json'
 # print(rawData)
 
 for i in dateList:
-    dm.setDataByKeyword(i)
+    dm.setDataByAllKeyword(i)
 
 # print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
 # ud = ['o','k','l']

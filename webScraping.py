@@ -21,7 +21,7 @@ from collections import Counter
 # from testCookie import write, writeJson
 class webScraping():
     def __init__(self):
-        self.keyword = os.listdir("Tweet_Test\collectkeys")
+        self.keyword = os.listdir("collectkeys")
         self.web = [
                     "https://www.animenewsnetwork.com/",
                     "https://www.cbr.com/category/anime-news/",

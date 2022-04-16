@@ -403,7 +403,7 @@ class DataManager:
     def setDictSentiment(self,soup,link,data,today):
         ex = web.webScraping()
         resualtDict = {}
-        keyword = os.listdir("Tweet_Test\collectkeys")
+        keyword = os.listdir("collectkeys")
         try:
             wc = self.paragraphToList(data)
             
@@ -459,13 +459,46 @@ class DataManager:
             pass
         return resualtDict
     
-    def setDataByKeyword(self,fileName): #All old data
+    def setDataByKeyword(self,fileName,Keyword):
         ex = web.webScraping()
         print("File Name : ",fileName)
         # path = "WebData"
         # rawData = os.listdir(path)
         # for i in rawData:
-        keyword = os.listdir("Tweet_Test\collectkeys")
+        keyword = os.listdir("collectkeys")
+        todayByFile = fileName.split("_")[0]
+        print("Date : ",todayByFile)
+        newpath = os.path.join('web search',todayByFile)
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        
+        for kw in keyword:
+            # df = self.setStartInfo()
+            newpath = os.path.join('web search',todayByFile,kw+'.csv')
+            if not os.path.exists(newpath):
+                self.creatNewSearchFile(newpath)
+                # self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
+        
+        data = self.readJson(os.path.join("WebData",fileName))
+        for d in data.keys():
+            for l in list(data[d].keys()):
+                soup = ex.makeSoup(l)
+                for p in data[d][l]["Data"]:
+                    self.setDictSentiment(soup,l,p,todayByFile)
+        
+    def setDataByKeywordAllDate(self): #For Old Data
+        path = "WebData"
+        rawData = os.listdir(path)
+        for i in rawData:
+            self.setDataByAllKeyword(i)
+            
+    def setDataByAllKeyword(self,fileName): #All old data
+        ex = web.webScraping()
+        print("File Name : ",fileName)
+        # path = "WebData"
+        # rawData = os.listdir(path)
+        # for i in rawData:
+        keyword = os.listdir("collectkeys")
         todayByFile = fileName.split("_")[0]
         print("Date : ",todayByFile)
         newpath = os.path.join('web search',todayByFile)
