@@ -1,4 +1,5 @@
 import ast
+from collections import Counter
 from csv import DictWriter, writer
 import csv
 import json
@@ -18,6 +19,8 @@ import time
 import shutil
 import requests
 import urllib.robotparser
+import webScraping as web
+from langdetect import detect
 
 class DataManager:
     def __init__(self):
@@ -388,85 +391,99 @@ class DataManager:
             dict_writer.writerow(dict_of_elem)
             print("... Save Dict to ",file_name,"  successful.")
             
-    def setDataInfo(self,jsonFile):
-        keyword = self.keys
-        print(keyword,jsonFile)
-        todayByFile = jsonFile.split("_")[0]
-        field_names = ['Date','Keyword','Word Count','Ref','Link','Data','Sentiment','Lang','Ref Link']
-        # df = {
-        #         'Date' : [],
-        #         'Keyword' : [],
-        #         'Word Count' : [],
-        #         "Ref" : [],
-        #         "Link" : [],
-        #         "Data" : [],
-        #         "Sentiment" : [],
-        #         'Lang' : [],
-        #         "Ref Link" : []
-        #         }
+    def creatNewSearchFile(self,path):
+        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+        with open(path, 'a+', newline='', encoding="utf8") as f: 
+            write = csv.writer(f) 
+            write.writerow(field_names)
+            f.close()
+    
+    def setDictSentiment(self,soup,link,data,today):
+        ex = web.webScraping()
+        resualtDict = {}
+        keyword = os.listdir("Tweet_Test\collectkeys")
+        try:
+            wc = self.paragraphToList(data)
+            
+            stm = ''
+            if detect(data) == 'th':
+                stm = self.getSentimentTH(data)
+            elif detect(data) == 'en':
+                stm = self.getSentimentENG(data)
+            
+            for tuplew in wc:
+                if tuplew[0] in keyword:
+                    i = tuplew[0]
+                    wcCount = tuplew[1]
+                    # print("Lang : ",detect(data))
+                    if stm != '':
+                        dfdict = {'Date':today,
+                            'Keyword':i,
+                            'Word Count':wcCount,
+                            'Ref':0,'Link': link,
+                            'Title':ex.getTitle(soup),
+                            'Data':data,
+                            'Sentiment':stm,
+                            'Lang':ex.getLang(soup),
+                            'Ref Link':dict(Counter(ex.getAllRefLink()))}
+                        # print(data)
+                        print("----------",i,tuplew)
+                        
+                        # print(df)
+                        savePath = os.path.join("web search",today,i+'.csv') 
+                        
+                        # dataraw = pd.read_csv(newpath)
+                        # newdata = dataraw.drop_duplicates()
+                        # newdata.to_csv(savePath, encoding='utf-8', index=False)
+                        
+                        try:
+                            filesize = self.getCountCsvLine(savePath)
+                        except :
+                            filesize = 1000
+                            pass
+                        if filesize >= 1000:
+                            n=1
+                            newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                            while os.path.exists(newname):
+                                n+=1
+                                newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                            ex.renameFile(savePath,newname)
+                            self.creatNewSearchFile(savePath)
+                        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+                        ex.writCsvByDict(savePath,field_names,dfdict)
+                    
+        except langdetect.lang_detect_exception.LangDetectException:
+            print("\n******* Error Data : ",data)
+            pass
+        return resualtDict
+    
+    def setDataByKeyword(self,fileName): #All old data
+        ex = web.webScraping()
+        print("File Name : ",fileName)
+        # path = "WebData"
+        # rawData = os.listdir(path)
+        # for i in rawData:
+        keyword = os.listdir("Tweet_Test\collectkeys")
+        todayByFile = fileName.split("_")[0]
+        print("Date : ",todayByFile)
+        newpath = os.path.join('web search',todayByFile)
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
         
-        data = self.readJson(os.path.join("WebData",jsonFile))
-        # print(data)
+        for kw in keyword:
+            # df = self.setStartInfo()
+            newpath = os.path.join('web search',todayByFile,kw+'.csv')
+            if not os.path.exists(newpath):
+                self.creatNewSearchFile(newpath)
+                # self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
+        
+        data = self.readJson(os.path.join("WebData",fileName))
         for d in data.keys():
             for l in list(data[d].keys()):
+                soup = ex.makeSoup(l)
                 for p in data[d][l]["Data"]:
-                    try:
-                        wc = self.paragraphToList(p)
-                        for t in wc:
-                            # df = []
-                            for kw in keyword:
-                                if t[0] == kw:
-                                    df = []
-                                    # print(wc)
-                                    print("\n\n",kw)
-                                    countWord = t[1]
-                                    if data[d][l]["Lang"].lower() == 'th':
-                                        stm = self.getSentimentTH(p)
-                                    else : 
-                                        stm = self.getSentimentENG(p)
-                                    # stm = "Good"
-                                    # df = {
-                                    #     'Date' : todayByFile,
-                                    #     'Keyword' : keyword,
-                                    #     'Word Count' : 0,
-                                    #     "Ref" : countWord,
-                                    #     "Link" : l,
-                                    #     "Data" : p,
-                                    #     "Sentiment" : stm,
-                                    #     'Lang' : data[d][l]["Lang"],
-                                    #     "Ref Link" : data[d][l]["Ref"]
-                                    #     }
-                                    df = [todayByFile,kw,0,countWord,l,p,stm,data[d][l]["Lang"],data[d][l]["Ref"]]
-                                    # print(df)
-                                    self.writeCsvByList(os.path.join("web search",todayByFile,kw+'.csv'),df)
-                                    # self.append_dict_as_row(os.path.join("web search",todayByFile,kw+'.csv'), df, field_names)
-                                    break
-                                else:
-                                    os.system("CLS")
-                    except :
-                        pass
-        # df=oldDf.append(df, ignore_index = True)
-        # return pd.DataFrame.from_dict(df)
-    
-    def setDataByKeyword(self):
-        path = "WebData"
-        rawData = os.listdir(path)
-        for i in rawData:
-            todayByFile = i.split("_")[0]
-            print(todayByFile)
-            newpath = os.path.join('web search',todayByFile)
-            if not os.path.exists(newpath):
-                os.makedirs(newpath)
-                for kw in keyword:
-                    df = self.setStartInfo()
-                    self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
-                
-            keyword = os.listdir("Tweet_Test\collectkeys")
-            # for kw in keyword:
-                # df = self.setDataInfo(kw,i)
-                # df = self.setStartInfo()
-                # self.writeCsvByDf(os.path.join(newpath,kw+".csv"),df)
-            self.setDataInfo(i)
+                    self.setDictSentiment(soup,l,p,todayByFile)
+        
                 
     # def startSearch(self,Ldate,LWord):# date []
     #     # self.readJson

@@ -132,10 +132,12 @@ class webScraping():
         return self.refLink
         
     def getLang(self,soup):
-        for link in soup.find_all('html', lang=True):
-            # print(link['lang'])
-            return link['lang']
-        return "Don't Set"
+        try:
+            for link in soup.find_all('html', lang=True):
+                # print(link['lang'])
+                return link['lang']
+        except :
+            return "Don't Set"
     
     # def getData(self,soup):
     #     # divSoup = soup.find_all('div')
@@ -452,13 +454,13 @@ class webScraping():
             n-=1
             data = i.text.replace("\n"," ")
             resualt.append(data)
-            # self.setDataByKeyWord(soup,data)       
+            self.setDataByKeyWord(soup,data)       
         
     def startScraping(self):
         now = datetime.now()
         starttime = now.strftime("%H:%M:%S")
         # countWeb = len(self.web)
-        countWeb = 15
+        countWeb = 0
         for link in self.web:
             print(link)
             countWeb += 1
