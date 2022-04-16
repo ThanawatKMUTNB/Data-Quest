@@ -4,43 +4,39 @@ from itertools import count
 import json
 import re
 from urllib.parse import urlparse
+
+import pandas as pd
 import webScraping as web
 import DataManager as data
 from io import StringIO
 import os
 import ast
+from langdetect import detect
 ex = web.webScraping()
 dm = data.DataManager()
 link = "https://www.animenewsnetwork.com/"
-path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+# path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
 rawData = os.listdir(path)
+today = ex.getTodayDate()
+newpath = os.path.join('web search',today,"anime(1).csv")
 
-# ex.startScraping()
+dateList = ['02-04-2022_10_WebJsonData.json', '02-04-2022_11_WebJsonData.json', '02-04-2022_12_WebJsonData.json', '02-04-2022_13_WebJsonData.json', '02-04-2022_14_WebJsonData.json', '02-04-2022_15_WebJsonData.json', '02-04-2022_16_WebJsonData.json', '02-04-2022_17_WebJsonData.json', '02-04-2022_18_WebJsonData.json', '02-04-2022_19_WebJsonData.json', '02-04-2022_1_WebJsonData.json', '02-04-2022_2_WebJsonData.json', '02-04-2022_3_WebJsonData.json', '02-04-2022_4_WebJsonData.json', '02-04-2022_5_WebJsonData.json', '02-04-2022_6_WebJsonData.json', '02-04-2022_7_WebJsonData.json', '02-04-2022_8_WebJsonData.json', '02-04-2022_9_WebJsonData.json'] 
+dateList2 =  ['03-04-2022_10_WebJsonData.json', '03-04-2022_11_WebJsonData.json', '03-04-2022_12_WebJsonData.json', '03-04-2022_13_WebJsonData.json', '03-04-2022_14_WebJsonData.json', '03-04-2022_15_WebJsonData.json', '03-04-2022_16_WebJsonData.json', '03-04-2022_17_WebJsonData.json', '03-04-2022_18_WebJsonData.json', '03-04-2022_19_WebJsonData.json', '03-04-2022_1_WebJsonData.json', '03-04-2022_2_WebJsonData.json', '03-04-2022_3_WebJsonData.json', '03-04-2022_4_WebJsonData.json', '03-04-2022_5_WebJsonData.json', '03-04-2022_6_WebJsonData.json', '03-04-2022_7_WebJsonData.json', '03-04-2022_8_WebJsonData.json', '03-04-2022_9_WebJsonData.json', '04-04-2022_10_WebJsonData.json', '04-04-2022_11_WebJsonData.json', '04-04-2022_12_WebJsonData.json', '04-04-2022_13_WebJsonData.json', '04-04-2022_14_WebJsonData.json', '04-04-2022_15_WebJsonData.json', '04-04-2022_16_WebJsonData.json', '04-04-2022_17_WebJsonData.json', '04-04-2022_18_WebJsonData.json', '04-04-2022_19_WebJsonData.json', '04-04-2022_1_WebJsonData.json', '04-04-2022_2_WebJsonData.json', '04-04-2022_3_WebJsonData.json', '04-04-2022_4_WebJsonData.json', '04-04-2022_5_WebJsonData.json', '04-04-2022_6_WebJsonData.json', '04-04-2022_7_WebJsonData.json', '04-04-2022_8_WebJsonData.json', '04-04-2022_9_WebJsonData.json', '06-04-2022_10_WebJsonData.json', '06-04-2022_11_WebJsonData.json', '06-04-2022_12_WebJsonData.json', '06-04-2022_13_WebJsonData.json', '06-04-2022_14_WebJsonData.json', '06-04-2022_15_WebJsonData.json', '06-04-2022_16_WebJsonData.json', '06-04-2022_17_WebJsonData.json', '06-04-2022_18_WebJsonData.json', '06-04-2022_19_WebJsonData.json', '06-04-2022_1_WebJsonData.json', '06-04-2022_2_WebJsonData.json', '06-04-2022_3_WebJsonData.json', '06-04-2022_4_WebJsonData.json', '06-04-2022_5_WebJsonData.json', '06-04-2022_6_WebJsonData.json', '06-04-2022_7_WebJsonData.json', '06-04-2022_8_WebJsonData.json', '06-04-2022_9_WebJsonData.json', '07-04-2022_10_WebJsonData.json', '07-04-2022_11_WebJsonData.json', '07-04-2022_12_WebJsonData.json', '07-04-2022_13_WebJsonData.json', '07-04-2022_14_WebJsonData.json', '07-04-2022_15_WebJsonData.json', '07-04-2022_16_WebJsonData.json', '07-04-2022_17_WebJsonData.json', '07-04-2022_18_WebJsonData.json', '07-04-2022_19_WebJsonData.json', '07-04-2022_1_WebJsonData.json', '07-04-2022_2_WebJsonData.json', '07-04-2022_3_WebJsonData.json', '07-04-2022_4_WebJsonData.json', '07-04-2022_5_WebJsonData.json', '07-04-2022_6_WebJsonData.json', '07-04-2022_7_WebJsonData.json', '07-04-2022_8_WebJsonData.json', '07-04-2022_9_WebJsonData.json', '08-04-2022_10_WebJsonData.json', '08-04-2022_11_WebJsonData.json', '08-04-2022_12_WebJsonData.json', '08-04-2022_13_WebJsonData.json', '08-04-2022_14_WebJsonData.json', '08-04-2022_15_WebJsonData.json', '08-04-2022_16_WebJsonData.json', '08-04-2022_17_WebJsonData.json', 
+            '08-04-2022_18_WebJsonData.json', '08-04-2022_19_WebJsonData.json', '08-04-2022_1_WebJsonData.json', '08-04-2022_2_WebJsonData.json', '08-04-2022_3_WebJsonData.json', '08-04-2022_4_WebJsonData.json', '08-04-2022_5_WebJsonData.json', '08-04-2022_6_WebJsonData.json', 
+            '08-04-2022_7_WebJsonData.json', '08-04-2022_8_WebJsonData.json', '08-04-2022_9_WebJsonData.json', '09-04-2022_10_WebJsonData.json', 
+            '09-04-2022_11_WebJsonData.json', '09-04-2022_12_WebJsonData.json', '09-04-2022_13_WebJsonData.json', '09-04-2022_14_WebJsonData.json', '09-04-2022_15_WebJsonData.json', '09-04-2022_16_WebJsonData.json', '09-04-2022_17_WebJsonData.json', '09-04-2022_18_WebJsonData.json', '09-04-2022_19_WebJsonData.json', '09-04-2022_1_WebJsonData.json', '09-04-2022_2_WebJsonData.json', '09-04-2022_3_WebJsonData.json', '09-04-2022_4_WebJsonData.json', '09-04-2022_5_WebJsonData.json', '09-04-2022_6_WebJsonData.json', '09-04-2022_7_WebJsonData.json', '09-04-2022_8_WebJsonData.json', '09-04-2022_9_WebJsonData.json', '10-04-2022_10_WebJsonData.json', '10-04-2022_11_WebJsonData.json', '10-04-2022_12_WebJsonData.json', '10-04-2022_13_WebJsonData.json', '10-04-2022_14_WebJsonData.json', '10-04-2022_15_WebJsonData.json', '10-04-2022_16_WebJsonData.json', '10-04-2022_17_WebJsonData.json', '10-04-2022_18_WebJsonData.json', '10-04-2022_19_WebJsonData.json', '10-04-2022_1_WebJsonData.json', '10-04-2022_2_WebJsonData.json', '10-04-2022_3_WebJsonData.json', '10-04-2022_4_WebJsonData.json', '10-04-2022_5_WebJsonData.json', '10-04-2022_6_WebJsonData.json', '10-04-2022_7_WebJsonData.json', '10-04-2022_8_WebJsonData.json', '10-04-2022_9_WebJsonData.json', '11-04-2022_10_WebJsonData.json', '11-04-2022_11_WebJsonData.json', '11-04-2022_12_WebJsonData.json', '11-04-2022_13_WebJsonData.json', '11-04-2022_14_WebJsonData.json', '11-04-2022_15_WebJsonData.json', '11-04-2022_16_WebJsonData.json', '11-04-2022_17_WebJsonData.json', '11-04-2022_18_WebJsonData.json', '11-04-2022_19_WebJsonData.json', '11-04-2022_1_WebJsonData.json', '11-04-2022_2_WebJsonData.json', '11-04-2022_3_WebJsonData.json', '11-04-2022_4_WebJsonData.json', '11-04-2022_5_WebJsonData.json', '11-04-2022_6_WebJsonData.json', '11-04-2022_7_WebJsonData.json', '11-04-2022_8_WebJsonData.json', '11-04-2022_9_WebJsonData.json', '12-04-2022_10_WebJsonData.json', '12-04-2022_11_WebJsonData.json', '12-04-2022_12_WebJsonData.json', '12-04-2022_13_WebJsonData.json', '12-04-2022_14_WebJsonData.json', '12-04-2022_15_WebJsonData.json', '12-04-2022_16_WebJsonData.json', '12-04-2022_17_WebJsonData.json', '12-04-2022_18_WebJsonData.json', '12-04-2022_19_WebJsonData.json', '12-04-2022_1_WebJsonData.json', '12-04-2022_2_WebJsonData.json', '12-04-2022_3_WebJsonData.json', '12-04-2022_4_WebJsonData.json', '12-04-2022_5_WebJsonData.json', '12-04-2022_6_WebJsonData.json', '12-04-2022_7_WebJsonData.json', '12-04-2022_8_WebJsonData.json', '12-04-2022_9_WebJsonData.json', '13-04-2022_10_WebJsonData.json', '13-04-2022_11_WebJsonData.json', '13-04-2022_12_WebJsonData.json', '13-04-2022_13_WebJsonData.json', '13-04-2022_14_WebJsonData.json', '13-04-2022_15_WebJsonData.json', '13-04-2022_16_WebJsonData.json', '13-04-2022_17_WebJsonData.json', '13-04-2022_18_WebJsonData.json', '13-04-2022_19_WebJsonData.json', '13-04-2022_1_WebJsonData.json', '13-04-2022_2_WebJsonData.json', '13-04-2022_3_WebJsonData.json', '13-04-2022_4_WebJsonData.json', '13-04-2022_5_WebJsonData.json', '13-04-2022_6_WebJsonData.json', '13-04-2022_7_WebJsonData.json', '13-04-2022_8_WebJsonData.json', '13-04-2022_9_WebJsonData.json', '14-04-2022_10_WebJsonData.json', '14-04-2022_11_WebJsonData.json', '14-04-2022_12_WebJsonData.json', '14-04-2022_13_WebJsonData.json', '14-04-2022_14_WebJsonData.json', '14-04-2022_15_WebJsonData.json', '14-04-2022_16_WebJsonData.json', '14-04-2022_17_WebJsonData.json', '14-04-2022_18_WebJsonData.json', '14-04-2022_19_WebJsonData.json', '14-04-2022_1_WebJsonData.json', '14-04-2022_2_WebJsonData.json', '14-04-2022_3_WebJsonData.json', '14-04-2022_4_WebJsonData.json', '14-04-2022_5_WebJsonData.json', '14-04-2022_6_WebJsonData.json', '14-04-2022_7_WebJsonData.json', '14-04-2022_8_WebJsonData.json', '14-04-2022_9_WebJsonData.json']
 
-# # print(rawData[0].split("_"))
+ex.startScraping()
 
-# for i in rawData:
-#     today = i.split("_")[0]
-    
-#     newpath = os.path.join('web search',today) 
-#     if not os.path.exists(newpath):
-#         os.makedirs(newpath)
-    
-#     d = {}
-#     for kw in ex.keyword:
-#         dm.setDataForSearch(os.path.join(newpath,kw+".json"),d)
-    
-#     path = os.path.join("WebData",i)
-#     dictForSearch = dm.readJson(path)
-#     headDateName = list(dictForSearch.keys())[0]
-    # print(headDateName)
-    
-    # for sublink in list(dictForSearch[headDateName].keys()):
-    #     dataList = dictForSearch[headDateName][sublink]["Data"]
-    #     for paragraph in dataList
-    
-    # dm.setDataForSearch(i.split("_")[0],d)
+# print(rawData)
 
-# print(dm.readCsvToDf("WebData\\"+rawData[0]))
+# for i in dateList:
+#     dm.setDataByKeyword(i)
+
+# print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
+# ud = ['o','k','l']
+# dm.writeCsvByList(os.path.join("web search","08-04-2022","animation.csv"),ud)
+# print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
 
 # dm.startSearch(["02-04-2022","08-04-2022"],['Anime','Summer'])
