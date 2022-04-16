@@ -23,7 +23,7 @@ class Twitter_Scrap:
 
         #thai api
         self._url = "https://api.aiforthai.in.th/ssense"                     
-        self._headers = {'Apikey': "0kFkiFLdf4TAyY3JeUT9WVnB5naP6SjW"}
+        self._headers = {'Apikey': "vIQAf35aRkc7QUbR1fTPvzvtkqtSKAaz"}
 
         self.df = None
         self.keys = []
