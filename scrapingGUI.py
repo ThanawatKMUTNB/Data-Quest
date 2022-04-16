@@ -380,6 +380,7 @@ class Ui_MainWindow(QWidget):
 
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
+        self.keywords = list(set(self.keywords))
         self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :
