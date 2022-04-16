@@ -21,6 +21,7 @@ import requests
 import urllib.robotparser
 import webScraping as web
 from langdetect import detect
+from pythainlp.corpus import thai_stopwords
 
 class DataManager:
     def __init__(self):
@@ -161,6 +162,7 @@ class DataManager:
         #print(dataframe)
         nltk.download('stopwords')          #important
         dataframe = dataframe.reset_index()
+        th_stopwords = list(thai_stopwords())
         en_stops = set(stopwords.words('english'))
         word = {}
         for index,row in dataframe.iterrows():    #only tweet
@@ -175,7 +177,7 @@ class DataManager:
             elif row['Language'] == 'th':
                 allwords = word_tokenize(row['Tweet'], engine='newmm')
                 for w in allwords: 
-                    if w not in en_stops:
+                    if w not in th_stopwords:
                         if w in word:
                             word[w] += 1
                         else:

@@ -107,7 +107,7 @@ class Twitter_Scrap:
         self.df = pd.DataFrame({'Keyword':tweet_keyword,'User':twitter_users,'Tweet': tweet_string,'Language':tweet_language, 'Time': tweet_time,'User Location':twitter_users_location,
                             'Hashtag':tweet_hashtag,'Polarity':tweet_polarity,'Likes':tweet_fav,'Retweet':tweet_countRT,'Sentiment':tweet_sentiment})
 
-        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y/%m/%d')
+        #self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y/%m/%d')
         #self.df['Time'] = pd.to_datetime(self.df['Time'])
 
         return self.df
@@ -151,19 +151,19 @@ class Twitter_Scrap:
                 self.keys.extend(dhave)
                 self.savedata(dhave,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            elif Ans == "real":
+            elif Ans == "real":         #search old keys real time
                 self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        elif keyword[0] in self.keys:   #seach 1 key
+        elif keyword[0] in self.keys:   #1 key in old keys
             if Ans == "real":
                 self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 return self.df.loc[self.df['Keyword']==keyword[0]]
-        else:                           #1keyword (new)
-            if Ans == 'yes':            #search new key
+        else:              #1keyword (new)
+            if Ans == 'yes':            #1 key but new key
                 self.keys.extend(keyword)
                 self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
