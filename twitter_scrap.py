@@ -107,9 +107,39 @@ class Twitter_Scrap:
         self.df = pd.DataFrame({'Keyword':tweet_keyword,'User':twitter_users,'Tweet': tweet_string,'Language':tweet_language, 'Time': tweet_time,'User Location':twitter_users_location,
                             'Hashtag':tweet_hashtag,'Polarity':tweet_polarity,'Likes':tweet_fav,'Retweet':tweet_countRT,'Sentiment':tweet_sentiment})
 
-        #self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y/%m/%d')
+        
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%Y-%m-%d')
         #self.df['Time'] = pd.to_datetime(self.df['Time'])
-
+        folder = "collectkeys"
+        path = str(folder+'/'+key_word)
+        days = list(set(self.df['Time'].tolist()))
+        if key_word not in self.keys:
+            
+            if not os.path.exists(path):    
+                os.mkdir(path)              #create direc for keyword
+            for d in days:
+                dfff = self.df.loc[self.df['Time'].isin([d])]
+                dfff.to_csv(path+'/'+key_word+'_'+d+'.csv',encoding='utf-8',index=False)
+            print('save new file comp')
+        else:
+            print('save old key')
+            allfilepath = glob.glob(str(str(os.getcwd())+"\\collectkeys\\"+key_word+"\\*.csv"))
+            filenames = []
+            for filepath in allfilepath:
+                filenames.append(os.path.basename(filepath))
+            for d in days:
+                dfff = self.df.loc[self.df['Time'].isin([d])]
+                csvname = str(path+'/'+key_word+'_'+d+'.csv')
+                if str(key_word+'_'+d+'.csv') in filenames:                        #same file
+                    print('have this file')
+                    olddf = pd.read_csv(csvname)
+                    newdf = pd.concat([dfff,olddf])
+                    newdf.drop_duplicates(keep='last',inplace=True)
+                    os.remove(csvname)
+                    newdf.to_csv(csvname,encoding='utf-8',index=False)
+                else:
+                    dfff.to_csv(csvname,encoding='utf-8',index=False)
+            print('save file comp')
         return self.df
 
     def savedata(self,keyword,until): #keyword is list
@@ -148,8 +178,9 @@ class Twitter_Scrap:
             print(keyword)
             print(dhave)
             if len(dhave) > 0:          #search new keyword
-                self.keys.extend(dhave)
+                
                 self.savedata(dhave,until)
+                self.keys.extend(dhave)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             elif Ans == "real":         #search old keys real time
                 self.savedata(keyword,until)
@@ -163,13 +194,14 @@ class Twitter_Scrap:
             else:
                 return self.df.loc[self.df['Keyword']==keyword[0]]
         else:              #1keyword (new)
-            if Ans == 'yes':            #1 key but new key
+            if Ans == 'yes':            #new key 1 key
+                
+                self.savedata(keyword,until)
                 self.keys.extend(keyword)
-                self.savedata(keyword,until)
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            elif Ans == "real":
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            # elif Ans == "real":
+            #     self.savedata(keyword,until)
+            #     return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             else:
                 print('You select NO')
                 return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
