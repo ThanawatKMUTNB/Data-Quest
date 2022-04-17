@@ -1,6 +1,7 @@
 from ast import keyword
 import encodings
 from msilib.schema import ListView
+from tabnanny import check
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
@@ -16,7 +17,8 @@ from datetime import datetime, timedelta
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
-
+import numpy as np
+from tqdm import tqdm
 from requests import delete
 import importWin as windo 
 
@@ -134,9 +136,7 @@ class Ui_MainWindow(QWidget):
 
     def showRealtime(self) : #search key in this time
         print('real time')
-        if datetime.now().date() <= self.dateUntilReturn():
-            pass
-        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+        if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
             self.showErrorDialog2()
             return
         keywords = self.SearchBox1.text()
@@ -183,7 +183,8 @@ class Ui_MainWindow(QWidget):
         # self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         # self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
-    def button1(self) : 
+    def button1(self) :
+        
         print("\n\n")
         print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
@@ -203,12 +204,10 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                if datetime.now().date() <= self.dateUntilReturn():
-                    pass
-                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+                if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
                     self.showErrorDialog2()
                     return
-                if self.showDialog() == 'Yes':      #search new keyword
+                if self.showDialog() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
                     self.df = tw.searchkeys(keywords,'yes',str(self.dateUntilReturn()))
                     dm.concatfile(self.df)
@@ -223,7 +222,7 @@ class Ui_MainWindow(QWidget):
             tw.setdataframe(self.df)
         #print(self.SearchBox1.text())
         print(len(self.df.index),tw.keys)
-
+        
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -381,10 +380,22 @@ class Ui_MainWindow(QWidget):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
+    def showDialogWebForToday(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Do you want to search?") #แสดงข้อความ
+        msgBox.setWindowTitle("Warning") #Title
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
+        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
+        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
+            return 'Yes'
+        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            return 'No'
 
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
-        self.keywords = list(set(self.keywords))
         self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :
@@ -407,9 +418,10 @@ class Ui_MainWindow(QWidget):
         return
     
     def progressTime(self):
-        self.settime = self.df['Column'].apply(lambda x:x**3)
-        self.progressBar.setValue(self.settime)
-
+            self.progressBar.setValue(100)
+            self.button1()
+            self.progressBar.setValue(0)
+            
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -442,9 +454,6 @@ class Ui_MainWindow(QWidget):
 
         #self.settime = self.df['Keywords'].apply(lambda x:x**3) #มันเรียกเอา column ทั้งหมดมานับแล้วำนวณเป็นเวลาออกมา
         self.progressBar = QProgressBar(self.tab)
-        self.progressBar.setMaximum(100)
-        self.progressBar.setValue(0)
-        self.progressBar.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -456,11 +465,6 @@ class Ui_MainWindow(QWidget):
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar.setObjectName("progressBar")
         self.gridLayout.addWidget(self.progressBar, 4, 5, 1, 1) 
-        #self.progressBar.value(self.settime)
-        #self.progressBar.hide()   
-        #timer = QTimer(self.tab)
-        #timer.timeout.connect(self.progressTime)
-        #timer.start(1000)
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
@@ -472,6 +476,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setObjectName("tableView")
         self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
         self.tableView.setModel(self.model) #show table in pyqt5
+        #self.progressBar.setMaximum(1)
         
         self.label_2 = QtWidgets.QLabel(self.tab)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
@@ -491,8 +496,8 @@ class Ui_MainWindow(QWidget):
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
         #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
-        btm1 = functools.partial(self.button1)   
-        self.PushButton_1.clicked.connect(btm1)
+        #btm1 = functools.partial()
+        self.PushButton_1.clicked.connect(self.progressTime)
 
         #สร้างไว้สำหรับรีเฟรช
         btmRefresh_1 = functools.partial(self.refreshButton_1)   
@@ -760,7 +765,7 @@ class Ui_MainWindow(QWidget):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "TweetW"))
 
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
-        self.PushButton_6.setText(_translate("MainWindow", "Default"))
+        self.PushButton_6.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh_3.setText(_translate("MainWindow", ""))
         self.PushButtonDelete_3.setText(_translate("MainWindow", ""))
         self.label_7.setText(_translate("MainWindow", "Web scraping"))
