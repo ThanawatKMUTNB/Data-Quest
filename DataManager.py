@@ -141,6 +141,7 @@ class DataManager:
         print('collect complete')
 
     def getperiod(self,since,until):  ####column for twitter
+        
         self.formatdatetime('Time')
         dff = self.df
         dff.sort_values(by=['Time','Keyword'],inplace=True)
