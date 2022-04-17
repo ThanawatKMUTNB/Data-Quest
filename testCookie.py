@@ -22,16 +22,16 @@ today = ex.getTodayDate()
 newpath = os.path.join('web search',today,"anime(1).csv")
 
 # dateList = ['02-04-2022_2_WebJsonData.json', '02-04-2022_3_WebJsonData.json', '02-04-2022_4_WebJsonData.json', '02-04-2022_5_WebJsonData.json', '02-04-2022_6_WebJsonData.json', '02-04-2022_7_WebJsonData.json', '02-04-2022_8_WebJsonData.json', '02-04-2022_9_WebJsonData.json'] 
-dateList =  ['03-04-2022_10_WebJsonData.json', '03-04-2022_11_WebJsonData.json', 
-              '03-04-2022_12_WebJsonData.json', '03-04-2022_13_WebJsonData.json', 
-              '03-04-2022_14_WebJsonData.json', '03-04-2022_15_WebJsonData.json', 
-              '03-04-2022_16_WebJsonData.json', '03-04-2022_17_WebJsonData.json', 
-              '03-04-2022_18_WebJsonData.json', '03-04-2022_19_WebJsonData.json', 
-              '03-04-2022_1_WebJsonData.json', '03-04-2022_2_WebJsonData.json', 
-              '03-04-2022_3_WebJsonData.json', '03-04-2022_4_WebJsonData.json', 
-              '03-04-2022_5_WebJsonData.json', '03-04-2022_6_WebJsonData.json', 
-              '03-04-2022_7_WebJsonData.json', '03-04-2022_8_WebJsonData.json', 
-              '03-04-2022_9_WebJsonData.json']
+dateList =  ['02-04-2022_10_WebJsonData.json', '02-04-2022_11_WebJsonData.json', 
+              '02-04-2022_12_WebJsonData.json', '02-04-2022_13_WebJsonData.json', 
+              '02-04-2022_14_WebJsonData.json', '02-04-2022_15_WebJsonData.json', 
+              '02-04-2022_16_WebJsonData.json', '02-04-2022_17_WebJsonData.json', 
+              '02-04-2022_18_WebJsonData.json', '02-04-2022_19_WebJsonData.json', 
+              '02-04-2022_1_WebJsonData.json', '02-04-2022_2_WebJsonData.json', 
+              '02-04-2022_3_WebJsonData.json', '02-04-2022_4_WebJsonData.json', 
+              '02-04-2022_5_WebJsonData.json', '02-04-2022_6_WebJsonData.json', 
+              '02-04-2022_7_WebJsonData.json', '02-04-2022_8_WebJsonData.json', 
+              '02-04-2022_9_WebJsonData.json']
               
 dateList2 =  ['04-04-2022_10_WebJsonData.json', '04-04-2022_11_WebJsonData.json', '04-04-2022_12_WebJsonData.json', '04-04-2022_13_WebJsonData.json', '04-04-2022_14_WebJsonData.json', '04-04-2022_15_WebJsonData.json', '04-04-2022_16_WebJsonData.json', '04-04-2022_17_WebJsonData.json', '04-04-2022_18_WebJsonData.json', '04-04-2022_19_WebJsonData.json', '04-04-2022_1_WebJsonData.json', '04-04-2022_2_WebJsonData.json', '04-04-2022_3_WebJsonData.json', '04-04-2022_4_WebJsonData.json', '04-04-2022_5_WebJsonData.json', '04-04-2022_6_WebJsonData.json', '04-04-2022_7_WebJsonData.json', '04-04-2022_8_WebJsonData.json', '04-04-2022_9_WebJsonData.json', '06-04-2022_10_WebJsonData.json', '06-04-2022_11_WebJsonData.json', '06-04-2022_12_WebJsonData.json', '06-04-2022_13_WebJsonData.json', '06-04-2022_14_WebJsonData.json', '06-04-2022_15_WebJsonData.json', '06-04-2022_16_WebJsonData.json', '06-04-2022_17_WebJsonData.json', '06-04-2022_18_WebJsonData.json', '06-04-2022_19_WebJsonData.json', '06-04-2022_1_WebJsonData.json', '06-04-2022_2_WebJsonData.json', '06-04-2022_3_WebJsonData.json', '06-04-2022_4_WebJsonData.json', '06-04-2022_5_WebJsonData.json', '06-04-2022_6_WebJsonData.json', '06-04-2022_7_WebJsonData.json', '06-04-2022_8_WebJsonData.json', '06-04-2022_9_WebJsonData.json', '07-04-2022_10_WebJsonData.json', '07-04-2022_11_WebJsonData.json', '07-04-2022_12_WebJsonData.json', '07-04-2022_13_WebJsonData.json', '07-04-2022_14_WebJsonData.json', '07-04-2022_15_WebJsonData.json', '07-04-2022_16_WebJsonData.json', '07-04-2022_17_WebJsonData.json', '07-04-2022_18_WebJsonData.json', '07-04-2022_19_WebJsonData.json', '07-04-2022_1_WebJsonData.json', '07-04-2022_2_WebJsonData.json', '07-04-2022_3_WebJsonData.json', '07-04-2022_4_WebJsonData.json', '07-04-2022_5_WebJsonData.json', '07-04-2022_6_WebJsonData.json', '07-04-2022_7_WebJsonData.json', '07-04-2022_8_WebJsonData.json', '07-04-2022_9_WebJsonData.json', '08-04-2022_10_WebJsonData.json', '08-04-2022_11_WebJsonData.json', '08-04-2022_12_WebJsonData.json', '08-04-2022_13_WebJsonData.json', '08-04-2022_14_WebJsonData.json', '08-04-2022_15_WebJsonData.json', '08-04-2022_16_WebJsonData.json', '08-04-2022_17_WebJsonData.json', 
             '08-04-2022_18_WebJsonData.json', '08-04-2022_19_WebJsonData.json', '08-04-2022_1_WebJsonData.json', '08-04-2022_2_WebJsonData.json', '08-04-2022_3_WebJsonData.json', '08-04-2022_4_WebJsonData.json', '08-04-2022_5_WebJsonData.json', '08-04-2022_6_WebJsonData.json', 
