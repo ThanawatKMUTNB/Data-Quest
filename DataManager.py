@@ -210,15 +210,15 @@ class DataManager:
                        orient='index')
         return df
     
-    # def getReadByDateList(self,Sdate):
-    #     DList = []
-    #     for root, dirs, files in os.walk(r'WebData'):
-    #         for name in files:
-    #             if Sdate in str(name): 
-    #                 # DList.append(name)
-    #                 DList.append(os.path.abspath(os.path.join(root, name)))
-    #                 # print(os.path.abspath(os.path.join(root, name)))
-    #     return DList
+    def getReadByDateList(self,Sdate):
+        DList = []
+        for root, dirs, files in os.walk(r'WebData'):
+            for name in files:
+                if Sdate in str(name): 
+                    DList.append(name)
+                    # DList.append(os.path.abspath(os.path.join(root, name)))
+                    # print(os.path.abspath(os.path.join(root, name)))
+        return DList
     
     def readJson(self,path):
         with open(path, 'r') as f:
@@ -315,17 +315,17 @@ class DataManager:
         result = rp.can_fetch("*", link)
         return result
     
-    # def date_range(self,start, end):
-    #     print(start, end)
-    #     dateS = datetime.strptime(start,'%d-%m-%Y')
-    #     dateE = datetime.strptime(end,'%d-%m-%Y')
-    #     delta = dateE - dateS  # as timedelta
-    #     days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
-    #     resualt = [] 
-    #     for i in days:
-    #         resualt.append(str(i.day).zfill(2)+"-"+str(i.month).zfill(2)+"-"+str(i.year))
-    #     # print(resualt)
-    #     return resualt
+    def date_range(self,start, end):
+        print(start, end)
+        dateS = datetime.strptime(start,'%d-%m-%Y')
+        dateE = datetime.strptime(end,'%d-%m-%Y')
+        delta = dateE - dateS  # as timedelta
+        days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
+        resualt = [] 
+        for i in days:
+            resualt.append(str(i.day).zfill(2)+"-"+str(i.month).zfill(2)+"-"+str(i.year))
+        # print(resualt)
+        return resualt
 
     # start_date = datetime(2008, 8, 1)
     # end_date = datetime(2008, 8, 3)
@@ -518,10 +518,9 @@ class DataManager:
                 soup = ex.makeSoup(l)
                 for p in data[d][l]["Data"]:
                     self.setDictSentiment(soup,l,p,todayByFile)
-        
-                
-    # def startSearch(self,Ldate,LWord):# date []
-    #     # self.readJson
+    
+    def startSearch(self,Ldate,LWord):# date []
+    #   # self.readJson
     #     df = {
     #             'Date' : [],
     #             'Keyword' : [],
@@ -532,9 +531,11 @@ class DataManager:
     #             'Lang' : [],
     #             "Ref Link" : []
     #             }
-    #     ListOfDate = self.date_range(Ldate[0],Ldate[1])
-    #     for j in ListOfDate:
-    #         FileByDateList = self.getReadByDateList(j)
+        ListOfDate = self.date_range(Ldate[0],Ldate[1])
+        print("ListOfDate : ",ListOfDate)
+        for j in ListOfDate:
+            FileByDateList = self.getReadByDateList(j)
+            print(FileByDateList)
     #         # print(j)
     #         # print(FileByDateList)
     #         if FileByDateList != []:

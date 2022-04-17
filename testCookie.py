@@ -23,12 +23,6 @@ rawData = os.listdir(path)
 today = ex.getTodayDate()
 newpath = os.path.join('web search',today,"anime(1).csv")
 
-# dateList = ['02-04-2022_2_WebJsonData.json', '02-04-2022_3_WebJsonData.json', '02-04-2022_4_WebJsonData.json', '02-04-2022_5_WebJsonData.json', '02-04-2022_6_WebJsonData.json', '02-04-2022_7_WebJsonData.json', '02-04-2022_8_WebJsonData.json', '02-04-2022_9_WebJsonData.json'] 
-# dateList =  ['02-04-2022_10_WebJsonData.json', '02-04-2022_11_WebJsonData.json', 
-#               '02-04-2022_12_WebJsonData.json', '02-04-2022_13_WebJsonData.json', 
-#               '02-04-2022_14_WebJsonData.json', '02-04-2022_15_WebJsonData.json', 
-#               '02-04-2022_16_WebJsonData.json', '02-04-2022_17_WebJsonData.json', 
-#               '02-04-2022_18_WebJsonData.json', '02-04-2022_19_WebJsonData.json', ]
 dateList =  ['02-04-2022_1_WebJsonData.json', '02-04-2022_2_WebJsonData.json', 
               '02-04-2022_3_WebJsonData.json', '02-04-2022_4_WebJsonData.json', 
               '02-04-2022_5_WebJsonData.json', '02-04-2022_6_WebJsonData.json', 
@@ -40,7 +34,7 @@ dateList2 =  ['04-04-2022_10_WebJsonData.json', '04-04-2022_11_WebJsonData.json'
             '08-04-2022_7_WebJsonData.json', '08-04-2022_8_WebJsonData.json', '08-04-2022_9_WebJsonData.json', '09-04-2022_10_WebJsonData.json', 
             '09-04-2022_11_WebJsonData.json', '09-04-2022_12_WebJsonData.json', '09-04-2022_13_WebJsonData.json', '09-04-2022_14_WebJsonData.json', '09-04-2022_15_WebJsonData.json', '09-04-2022_16_WebJsonData.json', '09-04-2022_17_WebJsonData.json', '09-04-2022_18_WebJsonData.json', '09-04-2022_19_WebJsonData.json', '09-04-2022_1_WebJsonData.json', '09-04-2022_2_WebJsonData.json', '09-04-2022_3_WebJsonData.json', '09-04-2022_4_WebJsonData.json', '09-04-2022_5_WebJsonData.json', '09-04-2022_6_WebJsonData.json', '09-04-2022_7_WebJsonData.json', '09-04-2022_8_WebJsonData.json', '09-04-2022_9_WebJsonData.json', '10-04-2022_10_WebJsonData.json', '10-04-2022_11_WebJsonData.json', '10-04-2022_12_WebJsonData.json', '10-04-2022_13_WebJsonData.json', '10-04-2022_14_WebJsonData.json', '10-04-2022_15_WebJsonData.json', '10-04-2022_16_WebJsonData.json', '10-04-2022_17_WebJsonData.json', '10-04-2022_18_WebJsonData.json', '10-04-2022_19_WebJsonData.json', '10-04-2022_1_WebJsonData.json', '10-04-2022_2_WebJsonData.json', '10-04-2022_3_WebJsonData.json', '10-04-2022_4_WebJsonData.json', '10-04-2022_5_WebJsonData.json', '10-04-2022_6_WebJsonData.json', '10-04-2022_7_WebJsonData.json', '10-04-2022_8_WebJsonData.json', '10-04-2022_9_WebJsonData.json', '11-04-2022_10_WebJsonData.json', '11-04-2022_11_WebJsonData.json', '11-04-2022_12_WebJsonData.json', '11-04-2022_13_WebJsonData.json', '11-04-2022_14_WebJsonData.json', '11-04-2022_15_WebJsonData.json', '11-04-2022_16_WebJsonData.json', '11-04-2022_17_WebJsonData.json', '11-04-2022_18_WebJsonData.json', '11-04-2022_19_WebJsonData.json', '11-04-2022_1_WebJsonData.json', '11-04-2022_2_WebJsonData.json', '11-04-2022_3_WebJsonData.json', '11-04-2022_4_WebJsonData.json', '11-04-2022_5_WebJsonData.json', '11-04-2022_6_WebJsonData.json', '11-04-2022_7_WebJsonData.json', '11-04-2022_8_WebJsonData.json', '11-04-2022_9_WebJsonData.json', '12-04-2022_10_WebJsonData.json', '12-04-2022_11_WebJsonData.json', '12-04-2022_12_WebJsonData.json', '12-04-2022_13_WebJsonData.json', '12-04-2022_14_WebJsonData.json', '12-04-2022_15_WebJsonData.json', '12-04-2022_16_WebJsonData.json', '12-04-2022_17_WebJsonData.json', '12-04-2022_18_WebJsonData.json', '12-04-2022_19_WebJsonData.json', '12-04-2022_1_WebJsonData.json', '12-04-2022_2_WebJsonData.json', '12-04-2022_3_WebJsonData.json', '12-04-2022_4_WebJsonData.json', '12-04-2022_5_WebJsonData.json', '12-04-2022_6_WebJsonData.json', '12-04-2022_7_WebJsonData.json', '12-04-2022_8_WebJsonData.json', '12-04-2022_9_WebJsonData.json', '13-04-2022_10_WebJsonData.json', '13-04-2022_11_WebJsonData.json', '13-04-2022_12_WebJsonData.json', '13-04-2022_13_WebJsonData.json', '13-04-2022_14_WebJsonData.json', '13-04-2022_15_WebJsonData.json', '13-04-2022_16_WebJsonData.json', '13-04-2022_17_WebJsonData.json', '13-04-2022_18_WebJsonData.json', '13-04-2022_19_WebJsonData.json', '13-04-2022_1_WebJsonData.json', '13-04-2022_2_WebJsonData.json', '13-04-2022_3_WebJsonData.json', '13-04-2022_4_WebJsonData.json', '13-04-2022_5_WebJsonData.json', '13-04-2022_6_WebJsonData.json', '13-04-2022_7_WebJsonData.json', '13-04-2022_8_WebJsonData.json', '13-04-2022_9_WebJsonData.json', '14-04-2022_10_WebJsonData.json', '14-04-2022_11_WebJsonData.json', '14-04-2022_12_WebJsonData.json', '14-04-2022_13_WebJsonData.json', '14-04-2022_14_WebJsonData.json', '14-04-2022_15_WebJsonData.json', '14-04-2022_16_WebJsonData.json', '14-04-2022_17_WebJsonData.json', '14-04-2022_18_WebJsonData.json', '14-04-2022_19_WebJsonData.json', '14-04-2022_1_WebJsonData.json', '14-04-2022_2_WebJsonData.json', '14-04-2022_3_WebJsonData.json', '14-04-2022_4_WebJsonData.json', '14-04-2022_5_WebJsonData.json', '14-04-2022_6_WebJsonData.json', '14-04-2022_7_WebJsonData.json', '14-04-2022_8_WebJsonData.json', '14-04-2022_9_WebJsonData.json']
 
-ex.startScraping()
+# ex.startScraping()
 
 # print(rawData)
 
@@ -57,4 +51,5 @@ ex.startScraping()
 # dm.writeCsvByList(os.path.join("web search","08-04-2022","animation.csv"),ud)
 # print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
 
-# dm.startSearch(["02-04-2022","08-04-2022"],['Anime','Summer'])
+# print(dm.date_range("02-04-2022","08-04-2022"))
+dm.startSearch(["11-04-2022","17-04-2022"],['Anime','Summer'])
