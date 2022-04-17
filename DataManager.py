@@ -60,7 +60,7 @@ class DataManager:
                 polarity = str(response.json()['sentiment']['polarity'])
             except (KeyError):
                 polarity = 'neutral'
-        except requests.exceptions.JSONDecodeError:
+        except :
             polarity = 'URI too long'
             pass
         return polarity

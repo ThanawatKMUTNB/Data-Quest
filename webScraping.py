@@ -28,24 +28,24 @@ class webScraping():
                     "https://myanimelist.net/",
                     "https://otakumode.com/news/anime",
                     
-                    # "https://news.dexclub.com/",
-                    # "https://my-best.in.th/49872",
-                    # "https://www.anime-japan.jp/2021/en/news/",
-                    # "https://todayanimenews.com",
+                    "https://news.dexclub.com/",
+                    "https://my-best.in.th/49872",
+                    "https://www.anime-japan.jp/2021/en/news/",
+                    "https://todayanimenews.com",
                     
-                    # "https://anime-news.tokyo/" ,
-                    # "https://manga.tokyo/news/",
+                    "https://anime-news.tokyo/" ,
+                    "https://manga.tokyo/news/",
                     
-                    # "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
-                    # "https://www.independent.co.uk/topic/anime",
-                    # "https://soranews24.com/tag/anime/",
-                    # "https://anitrendz.net/news/",
-                    # "https://thebestjapan.com/the-best-of-japan/anime-fans/",
-                    # "https://wiki.anime-os.com/chart/all-2020/",
-                    # "https://kwaamsuk.net/10-anime-netflix/",
-                    # "https://www.online-station.net/anime/326294/",
-                    # "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
-                    # "https://www.metalbridges.com/cool-anime-songs/"
+                    "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
+                    "https://www.independent.co.uk/topic/anime",
+                    "https://soranews24.com/tag/anime/",
+                    "https://anitrendz.net/news/",
+                    "https://thebestjapan.com/the-best-of-japan/anime-fans/",
+                    "https://wiki.anime-os.com/chart/all-2020/",
+                    "https://kwaamsuk.net/10-anime-netflix/",
+                    "https://www.online-station.net/anime/326294/",
+                    "https://th.kokorojapanstore.com/blogs/blogs/35-best-anime-of-all-time-new-and-old-in-2021",
+                    "https://www.metalbridges.com/cool-anime-songs/"
                     ] 
         
         # self.web = ["https://www.animenewsnetwork.com/","https://www.cbr.com/",
@@ -515,9 +515,12 @@ class webScraping():
                 except :
                     pass
                 # print(json.dumps(dictForJson, indent=4))
-                now = datetime.now()
-                Endtime = now.strftime("%H:%M:%S")
-                print(starttime,Endtime)
+                # now = datetime.now()
+                # Endtime = now.strftime("%H:%M:%S")
+                # print(starttime,Endtime)
                 self.writeJson(dictForJson)
+        now = datetime.now()
+        Endtime = now.strftime("%H:%M:%S")
+        print(starttime,Endtime)
     
     
