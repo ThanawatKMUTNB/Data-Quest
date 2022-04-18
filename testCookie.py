@@ -52,4 +52,4 @@ dateList2 =  ['04-04-2022_10_WebJsonData.json', '04-04-2022_11_WebJsonData.json'
 # print(dm.readCsvToDf(os.path.join("web search","08-04-2022","animation.csv")))
 
 # print(dm.date_range("02-04-2022","08-04-2022"))
-print(dm.startSearch(["11-04-2022","17-04-2022"],['anime']))
+print(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))

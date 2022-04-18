@@ -528,25 +528,38 @@ class DataManager:
             # print(root, dirs, files)
             for name in files:
                 # print(name)
+                nameOnly = name.split(".")
+                if kw == nameOnly[0] : 
+                    # print(name)
+                    DList.append(pd.read_csv(os.path.join(path,name)).drop_duplicates())
+                    
                 nameOnly = name.split("(")
                 if kw == nameOnly[0] : 
+                    # print(name)
                     DList.append(pd.read_csv(os.path.join(path,name)).drop_duplicates())
+                    # DList.append(len(pd.read_csv(os.path.join(path,name)).drop_duplicates()))
                     # DList.append(os.path.abspath(os.path.join(root, name)))
                     # print(os.path.abspath(os.path.join(root, name)))
+        print("File : ",len(DList))
         return DList
     
     def startSearch(self,Ldate,LWord):# date []
         ListOfDate = self.date_range(Ldate[0],Ldate[1])
-        # print("ListOfDate : ",ListOfDate)
+        print("List Of Date : ",ListOfDate)
+        print("List Of Word : ",LWord)
         dfResult = []
         for j in ListOfDate:
             for kw in LWord:
                 # print(kw)
                 fileListForSearch = self.getReadByKeyword(j,kw)
+                dfResult += fileListForSearch
                 # print(len(fileListForSearch))
-                dfResult.append(fileListForSearch)
+                # dfResult.append(fileListForSear0ch)
                 # print(fileListForSearch)
                 # for path in fileListForSearch:
-        # return pd.concat(dfResult,ignore_index=True)
-        return dfResult
+        newDf = pd.concat(dfResult,ignore_index=True)
+        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+        newDf.sort_values(field_names)
+        # print(len(dfResult))
+        return newDf
                     
