@@ -34,6 +34,7 @@ class webScraping():
                     "https://todayanimenews.com",
                     
                     "https://anime-news.tokyo/" ,
+                    
                     "https://manga.tokyo/news/",
                     
                     "https://www.bbc.com/news/topics/c1715pzrj24t/anime",
