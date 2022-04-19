@@ -319,8 +319,8 @@ class DataManager:
     
     def date_range(self,start, end):
         print(start, end)
-        dateS = datetime.strptime(start,'%d-%m-%Y')
-        dateE = datetime.strptime(end,'%d-%m-%Y')
+        dateS = datetime.strptime(str(start),'%Y-%m-%d')
+        dateE = datetime.strptime(str(end),'%Y-%m-%d')
         delta = dateE - dateS  # as timedelta
         days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
         resualt = [] 
