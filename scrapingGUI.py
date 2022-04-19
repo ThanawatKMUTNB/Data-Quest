@@ -58,15 +58,18 @@ class Ui_MainWindow(QWidget):
         #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
         self.df = dm.newUnion()
         tw.setdataframe(self.df)
-        
+        #self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[""])
+        #tw.setdataframe(self.dt)
+        self.dt = None
+        #tw.setdataframe(self.dt)
         #self.data = win.OpenFile()
         #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
         self.getSince = str
         self.getUntil = str
         '''self.getSince_2 = str
-        self.getUntil_2 = str
+        self.getUntil_2 = str'''
         self.getSince_3 = str
-        self.getUntil_3 = 'str'''
+        self.getUntil_3 = str
         self.earliest = None
         self.lasted = None
         self.getDataDate1 = None
@@ -76,6 +79,10 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model)
         self.processWord = str
 
+        #self.modelWeb = TableModel(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
+        self.modelWeb = None
+        self.tableWeb = QtWidgets.QTableView()
+        self.tableWeb.setModel(self.modelWeb)
         #self.maxDate()
         #self.setDate()
         self.keywords = self.df['Keyword'].tolist()
@@ -94,21 +101,7 @@ class Ui_MainWindow(QWidget):
         until = dm.df['Time'].max().strftime('%Y/%m/%d')
         date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
         self.dateEdit_2.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_2.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
-
-    def dateSet_2(self) :
-        #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        dm.formatdatetime('Time')
-        since = dm.df['Time'].min().strftime('%Y/%m/%d')
-        date = (datetime.strptime(since,'%Y/%m/%d')).date()
-        self.dateEdit_3.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_3.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
-
-        #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        until = dm.df['Time'].max().strftime('%Y/%m/%d')
-        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
-        self.dateEdit_4.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_4.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        self.dateEdit_2.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช
 
     def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
@@ -116,13 +109,13 @@ class Ui_MainWindow(QWidget):
         since = dm.df['Time'].min().strftime('%Y/%m/%d')
         date = (datetime.strptime(since,'%Y/%m/%d')).date()
         self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_5.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        self.dateEdit_5.dateChanged.connect(self.dateSinceReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
         until = dm.df['Time'].max().strftime('%Y/%m/%d')
-        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
+        date2 = (datetime.strptime(str(until),'%Y/%m/%d')).date()
         self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_6.dateChanged.connect(self.dateUntilReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
     def dateSinceReturn(self) :
         self.getSince = self.dateEdit_1.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
@@ -133,6 +126,16 @@ class Ui_MainWindow(QWidget):
         self.getUntil = self.dateEdit_2.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getUntil)
         return self.getUntil
+
+    def dateSinceReturnWeb(self) :
+        self.getSince_3 = self.dateEdit_5.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        #print(self.getSince)
+        return self.getSince_3
+
+    def dateUntilReturnWeb(self) :
+        self.getUntil_3 = self.dateEdit_6.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        #print(self.getUntil)
+        return self.getUntil_3
 
     def showRealtime(self) : #search key in this time
         print('real time')
@@ -362,6 +365,54 @@ class Ui_MainWindow(QWidget):
         elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
             return 'No'
 
+    def showTableWeb(self) :
+        print("\n\n")
+        #print(len(self.dt.index),'rows')
+        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+        if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
+            self.showErrorDialog()
+            return
+        self.dt = dm.getperiod(str(self.dateSinceReturnWeb()),str(self.dateUntilReturnWeb()))
+        print(list(set(self.dt['Keyword'].tolist())))
+        tw.setdataframe(self.dt)
+        keywords = self.SearchBox_3.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        if "" not in keywords:
+            print(len(keywords),keywords)
+            dhave = []
+            for keyword in keywords:
+                if keyword not in self.keywords:
+                    dhave.append(keyword)
+            if len(dhave) > 0:
+                if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
+                    self.showErrorDialog2()
+                    return
+                if self.showDialog() == 'Yes':      #search new 
+                    self.keywords.extend(dhave)
+                    self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                    dm.concatfile(self.dt)
+                    #print(list(set(dm.df['Keyword'].tolist())))
+                    self.addlist()
+                else:
+                    self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                #dm.concatfile(self.dt)
+            else:
+                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+            #self.dateSet()    
+            #tw.setdataframe(self.dt)
+        print(self.SearchBox_3.text())
+        print(len(self.dt.index),tw.keys)
+        
+        self.modelNew = TableModel(self.dt) 
+        self.table2 = QtWidgets.QTableView()
+        self.table2.setModel(self.modelNew)
+        self.tableView_3.setModel(self.modelNew)
+
+        #self.labelShowKeywords()
+        #dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation'])
+
+
     def showErrorDialog(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -396,11 +447,16 @@ class Ui_MainWindow(QWidget):
 
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
+        self.listView_3.clear()
         self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :
             item = QtWidgets.QListWidgetItem(self.keywords[i])
             self.listView.addItem(item)
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView_3.addItem(item)
+            #self.listView_3.addItem(item)
 
     def addlist_2(self): #ไว้ add ค่าลงในตารางทางซ้าย (ที่ไว้โชว์ keyword) ของ tab TweetW
         self.listView_2.clear()
@@ -412,6 +468,12 @@ class Ui_MainWindow(QWidget):
         #     self.listView_2.addItem(item)
 
     def addlist_3(self): #ของ tab Web scraping
+        self.addlist()
+        self.listView_3.clear()
+        #self.keywords.sort()
+        for i in range(len(self.keywords)) :
+            item = QtWidgets.QListWidgetItem(self.keywords[i])
+            self.listView_3.addItem(item)
         return              
 
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
@@ -420,6 +482,11 @@ class Ui_MainWindow(QWidget):
     def progressTime(self):
             self.progressBar.setValue(100)
             self.button1()
+            self.progressBar.setValue(0)
+    
+    def progressTimeWeb(self) :
+            self.progressBar.setValue(100)
+            self.showTableWeb()
             self.progressBar.setValue(0)
             
     def setupUi(self, MainWindow):
@@ -522,12 +589,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
         self.gridLayout.addWidget(self.listView, 3, 0, 1, 1)
-        self.addlist()
-        
-        self.labelProcess = QtWidgets.QLabel(self.tab)
-        self.labelProcess.setAlignment(QtCore.Qt.AlignLeft )
-        self.labelProcess.setObjectName("labelProcess")
-        self.gridLayout.addWidget(self.labelProcess, 4, 0, 1, 1)
+        #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
         self.SearchBox1.setEnabled(True)
@@ -657,7 +719,7 @@ class Ui_MainWindow(QWidget):
         self.tableView_3.setSizePolicy(sizePolicy)
         self.tableView_3.setObjectName("tableView_3")
         self.gridLayout.addWidget(self.tableView_3, 3, 1, 1, 5)
-        self.tableView_3.setModel(self.model) #show table in pyqt5
+        self.tableView_3.setModel(self.modelWeb) #show table in pyqt5
 
         self.label_8 = QtWidgets.QLabel(self.tab_3)
         self.label_8.setAlignment(QtCore.Qt.AlignCenter)
@@ -672,6 +734,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_5 = QtWidgets.QPushButton(self.tab_3)
         self.PushButton_5.setObjectName("PushButton_5")
         self.gridLayout.addWidget(self.PushButton_5, 2, 4, 1, 1)
+        self.PushButton_5.clicked.connect(self.progressTimeWeb)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -679,6 +742,19 @@ class Ui_MainWindow(QWidget):
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         #btm1 = functools.partial(self.button1)   
         #self.PushButton_6.clicked.connect(btm1)
+
+        self.progressBar_3 = QProgressBar(self.tab_3)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
+        self.progressBar_3.setSizePolicy(sizePolicy)
+        self.progressBar_3.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.progressBar_3.setTextVisible(False)
+        self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
+        self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.progressBar_3.setObjectName("progressBar")
+        self.gridLayout.addWidget(self.progressBar_3, 4, 5, 1, 1) 
 
         self.listView_3 = QtWidgets.QListWidget(self.tab_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -689,8 +765,8 @@ class Ui_MainWindow(QWidget):
         self.listView_3.setMidLineWidth(0)
         self.listView_3.setObjectName("listView_3")
         self.gridLayout.addWidget(self.listView_3, 3, 0, 1, 1)
-        self.addlist_3()
-        
+        #self.addlist_3()
+        self.addlist()
         self.SearchBox_3 = QtWidgets.QLineEdit(self.tab_3)
         self.SearchBox_3.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -721,7 +797,9 @@ class Ui_MainWindow(QWidget):
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
+        self.dateSet_3()
         self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
+        
         self.tabWidget.addTab(self.tab_3, "")
 
 
@@ -750,7 +828,6 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
-        self.labelProcess.setText(_translate("MainWindow", ""))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
@@ -775,8 +852,6 @@ class Ui_MainWindow(QWidget):
 
         self.dateEdit_1.setDisplayFormat(_translate("MainWindow", "yyyy/M/d")) #format ของวันที่ที่แสดง
         self.dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
-        #self.dateEdit_3.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
-        #self.dateEdit_4.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_5.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
         self.dateEdit_6.setDisplayFormat(_translate("MainWindow", "yyyy/M/d"))
 
