@@ -106,14 +106,14 @@ class Ui_MainWindow(QWidget):
     def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
         dm.formatdatetime('Time')
-        since = dm.df['Time'].min().strftime('%Y/%m/%d')
-        date = (datetime.strptime(since,'%Y/%m/%d')).date()
+        since = dm.df['Time'].min().strftime('%d-%m-%Y')
+        date = (datetime.strptime(since,'%d-%m-%Y')).date()
         self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_5.dateChanged.connect(self.dateSinceReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        until = dm.df['Time'].max().strftime('%Y/%m/%d')
-        date2 = (datetime.strptime(str(until),'%Y/%m/%d')).date()
+        until = dm.df['Time'].max().strftime('%d-%m-%Y')
+        date2 = (datetime.strptime(str(until),'%d-%m-%Y')).date()
         self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
@@ -128,12 +128,14 @@ class Ui_MainWindow(QWidget):
         return self.getUntil
 
     def dateSinceReturnWeb(self) :
-        self.getSince_3 = self.dateEdit_5.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        dateChange = self.dateEdit_5.date().toPyDate()
+        self.getSince_3 = dateChange.strftime('%d-%m-%Y') #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getSince)
         return self.getSince_3
 
     def dateUntilReturnWeb(self) :
-        self.getUntil_3 = self.dateEdit_6.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        dateChange = self.dateEdit_6.date().toPyDate()
+        self.getUntil_3 = dateChange.strftime('%d-%m-%Y') #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getUntil)
         return self.getUntil_3
 
@@ -369,9 +371,9 @@ class Ui_MainWindow(QWidget):
         print("\n\n")
         #print(len(self.dt.index),'rows')
         print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
-        if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
+        '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
-            return
+            return'''
         self.dt = dm.getperiod(str(self.dateSinceReturnWeb()),str(self.dateUntilReturnWeb()))
         print(list(set(self.dt['Keyword'].tolist())))
         tw.setdataframe(self.dt)
@@ -485,9 +487,9 @@ class Ui_MainWindow(QWidget):
             self.progressBar.setValue(0)
     
     def progressTimeWeb(self) :
-            self.progressBar.setValue(100)
+            self.progressBar_3.setValue(100)
             self.showTableWeb()
-            self.progressBar.setValue(0)
+            self.progressBar_3.setValue(0)
             
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")

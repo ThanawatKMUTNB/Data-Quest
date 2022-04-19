@@ -319,8 +319,8 @@ class DataManager:
     
     def date_range(self,start, end):
         print(start, end)
-        dateS = datetime.strptime(str(start),'%Y-%m-%d')
-        dateE = datetime.strptime(str(end),'%Y-%m-%d')
+        dateS = datetime.strptime(str(start),'%d-%m-%Y')
+        dateE = datetime.strptime(str(end),'%d-%m-%Y')
         delta = dateE - dateS  # as timedelta
         days = [dateS + timedelta(days=i) for i in range(delta.days + 1)]
         resualt = [] 
@@ -563,3 +563,4 @@ class DataManager:
         # print(len(dfResult))
         return newDf
                     
+#DataManager().startSearch(['17-03-2022', '16-04-2022'],['spy x family'])
