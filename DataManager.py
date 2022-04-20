@@ -561,6 +561,6 @@ class DataManager:
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         newDf.sort_values(field_names)
         # print(len(dfResult))
-        return newDf
+        return newDf.drop_duplicates()
                     
 #DataManager().startSearch(['17-03-2022', '16-04-2022'],['spy x family'])
