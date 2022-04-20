@@ -18,12 +18,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
 import numpy as np
+from regex import W
 from tqdm import tqdm
 from requests import delete
 import importWin as windo 
 
 import DataManager
-import twitter_scrap 
+import twitter_scrap
+import webNewNew
 
 #Test        
 #ยังไม่แก้ช่วงวันที่ที่เลือกได้ใน tab 2 และ 3
@@ -88,7 +90,12 @@ class Ui_MainWindow(QWidget):
         self.keywords = self.df['Keyword'].tolist()
         self.keywords = list(set(self.keywords))
         self.tw_worddf = None
-
+    def showCalenderWin(self):
+        self.MainWindow2 = QtWidgets.QMainWindow()
+        self.ui2 = webNewNew.Ui_MainWindowSecond()
+        self.ui2.setupUi(self.MainWindow2)
+        self.MainWindow2.show()
+        
     def dateSet(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
         dm.formatdatetime('Time')
@@ -288,7 +295,8 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
         return
-    
+
+
     def deleteButton_1(self) : #สำหรับปุ่ม delete tab tweet
         if self.showDeleteDialog() == "Yes":
             keywords = self.SearchBox1.text()
@@ -367,6 +375,34 @@ class Ui_MainWindow(QWidget):
         elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
             return 'No'
 
+    def showSearchDialogWeb(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Do you want to search?") #แสดงข้อความ
+        msgBox.setWindowTitle("Warning") #Title
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
+        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
+        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
+            return 'Yes'
+        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            return 'No'
+    
+    def showDialogWebForNew(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Do you want to search?") #แสดงข้อความ
+        msgBox.setWindowTitle("Warning") #Title
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
+        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
+        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
+            return 'Yes'
+        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
+            return 'No'
+
     def showTableWeb(self) :
         print("\n\n")
         #print(len(self.dt.index),'rows')
@@ -390,7 +426,7 @@ class Ui_MainWindow(QWidget):
                 if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
                     self.showErrorDialog2()
                     return
-                if self.showDialog() == 'Yes':      #search new 
+                if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
                     dm.concatfile(self.dt)
@@ -414,6 +450,35 @@ class Ui_MainWindow(QWidget):
         #self.labelShowKeywords()
         #dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation'])
 
+    def searchNewWebButton(self) :
+        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
+        tenwords = list(map(lambda x: x.lower(), tenwords))
+        if self.showDialogWebForNew() == 'Yes':
+            self.keywords.extend(tenwords)
+            self.dateSet_3()
+            dhave = []
+            for keyword in tenwords:
+                if keyword not in self.keywords:
+                    dhave.append(keyword)
+            if len(dhave) > 0:
+                self.keywords.extend(dhave)
+                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                dm.concatfile(self.dt)
+                
+            else:
+                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+            # self.df = tw.savedata(tenwords)
+            # print(self.df)
+            # dm.concatfile(self.df)
+            # self.addlist()
+        else:
+            return
+        #self.addlist_2()    
+        self.addlist() 
+        self.modelNew = TableModel(self.dt) 
+        self.table2 = QtWidgets.QTableView()
+        self.table2.setModel(self.modelNew)
+        self.tableView_3.setModel(self.modelNew)
 
     def showErrorDialog(self):
         msg = QMessageBox()
@@ -433,19 +498,7 @@ class Ui_MainWindow(QWidget):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
-    def showDialogWebForToday(self): #ไว้เด้งข้อความขึ้นมา ถ้าตัวที่ป้อนเข้ามาใน entry ไม่มีอยู่ใน keywords ที่กำหนด
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText("Do you want to search?") #แสดงข้อความ
-        msgBox.setWindowTitle("Warning") #Title
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No) #มีปุ่ม yes และ no
-        #ถ้าอยากเปลี่ยนปุ่ทเป็นแบบอื่น เปลี่ยนจากพวก yes หรือ no ได้เลย เช่น Save Cancel Ok Close Open
-        #msgBox.buttonClicked.connect(msgButtonClick) ไม่มีไร เป็นการเชื่อมเวลากดปุ่ม ซึ่งในตอนนี้ไม่ได้เชื่อมฟังก์ชั่นอะไรไว้ 
-        returnValue = msgBox.exec()
-        if returnValue == QMessageBox.Yes: #ถ้ากด yes จะทำอะไร
-            return 'Yes'
-        elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
-            return 'No'
+    
 
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
@@ -730,7 +783,7 @@ class Ui_MainWindow(QWidget):
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
         self.PushButton_6.setObjectName("PushButton_6")
-        #self.PushButton_6.clicked.connect(self.showDefaultFile)
+        self.PushButton_6.clicked.connect(self.showCalenderWin)
 
         self.gridLayout.addWidget(self.PushButton_6, 2, 5, 1, 1)
         self.PushButton_5 = QtWidgets.QPushButton(self.tab_3)
@@ -861,6 +914,8 @@ class Ui_MainWindow(QWidget):
 if __name__ == "__main__":
     dm = DataManager.DataManager()
     tw = twitter_scrap.Twitter_Scrap()
+    #Dialog = QtWidgets.QDialog()
+    cn = webNewNew.Ui_MainWindowSecond()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
