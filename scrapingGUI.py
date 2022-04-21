@@ -414,8 +414,8 @@ class Ui_MainWindow(QWidget):
         print(list(set(self.dt['Keyword'].tolist())))
         tw.setdataframe(self.dt)
         keywords = self.SearchBox_3.text()
-        keywords = keywords.split(',')
-        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        #keywords = keywords.split(',')
+        #keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         if "" not in keywords:
             print(len(keywords),keywords)
             dhave = []
@@ -423,9 +423,9 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
+                '''if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
                     self.showErrorDialog2()
-                    return
+                    return'''
                 if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
@@ -534,11 +534,17 @@ class Ui_MainWindow(QWidget):
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
         return
     
-    def progressTime(self):
-            self.progressBar.setValue(100)
-            self.button1()
-            self.progressBar.setValue(0)
+    def progressTime(self): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน 
+                            #ฉะนั้นเวลากดปุ่ม ก็จะเรียกใช้ฟังก์ชั่นนี้แทนการเรียกฟังก์ชั่นปกติตรงๆแทน
+            self.progressBar.setValue(100) #ให้ Progress bar เป็น 100 เมื่อมีการทำงานของฟังก์ชั่นนั้น
+            self.button1() #เรียกฟังก์ชั่นนั้นมาใช้
+            self.progressBar.setValue(0) #พอทำเสร็จก็ให้ progress bar เป็น 0
     
+    def progressTime_2(self) : #For Tab 2
+            self.progressBar_3.setValue(100)
+            #Function
+            self.progressBar_3.setValue(0)
+
     def progressTimeWeb(self) :
             self.progressBar_3.setValue(100)
             self.showTableWeb()
@@ -693,6 +699,19 @@ class Ui_MainWindow(QWidget):
         ################# โชว์ df ใน tab tweetw
         self.tableView_2.setModel(self.model) #show table in pyqt5
         #################
+
+        self.progressBar_2 = QProgressBar(self.tab_2)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.progressBar_2.sizePolicy().hasHeightForWidth())
+        self.progressBar_2.setSizePolicy(sizePolicy)
+        self.progressBar_2.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.progressBar_2.setTextVisible(False)
+        self.progressBar_2.setOrientation(QtCore.Qt.Horizontal)
+        self.progressBar_2.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.progressBar_2.setObjectName("progressBar")
+        self.gridLayout.addWidget(self.progressBar_2, 4, 5, 1, 1)
 
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
