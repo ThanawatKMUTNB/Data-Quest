@@ -464,62 +464,65 @@ class webScraping():
         countWeb = 0
         for link in self.web:
             print(link)
-            countWeb += 1
-            dictForJson = {}
-            soup = self.makeSoup(link)
-            self.setMainDomain(link)
-            self.setSubLink(soup)
-            self.currentLink = link
-            dictForJson[self.getTodayDate()] = { link : {'Lang' : self.getLang(soup),
-                                                        'Title' : self.getTitle(soup),
-                                                        # 'Sub' : len(self.getAllSubLink()),
-                                                        'Ref' : dict(Counter(self.getAllRefLink())),
-                                                        'Data' : self.getDataList(soup)
-                                                        }
+            try:
+                countWeb += 1
+                dictForJson = {}
+                soup = self.makeSoup(link)
+                self.setMainDomain(link)
+                self.setSubLink(soup)
+                self.currentLink = link
+                dictForJson[self.getTodayDate()] = { link : {'Lang' : self.getLang(soup),
+                                                            'Title' : self.getTitle(soup),
+                                                            # 'Sub' : len(self.getAllSubLink()),
+                                                            'Ref' : dict(Counter(self.getAllRefLink())),
+                                                            'Data' : self.getDataList(soup)
+                                                            }
+                                                    }
+                self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
+                # countWeb += 1
+                sl = self.getAllSubLink()
+                n = len(sl)
+                for i in sl:
+                    print("\t",n)
+                    n-=1
+                    try:
+                        soup = self.makeSoup(i)
+                        self.setSubLink(soup)
+                        self.currentLink = i
+                        dictForJson[self.getTodayDate()].update({ i : {'Lang': self.getLang(soup),
+                                                'Title' : self.getTitle(soup),
+                                                # 'Sub' : len(self.getAllSubLink()),
+                                                'Ref' : dict(Counter(self.getAllRefLink())),
+                                                'Data' : self.getDataList(soup)
                                                 }
-            self.SaveFileName = "_"+str(countWeb)+"_WebJsonData.json"
-            # countWeb += 1
-            sl = self.getAllSubLink()
-            n = len(sl)
-            for i in sl:
-                print("\t",n)
-                n-=1
-                try:
-                    soup = self.makeSoup(i)
-                    self.setSubLink(soup)
-                    self.currentLink = i
-                    dictForJson[self.getTodayDate()].update({ i : {'Lang': self.getLang(soup),
-                                            'Title' : self.getTitle(soup),
-                                            # 'Sub' : len(self.getAllSubLink()),
-                                            'Ref' : dict(Counter(self.getAllRefLink())),
-                                            'Data' : self.getDataList(soup)
-                                            }
-                                            })
-                    ##
-                    # ssl = len(self.getAllSubLink())
-                    # for j in self.getAllSubLink():
-                    #     print("\t\t",ssl)
-                    #     ssl -= 1
-                    #     try:
-                    #         soup = self.makeSoup(j)
-                    #         self.setSubLink(soup)
-                    #         dictForJson[self.getTodayDate()].update({ j : {'Lang': self.getLang(soup),
-                    #                                 'Title' : self.getTitle(soup),
-                    #                                 # 'Sub' : len(self.getAllSubLink()),
-                    #                                 'Ref' : dict(Counter(self.getAllRefLink())),
-                    #                                 'Data' : self.getDataList(soup)
-                    #                                 }
-                    #                                 })
-                    #     except :
-                    #         pass
-                    ##
-                except :
-                    pass
-                # print(json.dumps(dictForJson, indent=4))
-                # now = datetime.now()
-                # Endtime = now.strftime("%H:%M:%S")
-                # print(starttime,Endtime)
+                                                })
+                        ##
+                        # ssl = len(self.getAllSubLink())
+                        # for j in self.getAllSubLink():
+                        #     print("\t\t",ssl)
+                        #     ssl -= 1
+                        #     try:
+                        #         soup = self.makeSoup(j)
+                        #         self.setSubLink(soup)
+                        #         dictForJson[self.getTodayDate()].update({ j : {'Lang': self.getLang(soup),
+                        #                                 'Title' : self.getTitle(soup),
+                        #                                 # 'Sub' : len(self.getAllSubLink()),
+                        #                                 'Ref' : dict(Counter(self.getAllRefLink())),
+                        #                                 'Data' : self.getDataList(soup)
+                        #                                 }
+                        #                                 })
+                        #     except :
+                        #         pass
+                        ##
+                    except :
+                        pass
+                    # print(json.dumps(dictForJson, indent=4))
+                    # now = datetime.now()
+                    # Endtime = now.strftime("%H:%M:%S")
+                    # print(starttime,Endtime)
                 self.writeJson(dictForJson)
+            except :
+                pass
         now = datetime.now()
         Endtime = now.strftime("%H:%M:%S")
         print(starttime,Endtime)
