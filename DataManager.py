@@ -15,6 +15,7 @@ import tweepy as tw
 import pandas as pd
 import re
 import glob
+import string
 import os
 import time
 import shutil
@@ -166,10 +167,13 @@ class DataManager:
         dataframe = dataframe.reset_index()
         th_stopwords = list(thai_stopwords())
         en_stops = set(stopwords.words('english'))
+        en_stops.update(list(string.ascii_lowercase))
+        en_stops.update(list(string.ascii_uppercase))
+        en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
         word = {}
         for index,row in dataframe.iterrows():    #only tweet
-            if row['Language'] == 'eng':
-                allwords = row['Tweet'].split()
+            if row['Language'] == 'en':
+                allwords = str(row['Tweet']).split()
                 for w in allwords: 
                     if w not in en_stops:
                         if w in word:
@@ -561,6 +565,6 @@ class DataManager:
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         newDf.sort_values(field_names)
         # print(len(dfResult))
-        return newDf
+        return newDf.drop_duplicates()
                     
 #DataManager().startSearch(['17-03-2022', '16-04-2022'],['spy x family'])
