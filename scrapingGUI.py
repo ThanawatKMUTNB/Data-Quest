@@ -257,7 +257,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model)
         self.labelShowKeywords()
         print('tab1 finish')
-
+        time.sleep(2)
         self.t2 = CollectWordThread(parent=None,df=self.df)         #use df from tab1 to data processing tab2
         self.t2.start()
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
