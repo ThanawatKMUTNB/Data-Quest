@@ -640,7 +640,8 @@ class Ui_MainWindow(QWidget):
         #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         #btm1 = functools.partial()
-        self.PushButton_1.clicked.connect(self.progressTime)
+        #self.PushButton_1.clicked.connect(self.progressTime)
+        self.PushButton_1.clicked.connect(self.button1)
 
         #สร้างไว้สำหรับรีเฟรช
         btmRefresh_1 = functools.partial(self.refreshButton_1)   
