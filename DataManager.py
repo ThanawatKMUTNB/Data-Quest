@@ -5,6 +5,7 @@ import csv
 import json
 from operator import index
 from unittest import result
+from numpy import choose
 from textblob import TextBlob 
 from datetime import datetime, timedelta
 from pythainlp import word_tokenize
@@ -406,6 +407,29 @@ class DataManager:
             write.writerow(field_names)
             f.close()
     
+    def addNewWord(self,NewWord,dateAdd): #List NewWord
+        print("----------",NewWord,dateAdd)
+        startDate = dateAdd[0]
+        endDate = dateAdd[1]
+        ListOfDate = self.date_range(str(startDate.isoformat()),str(endDate.isoformat()))
+        path = "web search"
+        todayByFile = os.listdir(path)
+        
+        #Add new word to all date
+        for i in todayByFile:
+            for kw in NewWord:
+                newpath = os.path.join('web search',i,kw+'.csv')
+                self.creatNewSearchFile(newpath)
+        
+        #Choosed Date
+        chooseDate = []
+        for i in ListOfDate:
+            if i in todayByFile:
+                chooseDate.append(i)
+        
+                
+            # self.setDataByAllKeyword(i)
+            
     def setDictSentiment(self,soup,link,data,today):
         ex = web.webScraping()
         resualtDict = {}

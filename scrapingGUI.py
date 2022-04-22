@@ -23,7 +23,7 @@ from tqdm import tqdm
 from requests import delete
 import importWin as windo 
 
-import DataManager
+import DataManager 
 import twitter_scrap
 import webNewNew
 
@@ -220,10 +220,13 @@ class Ui_MainWindow(QWidget):
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new 
+                    dm.addNewWord(dhave,[self.dateSinceReturn(),self.dateUntilReturn()])
                     self.keywords.extend(dhave)
-                    self.df = tw.searchkeys(keywords,'yes',str(self.dateUntilReturn()))
+                    self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
                     dm.concatfile(self.df)
+                    
                     #print(list(set(dm.df['Keyword'].tolist())))
+                    
                     self.addlist()
                 else:
                     self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
