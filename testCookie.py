@@ -22,7 +22,7 @@ dm = data.DataManager()
 
 link = "https://www.animenewsnetwork.com/"
 # path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
-path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/WebData"
+path = "C:/Users/Pooncharat Wongkom/Web-Scraping/WebData"
 rawData = os.listdir(path)
 today = ex.getTodayDate()
 newpath = os.path.join('web search',today,"anime(1).csv")
