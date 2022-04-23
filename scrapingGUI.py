@@ -25,7 +25,7 @@ import importWin as windo
 import time
 import threading
 
-import DataManager
+import DataManager 
 import twitter_scrap
 import webNewNew
 from Tw_Thread import *
@@ -254,10 +254,13 @@ class Ui_MainWindow(QWidget):
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new 
-                    self.keywords.extend(dhave)     #add list to list
-                    self.df = tw.searchkeys(keywords,'yes',str(self.dateUntilReturn()))
+                    # dm.addNewWord(dhave,[self.dateSinceReturn(),self.dateUntilReturn()])
+                    self.keywords.extend(dhave)
+                    self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
                     dm.concatfile(self.df)
+                    
                     #print(list(set(dm.df['Keyword'].tolist())))
+                    
                     self.addlist()
                 else:
                     self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
@@ -664,7 +667,8 @@ class Ui_MainWindow(QWidget):
         #คือเวลาเชื่อมกับปุ่มมันใส่พารามิเตอร์ลงไปแบบ self.PushButton_1.clicked.connect(self.showSecondFile("WebScrapingData24.csv")) 
         #ถ้าใส่แบบนั้นมันจะบัค เลยต้องใช้ functools มาช่วย
         #btm1 = functools.partial()
-        self.PushButton_1.clicked.connect(self.progressTime)
+        #self.PushButton_1.clicked.connect(self.progressTime)
+        self.PushButton_1.clicked.connect(self.button1)
 
         #สร้างไว้สำหรับรีเฟรช
         btmRefresh_1 = functools.partial(self.refreshButton_1)   
