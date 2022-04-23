@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 import nltk
 import pandas as pd
 import string
+import time 
 
 class TwitterThread(QtCore.QThread):
 	
@@ -23,32 +24,36 @@ class CollectWordThread(QtCore.QThread):
 	
     dataframe = QtCore.pyqtSignal(object)
     count = QtCore.pyqtSignal(int)
-    def __init__(self, parent=None,df=None):
+    def __init__(self, parent=None,df=None,en_stops={},th_stopwords={}):
         super(CollectWordThread, self).__init__(parent)
         self.dm = DataManager.DataManager()
         self.df = df
+        self.en_stops = en_stops
+        self.th_stopwords = th_stopwords
     def run(self):
         print('Starting Collectword thread...')
         #self.df = self.dm.collectwords(self.df)
         #######################################
 
-        nltk.download('stopwords')          #important
+        # nltk.download('stopwords')          #important
         dataframe = self.df.reset_index()
-        th_stopwords = list(thai_stopwords())
-        en_stops = set(stopwords.words('english'))
-        en_stops.update(list(string.ascii_lowercase))
-        en_stops.update(list(string.ascii_uppercase))
-        en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
+        # th_stopwords = list(thai_stopwords())
+        # en_stops = set(stopwords.words('english'))
+        # en_stops.update(list(string.ascii_lowercase))
+        # en_stops.update(list(string.ascii_uppercase))
+        # en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
         word = {}
         countrow = len(dataframe.index)
-        #print('start loop collect word')
+        print('start loop collect word')
         for index,row in dataframe.iterrows():    #only tweet
-            cnt = (int(index)/(int(countrow)*1.1))*100
+            if int(index) % 3000 == 0:
+                time.sleep(0.001)
+            cnt = (int(index)/(int(countrow)))*100
             self.count.emit(cnt)
             if row['Language'] == 'en':
                 allwords = str(row['Tweet']).split()
                 for w in allwords: 
-                    if w not in en_stops:
+                    if w not in self.en_stops:
                         if w in word:
                             word[w] += 1
                         else:
@@ -56,19 +61,19 @@ class CollectWordThread(QtCore.QThread):
             elif row['Language'] == 'th':
                 allwords = word_tokenize(row['Tweet'], engine='newmm')
                 for w in allwords: 
-                    if w not in th_stopwords:
+                    if w not in self.th_stopwords:
                         if w in word:
                             word[w] += 1
                         else:
                             word[w] = 1
             else:
                 pass
-            
-        #print(countrow,index)
+
         if 'RT' in word:
             del word['RT']  #for twitter
         if ' ' in word:
             del word[' ']   #for thai language
+        print('set to dataframe')
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         self.df = pd.DataFrame(sortword,columns=['Word','Count'])
         cnt = 100

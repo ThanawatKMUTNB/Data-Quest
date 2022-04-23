@@ -94,6 +94,14 @@ class Ui_MainWindow(QWidget):
         self.keywords = self.df['Keyword'].tolist()
         self.keywords = list(set(self.keywords))
         self.tw_worddf = None
+
+        self.th_stopwords = list(thai_stopwords())
+        nltk.download('stopwords')
+        self.en_stops = set(stopwords.words('english'))
+        self.en_stops.update(list(string.ascii_lowercase))
+        self.en_stops.update(list(string.ascii_uppercase))
+        self.en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
+
     def showCalenderWin(self):
         self.MainWindow2 = QtWidgets.QMainWindow()
         self.ui2 = webNewNew.Ui_MainWindowSecond()
@@ -213,14 +221,6 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
         return
-        # self.df = dm.setdefaultDF()
-        # #self.df = dm.unionfile(self.filename)
-        # self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        # print(len(self.df.index),tw.keys)
-        # self.model = TableModel(self.df) 
-        # self.table = QtWidgets.QTableView()
-        # self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-        # self.tableView_2.setModel(self.model) #เอาตารางไปโชว์เลย
 
     def button1(self) :     #Search BUTTON
         
@@ -279,7 +279,7 @@ class Ui_MainWindow(QWidget):
         self.labelShowKeywords()
         print('tab1 finish')
         time.sleep(2)
-        self.t2 = CollectWordThread(parent=None,df=self.df)         #use df from tab1 to data processing tab2
+        self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords)         #use df from tab1 to data processing tab2
         self.t2.start()
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
         self.t2.count.connect(self.progressTime_2)             
