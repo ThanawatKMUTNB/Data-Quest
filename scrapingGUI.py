@@ -189,7 +189,7 @@ class Ui_MainWindow(QWidget):
             else:
                 return
 
-    def showDefaultFileTweetW(self) : #Refresh BUTTON (from file)
+    def showDefaultFileTweetW(self) : #Refresh BUTTON for show collectkey(Tab2)
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -264,6 +264,8 @@ class Ui_MainWindow(QWidget):
         self.t2 = CollectWordThread(parent=None,df=self.df)         #use df from tab1 to data processing tab2
         self.t2.start()
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
+        self.t2.count.connect(self.progressTime_2)             
+        #self.t2.count.connect(self.progressTime)
     
     def CollectwordTab2(self,df):
         self.tw_worddf = df
@@ -306,13 +308,13 @@ class Ui_MainWindow(QWidget):
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
 
-    def refreshButton_1(self) :
+    def refreshButton_1(self) :#
         print('refresh')
         self.SearchBox1.clear()
         self.dateSet()
         self.df = dm.setdefaultDF()
         #self.df = dm.unionfile(self.filename)
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        #self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
         print(len(self.df.index),tw.keys)
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
@@ -558,16 +560,12 @@ class Ui_MainWindow(QWidget):
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
         return
     
-    def progressTime(self): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน 
+    def progressTime(self,counter): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน #
                             #ฉะนั้นเวลากดปุ่ม ก็จะเรียกใช้ฟังก์ชั่นนี้แทนการเรียกฟังก์ชั่นปกติตรงๆแทน
-            self.progressBar.setValue(100) #ให้ Progress bar เป็น 100 เมื่อมีการทำงานของฟังก์ชั่นนั้น
-            self.button1() #เรียกฟังก์ชั่นนั้นมาใช้
-            self.progressBar.setValue(0) #พอทำเสร็จก็ให้ progress bar เป็น 0
+        self.progressBar.setValue(counter) #ให้ Progress bar เป็น 100 เมื่อมีการทำงานของฟังก์ชั่นนั้น
     
-    def progressTime_2(self) : #For Tab 2
-            self.progressBar_3.setValue(100)
-            #Function
-            self.progressBar_3.setValue(0)
+    def progressTime_2(self,counter) : #For Tab 2
+        self.progressBar_2.setValue(counter)
 
     def progressTimeWeb(self) :
             self.progressBar_3.setValue(100)

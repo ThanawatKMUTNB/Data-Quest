@@ -25,6 +25,7 @@ import urllib.robotparser
 import webScraping as web
 from langdetect import detect
 from pythainlp.corpus import thai_stopwords
+from tqdm import tqdm
 
 class DataManager:
     def __init__(self):
@@ -144,7 +145,7 @@ class DataManager:
         print('collect complete')
 
     def getperiod(self,since,until):  ####column for twitter
-        
+
         self.formatdatetime('Time')
         dff = self.df
         dff.sort_values(by=['Time','Keyword'],inplace=True)
@@ -172,6 +173,7 @@ class DataManager:
         en_stops.update(list(string.ascii_uppercase))
         en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
         word = {}
+        countrow = len(dataframe.index)
         for index,row in dataframe.iterrows():    #only tweet
             if row['Language'] == 'en':
                 allwords = str(row['Tweet']).split()
@@ -191,6 +193,7 @@ class DataManager:
                             word[w] = 1
             else:
                 pass
+        print(countrow,index)
         if 'RT' in word:
             del word['RT']  #for twitter
         if ' ' in word:

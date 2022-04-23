@@ -8,6 +8,7 @@ import os
 import schedule
 import time
 import requests
+from tqdm import tqdm
 
 class Twitter_Scrap:
     def __init__(self):
@@ -170,41 +171,42 @@ class Twitter_Scrap:
         # if "" in keyword:
         #     return self.df
         
-        if len(keyword) > 1:            #>1 keyword
-            dhave = []
-            for key in keyword:
-                if key not in self.keys:
-                    dhave.append(key)
-            print(keyword)
-            print(dhave)
-            if len(dhave) > 0:          #search new keyword
+        #if len(keyword) > 1:            #>1 keyword
+        tqdm.pandas(desc='Processing Dataframe')
+        dhave = []
+        for key in keyword:
+            if key not in self.keys:
+                dhave.append(key)
+        print(keyword)
+        print(dhave)
+        if len(dhave) > 0:          #search new keyword
+            
+            self.savedata(dhave,until)
+            self.keys.extend(dhave)
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
+        elif Ans == "real":         #search old keys real time
+            self.savedata(keyword,until)
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
+        else:
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
+        # elif keyword[0] in self.keys:   #1 key in old keys
+        #     if Ans == "real":
+        #         self.savedata(keyword,until)
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     else:
+        #         return self.df.loc[self.df['Keyword']==keyword[0]]
+        # else:              #1keyword (new)
+        #     if Ans == 'yes':            #new key 1 key
                 
-                self.savedata(dhave,until)
-                self.keys.extend(dhave)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            elif Ans == "real":         #search old keys real time
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        elif keyword[0] in self.keys:   #1 key in old keys
-            if Ans == "real":
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:
-                return self.df.loc[self.df['Keyword']==keyword[0]]
-        else:              #1keyword (new)
-            if Ans == 'yes':            #new key 1 key
-                
-                self.savedata(keyword,until)
-                self.keys.extend(keyword)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            # elif Ans == "real":
-            #     self.savedata(keyword,until)
-            #     return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:
-                print('You select NO')
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #         self.savedata(keyword,until)
+        #         self.keys.extend(keyword)
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     # elif Ans == "real":
+        #     #     self.savedata(keyword,until)
+        #     #     return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     else:
+        #         print('You select NO')
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
             
 
 
