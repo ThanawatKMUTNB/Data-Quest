@@ -58,6 +58,7 @@ class Ui_MainWindow(QWidget):
     
     def __init__(self):
         super().__init__()
+        self.calendarDateClick = cn.qDateBegin()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
         #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
@@ -116,16 +117,33 @@ class Ui_MainWindow(QWidget):
     def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
         dm.formatdatetime('Time')
-        since = dm.df['Time'].min().strftime('%d-%m-%Y')
-        date = (datetime.strptime(since,'%d-%m-%Y')).date()
+        since = dm.df['Time'].min().strftime('%Y/%m/%d')
+        date = (datetime.strptime(since,'%Y/%m/%d')).date()
         self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_5.dateChanged.connect(self.dateSinceReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        until = dm.df['Time'].max().strftime('%d-%m-%Y')
-        date2 = (datetime.strptime(str(until),'%d-%m-%Y')).date()
+        until = dm.df['Time'].max().strftime('%Y/%m/%d')
+        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
         self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช
+
+    '''def dateSet_3(self) :
+        #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        dm.formatdatetime('Time')
+        since = dm.df['Time'].min().to_pydatetime()#.date()#.strftime('%Y/%m/%d')
+        print(type(since))
+        #date = (datetime.strptime(since,'%Y-%m-%d %H:%M:%S')).date()
+        date = since.date()
+        self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_5.dateChanged.connect(self.dateSinceReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+
+        #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
+        until = dm.df['Time'].max().to_pydatetime()#.strftime('%Y/%m/%d')
+        #date2 = (datetime.strptime(str(until),'%Y-%m-%d %H:%M:%S')).date()
+        date2 = until.date()
+        self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
+        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้'''
 
     def dateSinceReturn(self) :
         self.getSince = self.dateEdit_1.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
@@ -440,8 +458,8 @@ class Ui_MainWindow(QWidget):
         print(list(set(self.dt['Keyword'].tolist())))
         tw.setdataframe(self.dt)
         keywords = self.SearchBox_3.text()
-        #keywords = keywords.split(',')
-        #keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         if "" not in keywords:
             print(len(keywords),keywords)
             dhave = []
