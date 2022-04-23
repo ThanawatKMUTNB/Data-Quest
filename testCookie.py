@@ -41,7 +41,7 @@ dateList =  ['08-04-2022_10_WebJsonData.json', '08-04-2022_11_WebJsonData.json',
 now = datetime.now()
 starttime = now.strftime("%H:%M:%S")
 
-# ex.startScraping()
+ex.startScraping()
 
 for i in dateList:
     dm.setDataByAllKeyword(i)
