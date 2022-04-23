@@ -96,11 +96,19 @@ class DataManager:
         path=os.getcwd()
         keys = []
         start = 0
-        for f in glob.glob(path+'/collectkeys/*'):
-            keyname = os.path.split(f)[-1]
-            keys.append(keyname)
-        for k in keys:
+        file_folder = path+"/collectkeys/"
+        totalFiles = 0
+        for base, dirs, files in os.walk(file_folder):
+            for directories in dirs:
+                keys.append(directories)
+            for Files in files:
+                totalFiles += 1
+        # for f in glob.glob(path+'/collectkeys/*'):
+        #     keyname = os.path.split(f)[-1]
+        #     keys.append(keyname)
+        for k in tqdm(keys):
             for file in glob.glob(path+'/collectkeys/'+k+'/*.csv'):
+                #print(glob.glob(path+'/collectkeys/'+k+'/*.csv').index(file),totalFiles)
                 if start == 0:
                     self.df = pd.read_csv(file)
                     start +=1

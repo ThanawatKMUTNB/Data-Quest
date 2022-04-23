@@ -177,12 +177,20 @@ class Ui_MainWindow(QWidget):
 
     def showRealtime(self) : #BUTTON search key in this time
         print('real time')
-        if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+        if self.dateSinceReturn()>self.dateUntilReturn():
+            self.showErrorDialog()
+            return
+        if datetime.now().date() <= self.dateUntilReturn():
+            pass
+        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
             self.showErrorDialog2()
             return
         keywords = self.SearchBox1.text()
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+        #print(list(set(self.df['Keyword'].tolist())))
+        tw.setdataframe(self.df)
 
         if "" not in keywords:
             if self.showDialog() == 'Yes':
@@ -193,7 +201,7 @@ class Ui_MainWindow(QWidget):
                 self.table = QtWidgets.QTableView()
                 self.table.setModel(self.model)
                 self.tableView.setModel(self.model)
-                self.t2 = CollectWordThread(parent=None,df=self.df)
+                self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords) 
                 self.t2.start()
                 self.t2.dataframe.connect(self.CollectwordTab2)
             else:
@@ -209,7 +217,7 @@ class Ui_MainWindow(QWidget):
                 self.table.setModel(self.model)
                 self.tableView.setModel(self.model)
                 #self.dateSet() 
-                self.t2 = CollectWordThread(parent=None,df=self.df)
+                self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords) 
                 self.t2.start()
                 self.t2.dataframe.connect(self.CollectwordTab2)
             else:
@@ -250,7 +258,9 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:      #new keyword
-                if int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+                if datetime.now().date() <= self.dateUntilReturn():
+                    pass
+                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new 
@@ -547,6 +557,7 @@ class Ui_MainWindow(QWidget):
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
         self.listView_3.clear()
+        self.keywords = list(set(self.keywords))
         self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :

@@ -76,11 +76,10 @@ class CollectWordThread(QtCore.QThread):
         print('set to dataframe')
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         self.df = pd.DataFrame(sortword,columns=['Word','Count'])
+        
+        #######################################
         cnt = 100
         self.count.emit(cnt)
-
-        #######################################
-        
         self.dataframe.emit(self.df)            #return df to GUI
 
     def stop(self):

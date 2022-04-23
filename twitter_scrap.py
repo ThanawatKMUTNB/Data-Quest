@@ -121,7 +121,7 @@ class Twitter_Scrap:
             for d in days:
                 dfff = self.df.loc[self.df['Time'].isin([d])]
                 dfff.to_csv(path+'/'+key_word+'_'+d+'.csv',encoding='utf-8',index=False)
-            print('save new file comp')
+            print('save new file complete')
         else:
             print('save old key')
             allfilepath = glob.glob(str(str(os.getcwd())+"\\collectkeys\\"+key_word+"\\*.csv"))
@@ -140,7 +140,7 @@ class Twitter_Scrap:
                     newdf.to_csv(csvname,encoding='utf-8',index=False)
                 else:
                     dfff.to_csv(csvname,encoding='utf-8',index=False)
-            print('save file comp')
+            print('save file complete')
         return self.df
 
     def savedata(self,keyword,until): #keyword is list
@@ -172,23 +172,22 @@ class Twitter_Scrap:
         #     return self.df
         
         #if len(keyword) > 1:            #>1 keyword
-        tqdm.pandas(desc='Processing Dataframe')
+        #tqdm.pandas(desc='Processing Dataframe')
         dhave = []
         for key in keyword:
             if key not in self.keys:
                 dhave.append(key)
         print(keyword)
         print(dhave)
-        if len(dhave) > 0:          #search new keyword
-            
-            self.savedata(dhave,until)
-            self.keys.extend(dhave)
-            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
-        elif Ans == "real":         #search old keys real time
+        if len(dhave) > 0:          
+            self.savedata(dhave,until)      #search new keyword
+            self.keys.extend(dhave)         #add new keys
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        elif Ans == "real":                 #search old keys real time (until)
             self.savedata(keyword,until)
-            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
-        else:
-            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword']).progress_apply(lambda x: x)
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        else:                               #show old keys
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
         # elif keyword[0] in self.keys:   #1 key in old keys
         #     if Ans == "real":
         #         self.savedata(keyword,until)
