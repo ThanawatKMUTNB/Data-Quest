@@ -24,6 +24,10 @@ from requests import delete
 import importWin as windo 
 import time
 import threading
+import nltk
+import string
+from nltk.corpus import stopwords
+from pythainlp.corpus import thai_stopwords
 
 import DataManager 
 import twitter_scrap
@@ -63,7 +67,8 @@ class Ui_MainWindow(QWidget):
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
         #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
         self.df = dm.newUnion()
-        tw.setdataframe(self.df)
+        
+        #tw.setdataframe(self.df)
         #self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[""])
         #tw.setdataframe(self.dt)
         self.dt = None
@@ -176,6 +181,7 @@ class Ui_MainWindow(QWidget):
         return self.getUntil_3
 
     def showRealtime(self) : #BUTTON search key in this time
+        self.progressTime(0)
         print('real time')
         if self.dateSinceReturn()>self.dateUntilReturn():
             self.showErrorDialog()
@@ -189,37 +195,48 @@ class Ui_MainWindow(QWidget):
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        #print(list(set(self.df['Keyword'].tolist())))
+        self.t1 = TwitterThread(parent=None,df=self.df)
         tw.setdataframe(self.df)
-
+        self.t1.setdataframe(self.df)
+        #self.t1.oldkey = self.keywords
+        self.t1.until = str(self.dateUntilReturn())
+        self.t1.Ans = 'real'
         if "" not in keywords:
             if self.showDialog() == 'Yes':
-                self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
-                dm.concatfile(self.df)
-                self.addlist()
-                self.model = TableModel(self.df) 
-                self.table = QtWidgets.QTableView()
-                self.table.setModel(self.model)
-                self.tableView.setModel(self.model)
-                self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords) 
-                self.t2.start()
-                self.t2.dataframe.connect(self.CollectwordTab2)
+                #self.t1 = TwitterThread(parent=None,df=self.df,key=keywords,Ans='real',until=str(self.dateUntilReturn()))
+                self.t1.key = keywords
+                dhave = []
+                for keyword in keywords:
+                    if keyword not in self.keywords:
+                        dhave.append(keyword)
+                self.keywords.extend(dhave)
+                self.t1.start()
+                self.t1.countkeys.connect(self.progressTime)
+                self.t1.dataframe.connect(self.setTableTab1)
+                #self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
+                
+                # self.model = TableModel(self.df) 
+                # self.table = QtWidgets.QTableView()
+                # self.table.setModel(self.model)
+                # self.tableView.setModel(self.model)
             else:
                 return
         else:
             print('search new all keys')
             if self.showDialog() == 'Yes':
-                self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
-                dm.concatfile(self.df)
-                self.addlist()
-                self.model = TableModel(self.df) 
-                self.table = QtWidgets.QTableView()
-                self.table.setModel(self.model)
-                self.tableView.setModel(self.model)
+                self.t1.key = self.keywords
+                #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,Ans='real',until=str(self.dateUntilReturn()))
+                self.t1.start()
+                self.t1.countkeys.connect(self.progressTime)
+                self.t1.dataframe.connect(self.setTableTab1)
+                #self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
+                
+                # self.model = TableModel(self.df) 
+                # self.table = QtWidgets.QTableView()
+                # self.table.setModel(self.model)
+                # self.tableView.setModel(self.model)
                 #self.dateSet() 
-                self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords) 
-                self.t2.start()
-                self.t2.dataframe.connect(self.CollectwordTab2)
+                
             else:
                 return
 
@@ -230,70 +247,102 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model)
         return
 
-    def button1(self) :     #Search BUTTON
+    # def button1(self) :     #Search BUTTON
         
-        #self.ShowdfTab1()
-        self.t1 = TwitterThread(parent=None)        #for can use GUI while data processing
-        self.t1.start()
-        self.t1.finished.connect(self.ShowdfTab1)
+    #     #self.ShowdfTab1()
+    #     self.t1 = TwitterThread(parent=None)        #for can use GUI while data processing
+    #     self.t1.start()
+    #     self.t1.finished.connect(self.ShowdfTab1)
 
 
-    def ShowdfTab1(self):
+    def button1(self):
         print("\n\n")
+        self.progressTime(0)
         print(len(self.df.index),'rows')
         print(self.dateSinceReturn(),self.dateUntilReturn())
         if self.dateSinceReturn()>self.dateUntilReturn():
             self.showErrorDialog()
             return
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        #print(list(set(self.df['Keyword'].tolist())))
-        tw.setdataframe(self.df)
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set day range dataframe 
+        print(list(set(self.df['Keyword'].tolist())))
+        tw.setdataframe(self.df)        #set same dataframe for search 
+        self.t1 = TwitterThread(parent=None,df=self.df)
+        self.t1.setdataframe(self.df)
+        self.t1.until = str(self.dateUntilReturn())
+        self.t1.Ans = 'yes'
+
         keywords = self.SearchBox1.text()
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
         if "" not in keywords:
+            self.t1.key = keywords
             print(len(keywords),keywords)
             dhave = []
             for keyword in keywords:
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:      #new keyword
-                if datetime.now().date() <= self.dateUntilReturn():
+                if datetime.now().date() <= self.dateUntilReturn():         #for search until day greater than today
                     pass
-                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:     #cannot search twitter new keyword greater than 7 day
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new 
-                    # dm.addNewWord(dhave,[self.dateSinceReturn(),self.dateUntilReturn()])
                     self.keywords.extend(dhave)
-                    self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
-                    dm.concatfile(self.df)
+                    #self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
+                    self.t1.start()
+                    self.t1.countkeys.connect(self.progressTime)
+                    self.t1.dataframe.connect(self.setTableTab1)
                     
-                    #print(list(set(dm.df['Keyword'].tolist())))
-                    
-                    self.addlist()
                 else:
-                    self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
-                #dm.concatfile(self.df)
-            else:
-                self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
-            #self.dateSet()    
+                    #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+                    return
+                    
+            else:       #have key
+                #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+                self.t1.start()
+                #self.t1.countkeys.connect(self.progressTime)
+                self.t1.dataframe.connect(self.setTableTab1)
+                
+            self.t1.setdataframe(self.df)       #add new key to oldkey
             tw.setdataframe(self.df)
-        #print(self.SearchBox1.text())
+        else:
+            #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,until=str(self.dateUntilReturn()))
+            self.setTableTab1(self.df)
+            # self.t1.key = self.keywords
+            # self.t1.start()
+            # self.t1.countkeys.connect(self.progressTime)
+            # self.t1.dataframe.connect(self.setTableTab1)
+            
+
         print(len(self.df.index),tw.keys)
 
-        self.model = TableModel(self.df) 
+        # self.model = TableModel(self.df) 
+        # self.table = QtWidgets.QTableView()
+        # self.table.setModel(self.model)
+        # self.tableView.setModel(self.model)
+        # self.labelShowKeywords()
+        # print('tab1 finish')
+                    
+        #self.t2.count.connect(self.progressTime)
+    
+    def setTableTab1(self,df):
+        self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView.setModel(self.model)
         self.labelShowKeywords()
+        dm.concatfile(df)
+        self.addlist()
         print('tab1 finish')
-        time.sleep(2)
-        self.t2 = CollectWordThread(parent=None,df=self.df,en_stops=self.en_stops,th_stopwords=self.th_stopwords)         #use df from tab1 to data processing tab2
+        self.progressTime(100)
+        self.t1.stop()
+        time.sleep(1)
+        self.t2 = CollectWordThread(parent=None,df=df,en_stops=self.en_stops,th_stopwords=self.th_stopwords)         #use df from tab1 to data processing tab2
         self.t2.start()
+        self.t2.count.connect(self.progressTime_2)
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
-        self.t2.count.connect(self.progressTime_2)             
-        #self.t2.count.connect(self.progressTime)
+         
     
     def CollectwordTab2(self,df):
         self.tw_worddf = df
@@ -303,14 +352,19 @@ class Ui_MainWindow(QWidget):
         self.table2.setModel(self.model2)
         self.tableView_2.setModel(self.model2)
         print('tab2 finish')
+        self.t2.stop()
         
     def button2(self) : # TAB2 BUTTON for seach collect word[:10]
         # if self.tw_worddf == None:
         #     return
+        tw.setdataframe(dm.df)
         tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
         tenwords = list(map(lambda x: x.lower(), tenwords))
+        self.t1 = TwitterThread(parent=None,df=self.df)
+        self.t1.until = str(self.dateUntilReturn())
+        self.t1.Ans = 'yes'
         if self.showDialog() == 'Yes':
-            self.keywords.extend(tenwords)
+            
             self.dateSet()
             dhave = []
             for keyword in tenwords:
@@ -318,15 +372,18 @@ class Ui_MainWindow(QWidget):
                     dhave.append(keyword)
             if len(dhave) > 0:
                 self.keywords.extend(dhave)
-                self.df = tw.searchkeys(tenwords,'yes',str(self.dateUntilReturn()))
-                dm.concatfile(self.df)
+                #self.df = tw.searchkeys(tenwords,'yes',str(self.dateUntilReturn()))
+                self.t1.key = tenwords
+                self.t1.start()
+                self.t1.countkeys.connect(self.progressTime_2)
+                self.t1.dataframe.connect(self.searchCollectTab)
+                
                 
             else:
-                self.df = tw.searchkeys(tenwords,'no',str(self.dateUntilReturn()))
-            # self.df = tw.savedata(tenwords)
-            # print(self.df)
-            # dm.concatfile(self.df)
-            # self.addlist()
+                self.t1.Ans = 'no'
+                self.t1.key = tenwords
+                self.t1.start()
+                self.t1.dataframe.connect(self.searchCollectTab)
         else:
             return
         #self.addlist_2()    
@@ -335,6 +392,15 @@ class Ui_MainWindow(QWidget):
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
+    
+    def searchCollectTab(self,df):
+        dm.concatfile(df)
+        self.addlist() 
+        self.t1.stop()
+        self.model2 = TableModel(df) 
+        self.table2 = QtWidgets.QTableView()
+        self.table2.setModel(self.model2)
+        self.tableView_2.setModel(self.model2)
 
     def refreshButton_1(self) :#
         print('refresh')
@@ -557,7 +623,7 @@ class Ui_MainWindow(QWidget):
     def addlist(self): #ของ tab Tweet
         self.listView.clear()
         self.listView_3.clear()
-        self.keywords = list(set(self.keywords))
+        self.keywords = list(set(np.array(self.keywords,dtype=str)))
         self.keywords.sort()
         print(self.keywords)
         for i in range(len(self.keywords)) :

@@ -131,7 +131,7 @@ class Twitter_Scrap:
             for d in days:
                 dfff = self.df.loc[self.df['Time'].isin([d])]
                 csvname = str(path+'/'+key_word+'_'+d+'.csv')
-                if str(key_word+'_'+d+'.csv') in filenames:                        #same file
+                if str(key_word+'_'+d+'.csv') in filenames:                        #duplicate file
                     print('have this file')
                     olddf = pd.read_csv(csvname)
                     newdf = pd.concat([dfff,olddf])

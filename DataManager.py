@@ -128,6 +128,7 @@ class DataManager:
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
         self.formatdatetime('Time')
+        self.keys = list(set(self.df['Keyword'].tolist()))
         return self.df
     
     def setdefaultDF(self):
@@ -165,7 +166,7 @@ class DataManager:
             mask = (dff['Time']>=since) & (dff['Time']<=until)
         else:
             return dff
-        return dff.loc[mask]
+        return dff.loc[mask].sort_values(by=['Keyword','Time'])
 
     def getrowwithkeys(self,keys):              #type keys -> list
         df = self.df

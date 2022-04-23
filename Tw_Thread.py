@@ -1,20 +1,90 @@
-from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt5 import QtCore
 import DataManager
-from pythainlp.corpus import thai_stopwords
 from pythainlp import word_tokenize
-from nltk.corpus import stopwords
-import nltk
 import pandas as pd
-import string
-import time 
+import time
+import twitter_scrap
 
 class TwitterThread(QtCore.QThread):
 	
-    #any_signal = QtCore.pyqtSignal(int)
-    def __init__(self, parent=None):
+    countkeys = QtCore.pyqtSignal(int)
+    dataframe = QtCore.pyqtSignal(object)
+    def __init__(self, parent=None,df=None,key=None,Ans=None,until=None):
         super(TwitterThread, self).__init__(parent)
+        self.tw = twitter_scrap.Twitter_Scrap()
+        self.df = df
+        self.key = key  #for search
+        self.oldkey = self.df['Keyword'].tolist()
+        self.oldkey =  list(set(self.oldkey))
+        self.until = until
+        self.Ans = Ans
     def run(self):
         print('Starting Twitter thread...')
+        self.df = self.searchkeys()
+        self.dataframe.emit(self.df)            #return df to GUI
+    
+    def setdataframe(self,df):
+        self.df = df
+        self.oldkey = self.df['Keyword'].tolist()
+        self.oldkey = list(set(self.oldkey))
+    
+    def savedata(self,keyword,until): #keyword is list
+        
+        print('\nstart saving @')
+        allsearchkeys = len(keyword)
+        cnt = 0
+        for kw in keyword:
+            time.sleep(0.01)
+            self.df = pd.concat([self.df,self.tw.get_related_tweets(kw,until)])
+            cnt +=1
+            count = (cnt/allsearchkeys)*100
+            print(count)
+            self.countkeys.emit(count)
+
+        self.df.drop_duplicates(keep='last',inplace=True)
+        self.df.sort_values(by=['Keyword'],inplace=True)
+
+        print('save complete @')
+    
+
+    def searchkeys(self):   #keyword's type is list
+        keyword = self.key
+        Ans = self.Ans
+        until = self.until
+        if len(keyword) > 1:            #>1 keyword
+            dhave = []
+            for key in keyword:
+                if key not in self.oldkey:
+                    dhave.append(key)
+            print(self.oldkey)
+            print(dhave)
+            if Ans == "real":                 #search old keys real time (until)
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            elif len(dhave) > 0:          
+                self.savedata(dhave,until)      #search new keyword
+                self.oldkey.extend(dhave)         #add new keys
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            else:                               #show old keys
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        elif keyword[0] in self.oldkey:   #1 key in old keys
+            if Ans == "real":
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            else:
+                return self.df.loc[self.df['Keyword']==keyword[0]]
+        else:              #1keyword (new)
+            if Ans == 'yes':            #new key 1 key
+                self.savedata(keyword,until)
+                self.oldkey.extend(keyword)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            elif Ans == "real":
+                self.savedata(keyword,until)
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+            else:
+                print('You select NO')
+                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+
 
     def stop(self):
         print('Stopping Twitter thread...')
@@ -32,16 +102,8 @@ class CollectWordThread(QtCore.QThread):
         self.th_stopwords = th_stopwords
     def run(self):
         print('Starting Collectword thread...')
-        #self.df = self.dm.collectwords(self.df)
-        #######################################
 
-        # nltk.download('stopwords')          #important
         dataframe = self.df.reset_index()
-        # th_stopwords = list(thai_stopwords())
-        # en_stops = set(stopwords.words('english'))
-        # en_stops.update(list(string.ascii_lowercase))
-        # en_stops.update(list(string.ascii_uppercase))
-        # en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
         word = {}
         countrow = len(dataframe.index)
         print('start loop collect word')
@@ -77,7 +139,6 @@ class CollectWordThread(QtCore.QThread):
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         self.df = pd.DataFrame(sortword,columns=['Word','Count'])
         
-        #######################################
         cnt = 100
         self.count.emit(cnt)
         self.dataframe.emit(self.df)            #return df to GUI
