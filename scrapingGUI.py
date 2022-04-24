@@ -239,6 +239,7 @@ class Ui_MainWindow(QWidget):
                 
             else:
                 return
+        self.progressBar.value(0)
 
     def showDefaultFileTweetW(self) : #Refresh BUTTON for show collectkey(Tab2)
         self.model = TableModel(self.tw_worddf) 
@@ -315,7 +316,7 @@ class Ui_MainWindow(QWidget):
             # self.t1.start()
             # self.t1.countkeys.connect(self.progressTime)
             # self.t1.dataframe.connect(self.setTableTab1)
-            
+        
 
         print(len(self.df.index),tw.keys)
 
@@ -343,6 +344,7 @@ class Ui_MainWindow(QWidget):
         self.t2.start()
         self.t2.count.connect(self.progressTime_2)
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
+        self.progressTime(0)
          
     
     def CollectwordTab2(self,df):
@@ -354,6 +356,7 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model2)
         #print('tab2 finish')
         self.t2.stop()
+        self.progressTime_2(0)
         
     def button2(self) : # TAB2 BUTTON for seach collect word[:10]
         # if self.tw_worddf == None:
@@ -378,6 +381,7 @@ class Ui_MainWindow(QWidget):
                 self.t1.start()
                 self.t1.countkeys.connect(self.progressTime_2)
                 self.t1.dataframe.connect(self.searchCollectTab)
+                
                 
                 
             else:
@@ -660,12 +664,19 @@ class Ui_MainWindow(QWidget):
     def deleteButton_3() : #สำหรับปุ่ม delete tab web
         return
     
+    def percentProgress(self) :
+        valueTime = 0
+        rowdf = valueTime/100
+        
+
     def progressTime(self,counter): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน #
                             #ฉะนั้นเวลากดปุ่ม ก็จะเรียกใช้ฟังก์ชั่นนี้แทนการเรียกฟังก์ชั่นปกติตรงๆแทน
         self.progressBar.setValue(counter) #ให้ Progress bar เป็น 100 เมื่อมีการทำงานของฟังก์ชั่นนั้น
+        #self.progressBar.setValue(0)
     
     def progressTime_2(self,counter) : #For Tab 2
         self.progressBar_2.setValue(counter)
+        
 
     def progressTimeWeb(self) :
             self.progressBar_3.setValue(100)
@@ -710,11 +721,11 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
         self.progressBar.setSizePolicy(sizePolicy)
         self.progressBar.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar.setTextVisible(False)
+        self.progressBar.setTextVisible(True)
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar, 4, 5, 1, 1) 
+        self.gridLayout.addWidget(self.progressBar, 4, 4, 1, 2) 
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
@@ -830,11 +841,11 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar_2.sizePolicy().hasHeightForWidth())
         self.progressBar_2.setSizePolicy(sizePolicy)
         self.progressBar_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar_2.setTextVisible(False)
+        self.progressBar_2.setTextVisible(True)
         self.progressBar_2.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_2.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_2.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar_2, 4, 5, 1, 1)
+        self.gridLayout.addWidget(self.progressBar_2, 4, 4, 1, 2)
 
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
@@ -947,11 +958,11 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
         self.progressBar_3.setSizePolicy(sizePolicy)
         self.progressBar_3.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar_3.setTextVisible(False)
+        self.progressBar_3.setTextVisible(True)
         self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_3.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar_3, 4, 5, 1, 1) 
+        self.gridLayout.addWidget(self.progressBar_3, 4,4, 1, 2) 
 
         self.listView_3 = QtWidgets.QListWidget(self.tab_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
