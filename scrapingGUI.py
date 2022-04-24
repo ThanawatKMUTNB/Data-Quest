@@ -845,7 +845,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar_2.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_2.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_2.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar_2, 4, 5, 1, 1)
+        self.gridLayout.addWidget(self.progressBar_2, 4, 4, 1, 2)
 
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
@@ -962,7 +962,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_3.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar_3, 4, 5, 1, 1) 
+        self.gridLayout.addWidget(self.progressBar_3, 4,4, 1, 2) 
 
         self.listView_3 = QtWidgets.QListWidget(self.tab_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
