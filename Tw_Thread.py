@@ -30,7 +30,7 @@ class TwitterThread(QtCore.QThread):
     
     def savedata(self,keyword,until): #keyword is list
         
-        print('\nstart saving @')
+        print('\nstart saving ')
         allsearchkeys = len(keyword)
         cnt = 0
         for kw in keyword:
@@ -44,46 +44,47 @@ class TwitterThread(QtCore.QThread):
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
 
-        print('save complete @')
+        print('save complete ')
     
 
     def searchkeys(self):   #keyword's type is list
         keyword = self.key
         Ans = self.Ans
         until = self.until
-        if len(keyword) > 1:            #>1 keyword
-            dhave = []
-            for key in keyword:
-                if key not in self.oldkey:
-                    dhave.append(key)
-            print(self.oldkey)
-            print(dhave)
-            if Ans == "real":                 #search old keys real time (until)
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            elif len(dhave) > 0:          
-                self.savedata(dhave,until)      #search new keyword
-                self.oldkey.extend(dhave)         #add new keys
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:                               #show old keys
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        elif keyword[0] in self.oldkey:   #1 key in old keys
-            if Ans == "real":
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:
-                return self.df.loc[self.df['Keyword']==keyword[0]]
-        else:              #1keyword (new)
-            if Ans == 'yes':            #new key 1 key
-                self.savedata(keyword,until)
-                self.oldkey.extend(keyword)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            elif Ans == "real":
-                self.savedata(keyword,until)
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-            else:
-                print('You select NO')
-                return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #if len(keyword) > 1:            #>1 keyword
+        dhave = []
+        for key in keyword:
+            if key not in self.oldkey:
+                dhave.append(key)
+
+        print('searchnew',dhave)
+        
+        if len(dhave) > 0 and Ans =='yes':          
+            self.savedata(dhave,until)      #search new keyword
+            self.oldkey.extend(dhave)         #add new keys
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        elif Ans == "real":                 #search old keys real time (until)
+            self.savedata(keyword,until)
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        else:                               #show old keys
+            return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        # elif keyword[0] in self.oldkey:   #1 key in old keys
+        #     if Ans == "real":
+        #         self.savedata(keyword,until)
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     else:
+        #         return self.df.loc[self.df['Keyword']==keyword[0]]
+        # else:              #1keyword (new)
+        #     if Ans == 'yes':            #new key 1 key
+        #         self.savedata(keyword,until)
+        #         self.oldkey.extend(keyword)
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     elif Ans == "real":
+        #         self.savedata(keyword,until)
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
+        #     else:
+        #         print('You select NO')
+        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
 
 
     def stop(self):
@@ -106,7 +107,7 @@ class CollectWordThread(QtCore.QThread):
         dataframe = self.df.reset_index()
         word = {}
         countrow = len(dataframe.index)
-        print('start loop collect word')
+        #print('start loop collect word')
         for index,row in dataframe.iterrows():    #only tweet
             if int(index) % 3000 == 0:
                 time.sleep(0.001)
@@ -135,7 +136,7 @@ class CollectWordThread(QtCore.QThread):
             del word['RT']  #for twitter
         if ' ' in word:
             del word[' ']   #for thai language
-        print('set to dataframe')
+        #print('set to dataframe')
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
         self.df = pd.DataFrame(sortword,columns=['Word','Count'])
         

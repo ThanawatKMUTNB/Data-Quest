@@ -255,7 +255,7 @@ class Ui_MainWindow(QWidget):
     #     self.t1.finished.connect(self.ShowdfTab1)
 
 
-    def button1(self):
+    def button1(self):          #Search BUTTON Tab1
         print("\n\n")
         self.progressTime(0)
         print(len(self.df.index),'rows')
@@ -264,12 +264,13 @@ class Ui_MainWindow(QWidget):
             self.showErrorDialog()
             return
         self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set day range dataframe 
-        print(list(set(self.df['Keyword'].tolist())))
+        #print(list(set(self.df['Keyword'].tolist())))
         tw.setdataframe(self.df)        #set same dataframe for search 
         self.t1 = TwitterThread(parent=None,df=self.df)
         self.t1.setdataframe(self.df)
+        self.t1.oldkey = self.keywords
         self.t1.until = str(self.dateUntilReturn())
-        self.t1.Ans = 'yes'
+        
 
         keywords = self.SearchBox1.text()
         keywords = keywords.split(',')
@@ -288,10 +289,11 @@ class Ui_MainWindow(QWidget):
                     self.showErrorDialog2()
                     return
                 if self.showDialog() == 'Yes':      #search new 
+                    self.t1.Ans = 'yes'
                     self.keywords.extend(dhave)
                     #self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
                     self.t1.start()
-                    self.t1.countkeys.connect(self.progressTime)
+                    self.t1.countkeys.connect(self.progressTime)#
                     self.t1.dataframe.connect(self.setTableTab1)
                     
                 else:
@@ -304,7 +306,7 @@ class Ui_MainWindow(QWidget):
                 #self.t1.countkeys.connect(self.progressTime)
                 self.t1.dataframe.connect(self.setTableTab1)
                 
-            self.t1.setdataframe(self.df)       #add new key to oldkey
+            self.t1.setdataframe(self.df)       #add new key to oldkey ??
             tw.setdataframe(self.df)
         else:
             #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,until=str(self.dateUntilReturn()))
@@ -334,7 +336,6 @@ class Ui_MainWindow(QWidget):
         self.labelShowKeywords()
         dm.concatfile(df)
         self.addlist()
-        print('tab1 finish')
         self.progressTime(100)
         self.t1.stop()
         time.sleep(1)
@@ -351,7 +352,7 @@ class Ui_MainWindow(QWidget):
         self.table2 = QtWidgets.QTableView()
         self.table2.setModel(self.model2)
         self.tableView_2.setModel(self.model2)
-        print('tab2 finish')
+        #print('tab2 finish')
         self.t2.stop()
         
     def button2(self) : # TAB2 BUTTON for seach collect word[:10]
@@ -403,6 +404,7 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model2)
 
     def refreshButton_1(self) :#
+        self.progressTime(0)
         print('refresh')
         self.SearchBox1.clear()
         self.dateSet()
@@ -414,6 +416,7 @@ class Ui_MainWindow(QWidget):
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+        self.progressTime(100)
         return
 
 
@@ -423,6 +426,7 @@ class Ui_MainWindow(QWidget):
             keywords = keywords.split(',')
             keywords = list(map(lambda x: x.lower(), keywords))
             if "" not in keywords:
+                self.progressTime(0)
                 self.dateSet()
                 self.SearchBox1.clear()
                 self.df = dm.deletekeyword(keywords)
@@ -433,6 +437,7 @@ class Ui_MainWindow(QWidget):
                 self.table = QtWidgets.QTableView()
                 self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
                 self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+                self.progressTime(100)
             else:
                 print('nonKeyword')
                 return
