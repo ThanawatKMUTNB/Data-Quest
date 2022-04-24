@@ -22,8 +22,8 @@ dm = data.DataManager()
 
 link = "https://www.animenewsnetwork.com/"
 # path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
-path = "C:/Users/Pooncharat Wongkom/Web-Scraping/WebData"
-rawData = os.listdir(path)
+# path = "C:/Users/Pooncharat Wongkom/Web-Scraping/WebData"
+# rawData = os.listdir(path)
 today = ex.getTodayDate()
 newpath = os.path.join('web search',today,"anime(1).csv")
               
@@ -45,7 +45,7 @@ dateList =  ['09-04-2022_10_WebJsonData.json', '09-04-2022_11_WebJsonData.json',
 # now = datetime.now()
 # starttime = now.strftime("%H:%M:%S")
 
-ex.startScraping()
+# ex.startScraping()
 
 # for i in dateList:
 #     dm.setDataByAllKeyword(i)
@@ -55,4 +55,7 @@ ex.startScraping()
 
 # print(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
 
-#['kk'] [datetime.date(2022, 3, 17), datetime.date(2022, 4, 19)]
+# dm.addNewWordToAll(['Otaku'])
+
+# dm.delWordAllFile('kj')
+#dm.addNewWord(['kk'],[datetime.date(2022, 3, 17), datetime.date(2022, 4, 19)])
