@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from datetime import date
 from datetime import datetime
 import pandas as pd
+import Web_thread as webTread
 import webScraping as web
 import DataManager as data
 from io import StringIO
@@ -19,6 +20,7 @@ import scrapingGUI as scrap
 # sc = scrap.Ui_MainWindow()
 ex = web.webScraping()
 dm = data.DataManager()
+wt = webTread.WebThread()
 
 link = "https://www.animenewsnetwork.com/"
 # path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
@@ -45,15 +47,22 @@ dateList =  ['09-04-2022_10_WebJsonData.json', '09-04-2022_11_WebJsonData.json',
 # now = datetime.now()
 # starttime = now.strftime("%H:%M:%S")
 
-# ex.startScraping()
+ex.startScraping()
 
 # for i in dateList:
 #     dm.setDataByAllKeyword(i)
 # now = datetime.now()
 # Endtime = now.strftime("%H:%M:%S")
 # print(starttime,Endtime)
+# print(dm.currentLen)
 
-# print(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
+
+
+# dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation'])
+# print(dm.currentLen)
+# wt.start()
+
+
 
 # dm.addNewWordToAll(['Otaku'])
 
