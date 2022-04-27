@@ -534,10 +534,6 @@ class Ui_MainWindow(QWidget):
             return 'No'
             
     def showTableWeb(self) :
-        # self.wt = webTread.WebThread()
-        # self.wt.start()
-        # self.wt.sdate = self.dateSinceReturnWeb()
-        # self.wt.edate = self.dateUntilReturnWeb()
         # print("\n\n")
         # print(len(self.dt.index),'rows')
         # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
@@ -545,7 +541,7 @@ class Ui_MainWindow(QWidget):
             self.showErrorDialog()
             return'''
         self.dt = dm.getperiod(str(self.dateSinceReturnWeb()),str(self.dateUntilReturnWeb()))
-        print(list(set(self.dt['Keyword'].tolist())))
+        # print(list(set(self.dt['Keyword'].tolist())))
         tw.setdataframe(self.dt)
         keywords = self.SearchBox_3.text()
         keywords = keywords.split(',')
@@ -572,16 +568,23 @@ class Ui_MainWindow(QWidget):
                     # self.wt.keyword = self.keyword
                     # self.dt = self.wt.getDf()
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                    
                 #dm.concatfile(self.dt)
             else:
-                self.wt.keyword = keyword
-                # self.
+                # print("Am here")
+                # self.wt.start()
+                self.wt.any_signal.connect(self.upgradeProgressWeb)
                 self.dt = self.wt.getDf()
-                self.wt.start()
-                # self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                self.wt.any_signal.connect(self.upgradeProgressWeb)
+        
+                # dm.concatfile(self.dt)
+                # self.wt.stop()
             #self.dateSet()    
             #tw.setdataframe(self.dt)
-        self.wt.stop()
+
+        # self.wt.stop()
+        # self.upgradeProgressWeb(100)
+        
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -699,16 +702,19 @@ class Ui_MainWindow(QWidget):
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
         self.wt = webTread.WebThread(None,sd,ed,keywords)
+        # print(sd,ed,keywords)
+        # self.wt.start()
         self.wt.start()
-        self.showTableWeb()
         self.wt.any_signal.connect(self.upgradeProgressWeb)
+                
+        self.showTableWeb()
         
-        self.wt.stop()
-        self.progressBar_3.setValue(0)
+        # self.wt.stop()
+        # self.progressBar_3.setValue(0)
         
     def upgradeProgressWeb(self,val):
-        print("upgradeProgressWeb : ",val)
-        # val = dm.test()
+        print("\nupgradeProgressWeb : ",val,'\n')
+        # val = dm.test()          
         self.progressBar_3.setValue(val)
         
     def setupUi(self, MainWindow):
