@@ -2,6 +2,7 @@ from ast import keyword
 import encodings
 from msilib.schema import ListView
 from tabnanny import check
+from tkinter.messagebox import NO
 from typing_extensions import Self
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -90,7 +91,6 @@ class Ui_MainWindow(QWidget):
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.processWord = str
-
         #self.modelWeb = TableModel(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
         self.modelWeb = None
         self.tableWeb = QtWidgets.QTableView()
@@ -297,6 +297,7 @@ class Ui_MainWindow(QWidget):
                     self.t1.start()
                     self.t1.countkeys.connect(self.progressTime)#
                     self.t1.dataframe.connect(self.setTableTab1)
+                    self.setPolarityTab1(self.df)
                     
                 else:
                     #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
@@ -307,12 +308,15 @@ class Ui_MainWindow(QWidget):
                 self.t1.start()
                 #self.t1.countkeys.connect(self.progressTime)
                 self.t1.dataframe.connect(self.setTableTab1)
+                self.setPolarityTab1(self.df)
                 
             self.t1.setdataframe(self.df)       #add new key to oldkey ??
             tw.setdataframe(self.df)
         else:
             #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,until=str(self.dateUntilReturn()))
             self.setTableTab1(self.df)
+            self.setPolarityTab1(self.df)
+
             # self.t1.key = self.keywords
             # self.t1.start()
             # self.t1.countkeys.connect(self.progressTime)
@@ -336,6 +340,16 @@ class Ui_MainWindow(QWidget):
         self.Tw_Positive = (polarity['positive']/allrow)*100
         self.Tw_Negative = (polarity['negative']/allrow)*100
         self.Tw_Neutral = (polarity['neutral']/allrow)*100
+        self.Tw_Positive_Total = str(polarity['positive'])
+        self.Tw_Negative_Total = str(polarity['negative'])
+        self.Tw_Neutral_Total = str(polarity['neutral'])
+        _translate = QtCore.QCoreApplication.translate
+        self.labelPosTotal.setText(_translate("MainWindow", "Total " + self.Tw_Positive_Total + " tweets"))
+        self.labelNegaTotal.setText(_translate("MainWindow", "Total " + self.Tw_Negative_Total + " tweets"))
+        self.labelNeutralTotal.setText(_translate("MainWindow", "Total " + self.Tw_Neutral_Total + " tweets"))
+        self.pushButtonPos.setText(_translate("MainWindow", f"{self.Tw_Positive :.3f}" + "%"))
+        self.pushButtonNeu.setText(_translate("MainWindow", f"{self.Tw_Neutral:.3f}" + "%"))
+        self.pushButtonNega.setText(_translate("MainWindow", f"{self.Tw_Negative:.3f}" + "%"))
         #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
@@ -345,6 +359,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model)
         self.labelShowKeywords()
         dm.concatfile(df)
+        
         self.addlist()
         self.progressTime(100)
         self.t1.stop()
@@ -1094,16 +1109,10 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
-        self.labelPosTotal.setText(_translate("MainWindow", "Total 100 tweets"))
         self.labelPos.setText(_translate("MainWindow", "Positive"))
         self.labelNega.setText(_translate("MainWindow", "Negative"))
         self.labelNeutral.setText(_translate("MainWindow", "Neutral"))
-        self.labelNegaTotal.setText(_translate("MainWindow", "Total 200 tweets"))
-        self.labelNeutralTotal.setText(_translate("MainWindow", "Total 300 tweets"))
         self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
-        self.pushButtonPos.setText(_translate("MainWindow", "Pos"))
-        self.pushButtonNeu.setText(_translate("MainWindow", "Neu"))
-        self.pushButtonNega.setText(_translate("MainWindow", "Nega"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
