@@ -29,6 +29,8 @@ import string
 from nltk.corpus import stopwords
 from pythainlp.corpus import thai_stopwords
 
+import Web_thread as webTread
+
 import DataManager 
 import twitter_scrap
 import webNewNew
@@ -69,7 +71,6 @@ class Ui_MainWindow(QWidget):
         self.df = dm.newUnion()
         
         #tw.setdataframe(self.df)
-        #self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[""])
         #tw.setdataframe(self.dt)
         self.dt = None
         #tw.setdataframe(self.dt)
@@ -539,11 +540,15 @@ class Ui_MainWindow(QWidget):
             return 'Yes'
         elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
             return 'No'
-
+            
     def showTableWeb(self) :
-        print("\n\n")
-        #print(len(self.dt.index),'rows')
-        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+        # self.wt = webTread.WebThread()
+        # self.wt.start()
+        # self.wt.sdate = self.dateSinceReturnWeb()
+        # self.wt.edate = self.dateUntilReturnWeb()
+        # print("\n\n")
+        # print(len(self.dt.index),'rows')
+        # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
         '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
             return'''
@@ -563,19 +568,28 @@ class Ui_MainWindow(QWidget):
                 '''if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
                     self.showErrorDialog2()
                     return'''
+                
                 if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
+                    # self.wt.keyword = self.keywords
+                    # self.dt = self.wt.getDf()
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
                     dm.concatfile(self.dt)
-                    #print(list(set(dm.df['Keyword'].tolist())))
                     self.addlist()
                 else:
+                    # self.wt.keyword = self.keyword
+                    # self.dt = self.wt.getDf()
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
                 #dm.concatfile(self.dt)
             else:
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                self.wt.keyword = keyword
+                # self.
+                self.dt = self.wt.getDf()
+                self.wt.start()
+                # self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
             #self.dateSet()    
             #tw.setdataframe(self.dt)
+        self.wt.stop()
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -684,13 +698,27 @@ class Ui_MainWindow(QWidget):
     
     def progressTime_2(self,counter) : #For Tab 2
         self.progressBar_2.setValue(counter)
-        
 
     def progressTimeWeb(self) :
-            self.progressBar_3.setValue(100)
-            self.showTableWeb()
-            self.progressBar_3.setValue(0)
-            
+        keywords = self.SearchBox_3.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords)) 
+        self.progressBar_3.setValue(0)
+        sd = self.dateSinceReturnWeb()
+        ed = self.dateUntilReturnWeb()
+        self.wt = webTread.WebThread(None,sd,ed,keywords)
+        self.wt.start()
+        self.showTableWeb()
+        self.wt.any_signal.connect(self.upgradeProgressWeb)
+        
+        self.wt.stop()
+        self.progressBar_3.setValue(0)
+        
+    def upgradeProgressWeb(self,val):
+        print("upgradeProgressWeb : ",val)
+        # val = dm.test()
+        self.progressBar_3.setValue(val)
+        
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)

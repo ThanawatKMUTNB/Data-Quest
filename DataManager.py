@@ -43,7 +43,15 @@ class DataManager:
         self.df = None
         self._start = 0
         self.filenames = []
+        self.FullLen =  0
+        self.currentLen = 0
 
+    def test(self):
+        val = 0
+        while self.FullLen < 100:
+            self.FullLen += 1
+            return self.FullLen
+        
     def getSentimentENG(self,text):
         if TextBlob(text).sentiment.polarity > 0:
             return 'positive'
@@ -463,9 +471,15 @@ class DataManager:
             for kw in NewWord:
                 newpath = os.path.join('web search',i,kw+'.csv')
                 if not os.path.exists(newpath):
-                    print("New")
+                    # print("New")
                     self.creatNewSearchFile(newpath)
         
+        # OldwordList = os.listdir("collectkeys")
+        newpath = os.path.join('collectkeys',kw)
+        if not os.path.exists(newpath):
+            for kw in NewWord:
+                newpath = os.path.join('collectkeys',kw)
+                os.mkdir(newpath)
         #Choosed Date
         # chooseDate = []
         # for i in ListOfDate:
@@ -686,14 +700,17 @@ class DataManager:
                     # DList.append(len(pd.read_csv(os.path.join(path,name)).drop_duplicates()))
                     # DList.append(os.path.abspath(os.path.join(root, name)))
                     # print(os.path.abspath(os.path.join(root, name)))
-        print("File : ",len(DList))
+        # print("File : ",len(DList))
         return DList
     
+
     def startSearch(self,Ldate,LWord):# date []
         ListOfDate = self.date_range(Ldate[0],Ldate[1])
-        print("List Of Date : ",ListOfDate)
-        print("List Of Word : ",LWord)
+        # print("List Of Date : ",ListOfDate)
+        # print("List Of Word : ",LWord)
         dfResult = []
+        self.FullLen =  len(ListOfDate)
+        self.currentLen = 0
         for j in ListOfDate:
             for kw in LWord:
                 # print(kw)
@@ -703,6 +720,8 @@ class DataManager:
                 # dfResult.append(fileListForSear0ch)
                 # print(fileListForSearch)
                 # for path in fileListForSearch:
+            # print("------",(self.currentLen/self.FullLen)*100)
+            self.currentLen += 1
         newDf = pd.concat(dfResult,ignore_index=True)
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         newDf.sort_values(field_names)
