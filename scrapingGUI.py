@@ -2,6 +2,7 @@ from ast import keyword
 import encodings
 from msilib.schema import ListView
 from tabnanny import check
+from typing_extensions import Self
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
@@ -552,9 +553,6 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                '''if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
-                    self.showErrorDialog2()
-                    return'''
                 if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
@@ -661,12 +659,13 @@ class Ui_MainWindow(QWidget):
             self.listView_3.addItem(item)
         return              
 
-    def deleteButton_3() : #สำหรับปุ่ม delete tab web
+    def deleteButton_3(self) : #สำหรับปุ่ม delete tab web
+        deleteKey = self.SearchBox_3.text()
+        dm.deletekeyword(deleteKey)
         return
     
-    def percentProgress(self) :
-        valueTime = 0
-        rowdf = valueTime/100
+    
+
         
 
     def progressTime(self,counter): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน #
@@ -676,13 +675,14 @@ class Ui_MainWindow(QWidget):
     
     def progressTime_2(self,counter) : #For Tab 2
         self.progressBar_2.setValue(counter)
-        
 
     def progressTimeWeb(self) :
-            self.progressBar_3.setValue(100)
-            self.showTableWeb()
-            self.progressBar_3.setValue(0)
-            
+        #self.percentProgress()
+        self.progressBar_3.setValue(100)
+        self.showTableWeb()
+        self.progressBar_3.setValue(0)
+
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -703,15 +703,22 @@ class Ui_MainWindow(QWidget):
         self.gridLayout = QtWidgets.QGridLayout(self.tab)
         self.gridLayout.setObjectName("gridLayout")
         self.label_3 = QtWidgets.QLabel(self.tab)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
+        self.label_3.setSizePolicy(sizePolicy)
+        self.label_3.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
+        self.gridLayout.addWidget(self.label_3, 0, 8, 1, 1)
         self.dateEdit_1 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_1.setObjectName("dateEdit_1")
-        self.gridLayout.addWidget(self.dateEdit_1, 0, 3, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit_1, 0, 7, 1, 1)
         self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_2.setObjectName("dateEdit_2")
-        self.gridLayout.addWidget(self.dateEdit_2, 0, 5, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit_2, 0, 9, 1, 1)
 
         #self.settime = self.df['Keywords'].apply(lambda x:x**3) #มันเรียกเอา column ทั้งหมดมานับแล้วำนวณเป็นเวลาออกมา
         self.progressBar = QProgressBar(self.tab)
@@ -725,7 +732,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar, 4, 4, 1, 2) 
+        self.gridLayout.addWidget(self.progressBar, 7, 5, 1, 5) 
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
@@ -735,10 +742,53 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.tableView.sizePolicy().hasHeightForWidth())
         self.tableView.setSizePolicy(sizePolicy)
         self.tableView.setObjectName("tableView")
-        self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
+        self.gridLayout.addWidget(self.tableView, 3, 1, 1, 9)
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
-        
+
+        self.line = QtWidgets.QFrame(self.tab)
+        self.line.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.gridLayout.addWidget(self.line, 4, 3, 3, 1)
+        self.line_2 = QtWidgets.QFrame(self.tab)
+        self.line_2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.gridLayout.addWidget(self.line_2, 4, 6, 3, 1)
+        self.labelPosTotal = QtWidgets.QLabel(self.tab)
+        self.labelPosTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelPosTotal.setObjectName("labelPosTotal")
+        self.gridLayout.addWidget(self.labelPosTotal, 6, 1, 1, 2)
+        self.labelPos = QtWidgets.QLabel(self.tab)
+        self.labelPos.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelPos.setObjectName("labelPos")
+        self.gridLayout.addWidget(self.labelPos, 4, 1, 1, 2)
+        self.pushButtonPos = QtWidgets.QPushButton(self.tab)
+        self.pushButtonPos.setObjectName("pushButtonPos")
+        self.gridLayout.addWidget(self.pushButtonPos, 5, 1, 1, 2)
+        self.pushButtonNeu = QtWidgets.QPushButton(self.tab)
+        self.pushButtonNeu.setObjectName("pushButtonNeu")
+        self.gridLayout.addWidget(self.pushButtonNeu, 5, 7, 1, 3)
+        self.pushButtonNega = QtWidgets.QPushButton(self.tab)
+        self.pushButtonNega.setObjectName("pushButtonNega")
+        self.gridLayout.addWidget(self.pushButtonNega, 5, 4, 1, 2)
+        self.labelNega = QtWidgets.QLabel(self.tab)
+        self.labelNega.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNega.setObjectName("labelNega")
+        self.gridLayout.addWidget(self.labelNega, 4, 4, 1, 2)
+        self.labelNegaTotal = QtWidgets.QLabel(self.tab)
+        self.labelNegaTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNegaTotal.setObjectName("labelNegaTotal")
+        self.gridLayout.addWidget(self.labelNegaTotal, 6, 4, 1, 2)
+        self.labelNeutral = QtWidgets.QLabel(self.tab)
+        self.labelNeutral.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNeutral.setObjectName("labelNeutral")
+        self.gridLayout.addWidget(self.labelNeutral, 4, 7, 1, 3)
+        self.labelNeutralTotal = QtWidgets.QLabel(self.tab)
+        self.labelNeutralTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNeutralTotal.setObjectName("labelNeutralTotal")
+        self.gridLayout.addWidget(self.labelNeutralTotal, 6, 7, 1, 3)
         self.label_2 = QtWidgets.QLabel(self.tab)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
@@ -748,10 +798,10 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2.setObjectName("PushButton_2")
         self.PushButton_2.clicked.connect(self.showRealtime)
 
-        self.gridLayout.addWidget(self.PushButton_2, 2, 5, 1, 1)
+        self.gridLayout.addWidget(self.PushButton_2, 2, 9, 1, 1)
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
         self.PushButton_1.setObjectName("PushButton_1")
-        self.gridLayout.addWidget(self.PushButton_1, 2, 4, 1, 1)
+        self.gridLayout.addWidget(self.PushButton_1, 2, 7, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -783,7 +833,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setSizePolicy(sizePolicy)
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
-        self.gridLayout.addWidget(self.listView, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.listView, 3, 0, 4, 1)
         #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
@@ -794,7 +844,7 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.SearchBox1.sizePolicy().hasHeightForWidth())
         self.SearchBox1.setSizePolicy(sizePolicy)
         self.SearchBox1.setObjectName("SearchBox1")
-        self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 3)
+        self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 6)
         #test = self.SearchBox1.text() #text
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         #self.PushButton_1.clicked.connect(checkNew1)
@@ -802,7 +852,7 @@ class Ui_MainWindow(QWidget):
         self.label_1 = QtWidgets.QLabel(self.tab)
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
         self.label_1.setObjectName("label_1")
-        self.gridLayout.addWidget(self.label_1, 1, 0, 1, 6)
+        self.gridLayout.addWidget(self.label_1, 1, 2, 1, 1)
         #self.processBarGUI()
         self.tabWidget.addTab(self.tab, "")
         
@@ -958,7 +1008,7 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
         self.progressBar_3.setSizePolicy(sizePolicy)
         self.progressBar_3.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar_3.setTextVisible(True)
+        self.progressBar_3.setTextVisible(False)
         self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_3.setObjectName("progressBar")
@@ -1036,6 +1086,16 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
+        self.labelPosTotal.setText(_translate("MainWindow", "Total 100 tweets"))
+        self.labelPos.setText(_translate("MainWindow", "Positive"))
+        self.labelNega.setText(_translate("MainWindow", "Negative"))
+        self.labelNeutral.setText(_translate("MainWindow", "Neutral"))
+        self.labelNegaTotal.setText(_translate("MainWindow", "Total 200 tweets"))
+        self.labelNeutralTotal.setText(_translate("MainWindow", "Total 300 tweets"))
+        self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
+        self.pushButtonPos.setText(_translate("MainWindow", "Pos"))
+        self.pushButtonNeu.setText(_translate("MainWindow", "Neu"))
+        self.pushButtonNega.setText(_translate("MainWindow", "Nega"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
