@@ -59,7 +59,7 @@ class TwitterThread(QtCore.QThread):
 
         print('searchnew',dhave)
         
-        if len(dhave) > 0 and Ans =='yes':          
+        if len(dhave) > 0 and Ans =='yes':  #Ans yes for search dhave when dhave not update       
             self.savedata(dhave,until)      #search new keyword
             self.oldkey.extend(dhave)         #add new keys
             return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])

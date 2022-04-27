@@ -43,7 +43,15 @@ class DataManager:
         self.df = None
         self._start = 0
         self.filenames = []
+        self.FullLen =  0
+        self.currentLen = 0
 
+    def test(self):
+        val = 0
+        while self.FullLen < 100:
+            self.FullLen += 1
+            return self.FullLen
+        
     def getSentimentENG(self,text):
         if TextBlob(text).sentiment.polarity > 0:
             return 'positive'
@@ -229,12 +237,13 @@ class DataManager:
                        orient='index')
         return df
     
-    def getReadByDateList(self,Sdate):
+    def getReadByDateList(self,Ldate):
         DList = []
         for root, dirs, files in os.walk(r'WebData'):
             for name in files:
-                if Sdate in str(name): 
-                    DList.append(name)
+                for ld in Ldate:
+                    if ld in str(name): 
+                        DList.append(name)
                     # DList.append(os.path.abspath(os.path.join(root, name)))
                     # print(os.path.abspath(os.path.join(root, name)))
         return DList
@@ -413,35 +422,147 @@ class DataManager:
             print("... Save Dict to ",file_name,"  successful.")
             
     def creatNewSearchFile(self,path):
+        print(path)
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         with open(path, 'a+', newline='', encoding="utf8") as f: 
             write = csv.writer(f) 
             write.writerow(field_names)
             f.close()
     
-    def addNewWord(self,NewWord,dateAdd): #List NewWord
-        print("----------",NewWord,dateAdd)
-        startDate = dateAdd[0]
-        endDate = dateAdd[1]
-        ListOfDate = self.date_range(str(startDate.isoformat()),str(endDate.isoformat()))
+    def delWordAllFile(self,delWord): #delWord 1 str
+        path = "web search"
+        todayByFile = os.listdir(path)
+        for i in todayByFile:
+            newpath = os.path.join('web search',i)
+            for root, dirs, files in os.walk(newpath):
+                # print(root, dirs, files)
+                for name in files:
+                    nameOnly = name.split(".")
+                    if delWord == nameOnly[0] : 
+                        delpath = os.path.join('web search',i,name)
+                        os.remove(delpath)# print(name)
+                        
+                    nameOnly = name.rsplit("(",maxsplit=1)
+                    if delWord == nameOnly[0] :
+                        # print(name)
+                        delpath = os.path.join('web search',i,name)
+                        os.remove(delpath)
+            
+    def addNewWordToAll(self,NewWord): #List NewWord #List of str Date ["17-03-2022", "19-04-2022"]
+        # print("----------",NewWord,dateAdd)
+        ex = web.webScraping()
+        # startDate = datetime.strptime(dateAdd[0], '%d-%m-%Y')
+        # endDate = datetime.strptime(dateAdd[1], '%d-%m-%Y')
+        # print("Date : ",startDate,endDate)
+        
+        # startDate = datetime.datetime.strptime(startDate, '%d-%m-%Y')
+        # endDate = datetime.datetime.strptime(endDate, '%d-%m-%Y')
+        # print("Date : ",startDate,endDate)
+        
+        # print("isoformat : ",str(startDate.isoformat()),str(endDate.isoformat()))
+        # ListOfDate = self.date_range(str(startDate.isoformat()),str(endDate.isoformat()))
+        # ListOfDate = self.date_range(dateAdd[0],dateAdd[1])
+        # print('ListOfDate : ',ListOfDate)
         path = "web search"
         todayByFile = os.listdir(path)
         
-        #Add new word to all date
+        #Add new word file to all date file
         for i in todayByFile:
             for kw in NewWord:
                 newpath = os.path.join('web search',i,kw+'.csv')
-                self.creatNewSearchFile(newpath)
+                if not os.path.exists(newpath):
+                    # print("New")
+                    self.creatNewSearchFile(newpath)
         
+        # OldwordList = os.listdir("collectkeys")
+        newpath = os.path.join('collectkeys',kw)
+        if not os.path.exists(newpath):
+            for kw in NewWord:
+                newpath = os.path.join('collectkeys',kw)
+                os.mkdir(newpath)
         #Choosed Date
-        chooseDate = []
-        for i in ListOfDate:
-            if i in todayByFile:
-                chooseDate.append(i)
+        # chooseDate = []
+        # for i in ListOfDate:
+        #     if i in todayByFile:
+        #         chooseDate.append(i)
         
-                
-            # self.setDataByAllKeyword(i)
+        # print("chooseDate : ",chooseDate)
+        
+        rawDate = os.listdir('web search')
+        fileList = self.getReadByDateList(rawDate)
+        # print("fileList : ",fileList)
+        
+        for fileName in fileList:
+            data = self.readJson(os.path.join("WebData",fileName))
+            for d in data.keys():
+                for l in list(data[d].keys()):
+                    soup = ex.makeSoup(l)
+                    for p in data[d][l]["Data"]:
+                        todayByfileName = fileName.split("_")[0]
+                        self.setDictSentimentBynewWord(soup,l,p,todayByfileName,NewWord)
+        
             
+            # self.setDataByAllKeyword(i)
+    
+    def setDictSentimentBynewWord(self,soup,link,data,today,newWord):#newWord:List
+        ex = web.webScraping()
+        resualtDict = {}
+        keyword = newWord
+        try:
+            wc = self.paragraphToList(data)
+            
+            stm = ''
+            if detect(data) == 'th':
+                stm = self.getSentimentTH(data)
+            elif detect(data) == 'en':
+                stm = self.getSentimentENG(data)
+            
+            for tuplew in wc:
+                if tuplew[0] in keyword:
+                    i = tuplew[0]
+                    wcCount = tuplew[1]
+                    # print("Lang : ",detect(data))
+                    if stm != '':
+                        dfdict = {'Date':today,
+                            'Keyword':i,
+                            'Word Count':wcCount,
+                            'Ref':0,'Link': link,
+                            'Title':ex.getTitle(soup),
+                            'Data':data,
+                            'Sentiment':stm,
+                            'Lang':ex.getLang(soup),
+                            'Ref Link':dict(Counter(ex.getAllRefLink()))}
+                        # print(data)
+                        print("----------",i,tuplew)
+                        
+                        # print(df)
+                        savePath = os.path.join("web search",today,i+'.csv') 
+                        
+                        # dataraw = pd.read_csv(newpath)
+                        # newdata = dataraw.drop_duplicates()
+                        # newdata.to_csv(savePath, encoding='utf-8', index=False)
+                        
+                        try:
+                            filesize = self.getCountCsvLine(savePath)
+                        except :
+                            filesize = 1000
+                            pass
+                        if filesize >= 1000:
+                            n=1
+                            newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                            while os.path.exists(newname):
+                                n+=1
+                                newname = os.path.join("web search",today,i+"("+str(n)+")"+'.csv')
+                            ex.renameFile(savePath,newname)
+                            self.creatNewSearchFile(savePath)
+                        field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
+                        ex.writCsvByDict(savePath,field_names,dfdict)
+                    
+        except langdetect.lang_detect_exception.LangDetectException:
+            print("\n******* Error Data : ",data)
+            pass
+        # return resualtDict
+    
     def setDictSentiment(self,soup,link,data,today):
         ex = web.webScraping()
         resualtDict = {}
@@ -536,13 +657,13 @@ class DataManager:
             
     def setDataByAllKeyword(self,fileName): #All old data
         ex = web.webScraping()
-        print("File Name : ",fileName)
+        # print("File Name : ",fileName)
         # path = "WebData"
         # rawData = os.listdir(path)
         # for i in rawData:
         keyword = os.listdir("collectkeys")
         todayByFile = fileName.split("_")[0]
-        print("Date : ",todayByFile)
+        # print("Date : ",todayByFile)
         newpath = os.path.join('web search',todayByFile)
         if not os.path.exists(newpath):
             os.makedirs(newpath)
@@ -565,7 +686,6 @@ class DataManager:
         DList = []
         path = os.path.join("web search",date)
         for root, dirs, files in os.walk(path):
-            # print(root, dirs, files)
             for name in files:
                 # print(name)
                 nameOnly = name.split(".")
@@ -580,14 +700,17 @@ class DataManager:
                     # DList.append(len(pd.read_csv(os.path.join(path,name)).drop_duplicates()))
                     # DList.append(os.path.abspath(os.path.join(root, name)))
                     # print(os.path.abspath(os.path.join(root, name)))
-        print("File : ",len(DList))
+        # print("File : ",len(DList))
         return DList
     
+
     def startSearch(self,Ldate,LWord):# date []
         ListOfDate = self.date_range(Ldate[0],Ldate[1])
-        print("List Of Date : ",ListOfDate)
-        print("List Of Word : ",LWord)
+        # print("List Of Date : ",ListOfDate)
+        # print("List Of Word : ",LWord)
         dfResult = []
+        self.FullLen =  len(ListOfDate)
+        self.currentLen = 0
         for j in ListOfDate:
             for kw in LWord:
                 # print(kw)
@@ -597,6 +720,8 @@ class DataManager:
                 # dfResult.append(fileListForSear0ch)
                 # print(fileListForSearch)
                 # for path in fileListForSearch:
+            # print("------",(self.currentLen/self.FullLen)*100)
+            self.currentLen += 1
         newDf = pd.concat(dfResult,ignore_index=True)
         field_names = ['Date','Keyword','Word Count','Ref','Link','Title','Data','Sentiment','Lang','Ref Link']
         newDf.sort_values(field_names)

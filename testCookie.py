@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from datetime import date
 from datetime import datetime
 import pandas as pd
+import Web_thread as webTread
 import webScraping as web
 import DataManager as data
 from io import StringIO
@@ -19,11 +20,12 @@ import scrapingGUI as scrap
 # sc = scrap.Ui_MainWindow()
 ex = web.webScraping()
 dm = data.DataManager()
+wt = webTread.WebThread()
 
 link = "https://www.animenewsnetwork.com/"
 # path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
-path = "C:/Users/Pooncharat Wongkom/Web-Scraping/WebData"
-rawData = os.listdir(path)
+# path = "C:/Users/Pooncharat Wongkom/Web-Scraping/WebData"
+# rawData = os.listdir(path)
 today = ex.getTodayDate()
 newpath = os.path.join('web search',today,"anime(1).csv")
               
@@ -52,7 +54,17 @@ ex.startScraping()
 # now = datetime.now()
 # Endtime = now.strftime("%H:%M:%S")
 # print(starttime,Endtime)
+# print(dm.currentLen)
 
-# print(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
 
-#['kk'] [datetime.date(2022, 3, 17), datetime.date(2022, 4, 19)]
+
+# dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation'])
+# print(dm.currentLen)
+# wt.start()
+
+
+
+# dm.addNewWordToAll(['Otaku'])
+
+# dm.delWordAllFile('kj')
+#dm.addNewWord(['kk'],[datetime.date(2022, 3, 17), datetime.date(2022, 4, 19)])
