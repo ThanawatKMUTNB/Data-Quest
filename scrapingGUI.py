@@ -240,7 +240,7 @@ class Ui_MainWindow(QWidget):
                 
             else:
                 return
-        self.progressBar.value(0)
+        #self.progressTime.value(0)
 
     def showDefaultFileTweetW(self) : #Refresh BUTTON for show collectkey(Tab2)
         self.model = TableModel(self.tw_worddf) 
@@ -329,8 +329,16 @@ class Ui_MainWindow(QWidget):
         # print('tab1 finish')
                     
         #self.t2.count.connect(self.progressTime)
+    def setPolarityTab1(self,df):
+        polarity = df['Polarity'].value_counts()
+        allrow = df.shape[0]
+        self.Tw_Positive = (polarity['positive']/allrow)*100
+        self.Tw_Negative = (polarity['negative']/allrow)*100
+        self.Tw_Neutral = (polarity['neutral']/allrow)*100
+        #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
+        self.setPolarityTab1(df)
         self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -345,7 +353,7 @@ class Ui_MainWindow(QWidget):
         self.t2.start()
         self.t2.count.connect(self.progressTime_2)
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
-        self.progressTime(0)
+        #self.progressTime(0)
          
     
     def CollectwordTab2(self,df):
