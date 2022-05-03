@@ -1040,6 +1040,7 @@ class Ui_MainWindow(QWidget):
         self.label_8 = QtWidgets.QLabel(self.tab_3)
         self.label_8.setAlignment(QtCore.Qt.AlignCenter)
         self.label_8.setObjectName("label2")
+        self.label_8.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_8, 2, 0, 1, 1)
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
@@ -1112,6 +1113,7 @@ class Ui_MainWindow(QWidget):
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
+        self.label_7.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
         self.dateSet_3()
         self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
