@@ -221,9 +221,11 @@ class DataManager:
         #return sortword     #tuple in list
     
     def deletekeyword(self,keyword):
-        path=os.getcwd()
+        path = os.getcwd()
         for k  in keyword:
-            shutil.rmtree(path+'//collectkeys//'+k+'//')
+            #shutil.rmtree(path+'//collectkeys//'+k+'//')
+            shutil.rmtree(os.path.join(path,'collectkeys', k ))
+
             self.keys.remove(k)
             #self.df.drop(self.df[self.df['Keyword']==k].index,inplace = True)
             self.df = self.newUnion()
