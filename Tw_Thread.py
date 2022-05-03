@@ -20,6 +20,7 @@ class TwitterThread(QtCore.QThread):
         self.Ans = Ans
     def run(self):
         print('Starting Twitter thread...')
+        print(self.key,self.oldkey)
         self.df = self.searchkeys()
         self.dataframe.emit(self.df)            #return df to GUI
     
@@ -28,18 +29,18 @@ class TwitterThread(QtCore.QThread):
         self.oldkey = self.df['Keyword'].tolist()
         self.oldkey = list(set(self.oldkey))
     
-    def savedata(self,keyword,until): #keyword is list
+    def savedata(self,keyword,until):           #keyword is list
         
         print('\nstart saving ')
         allsearchkeys = len(keyword)
         cnt = 0
         for kw in keyword:
-            time.sleep(0.01)
+            time.sleep(0.01)                    #prevent programs from not responding
             self.df = pd.concat([self.df,self.tw.get_related_tweets(kw,until)])
             cnt +=1
             count = (cnt/allsearchkeys)*100
-            print(count)
-            self.countkeys.emit(count)
+            #print(count)
+            self.countkeys.emit(count)          #return to progressbar value
 
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
@@ -51,45 +52,28 @@ class TwitterThread(QtCore.QThread):
         keyword = self.key
         Ans = self.Ans
         until = self.until
-        #if len(keyword) > 1:            #>1 keyword
+        
         dhave = []
         for key in keyword:
             if key not in self.oldkey:
-                dhave.append(key)
+                dhave.append(key)                                                           #do not have keyword in self (for search new leyword)
 
         print('searchnew',dhave)
         
-        if len(dhave) > 0 and Ans =='yes':  #Ans yes for search dhave when dhave not update       
-            self.savedata(dhave,until)      #search new keyword
-            self.oldkey.extend(dhave)         #add new keys
+        if len(dhave) > 0 and Ans =='yes':                                                  #Ans yes for search dhave when dhave not update       
+            self.savedata(dhave,until)                                                      #search new keyword
+            self.oldkey.extend(dhave)                                                       #add new keys
             return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        elif Ans == "real":                 #search old keys real time (until)
+        elif Ans == "real":                                                                 #search old keys real time (until date)
             self.savedata(keyword,until)
             return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        else:                               #show old keys
+        else:                                                                               #show old keys
             return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        # elif keyword[0] in self.oldkey:   #1 key in old keys
-        #     if Ans == "real":
-        #         self.savedata(keyword,until)
-        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        #     else:
-        #         return self.df.loc[self.df['Keyword']==keyword[0]]
-        # else:              #1keyword (new)
-        #     if Ans == 'yes':            #new key 1 key
-        #         self.savedata(keyword,until)
-        #         self.oldkey.extend(keyword)
-        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        #     elif Ans == "real":
-        #         self.savedata(keyword,until)
-        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
-        #     else:
-        #         print('You select NO')
-        #         return self.df.loc[self.df['Keyword'].isin(keyword)].sort_values(by=['Keyword'])
 
 
     def stop(self):
         print('Stopping Twitter thread...')
-        self.terminate()
+        self.terminate()                                                                    #destroy thread
 
 class CollectWordThread(QtCore.QThread):
 	
@@ -108,21 +92,21 @@ class CollectWordThread(QtCore.QThread):
         word = {}
         countrow = len(dataframe.index)
         #print('start loop collect word')
-        for index,row in dataframe.iterrows():    #only tweet
-            if int(index) % 3000 == 0:
+        for index,row in dataframe.iterrows():                          #only tweet
+            if int(index) % 3000 == 0:                                  #prevent programs from not responding
                 time.sleep(0.001)
             cnt = (int(index)/(int(countrow)))*100
-            self.count.emit(cnt)
-            if row['Language'] == 'en':
-                allwords = str(row['Tweet']).split()
+            self.count.emit(cnt)                                        #return to progressbar value
+            if row['Language'] == 'en':                                 #this tweet is english language
+                allwords = str(row['Tweet']).split()                    #splite tweet
                 for w in allwords: 
                     if w not in self.en_stops:
                         if w in word:
-                            word[w] += 1
+                            word[w] += 1                                #count word
                         else:
                             word[w] = 1
             elif row['Language'] == 'th':
-                allwords = word_tokenize(row['Tweet'], engine='newmm')
+                allwords = word_tokenize(row['Tweet'], engine='newmm')  #split tweet
                 for w in allwords: 
                     if w not in self.th_stopwords:
                         if w in word:
@@ -133,17 +117,17 @@ class CollectWordThread(QtCore.QThread):
                 pass
 
         if 'RT' in word:
-            del word['RT']  #for twitter
+            del word['RT']                                                  #for twitter
         if ' ' in word:
-            del word[' ']   #for thai language
-        #print('set to dataframe')
+            del word[' ']                                                   #for thai language
+
         sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
-        self.df = pd.DataFrame(sortword,columns=['Word','Count'])
+        self.df = pd.DataFrame(sortword,columns=['Word','Count'])           #set to dataframe
         
         cnt = 100
-        self.count.emit(cnt)
-        self.dataframe.emit(self.df)            #return df to GUI
+        self.count.emit(cnt)                                                #return to progressbar value
+        self.dataframe.emit(self.df)                                        #return df to GUI
 
     def stop(self):
         print('Stopping Collectword thread...')
-        self.terminate()
+        self.terminate()                                                    #destroy thread
