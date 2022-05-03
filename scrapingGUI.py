@@ -67,16 +67,12 @@ class Ui_MainWindow(QWidget):
         self.calendarDateClick = cn.qDateBegin()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
-        #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+
         self.df = dm.newUnion()
         
-        #tw.setdataframe(self.df)
-        #self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[""])
-        #tw.setdataframe(self.dt)
+
         self.dt = None
-        #tw.setdataframe(self.dt)
-        #self.data = win.OpenFile()
-        #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
+
         self.getSince = str
         self.getUntil = str
         '''self.getSince_2 = str
@@ -90,6 +86,7 @@ class Ui_MainWindow(QWidget):
         self.model = TableModel(self.df)
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
+        
         self.processWord = str
         #self.modelWeb = TableModel(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
         self.modelWeb = None
@@ -104,9 +101,10 @@ class Ui_MainWindow(QWidget):
         self.th_stopwords = list(thai_stopwords())
         nltk.download('stopwords')
         self.en_stops = set(stopwords.words('english'))
-        self.en_stops.update(list(string.ascii_lowercase))
+        self.en_stops.update(list(string.ascii_lowercase))                  #add alphabet lower and upper for not collect
         self.en_stops.update(list(string.ascii_uppercase))
-        self.en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
+        self.en_stops.update(['0','1','2','3','4','5','6','7','8','9'])     #add number for not collect
+
 
     def showCalenderWin(self):
         self.MainWindow2 = QtWidgets.QMainWindow()
@@ -181,80 +179,62 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil_3
 
-    def showRealtime(self) : #BUTTON search key in this time
+    def showRealtime(self) : #BUTTON (search new) key in until time
         self.progressTime(0)
         print('real time')
-        if self.dateSinceReturn()>self.dateUntilReturn():
-            self.showErrorDialog()
+        if self.dateSinceReturn()>self.dateUntilReturn():                               #return when until date greater than since date
+            self.showErrorDialog()  
             return
         if datetime.now().date() <= self.dateUntilReturn():
             pass
-        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:             #can not search tweet until greater than 7 day
             self.showErrorDialog2()
             return
-        keywords = self.SearchBox1.text()
-        keywords = keywords.split(',')
-        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        self.t1 = TwitterThread(parent=None,df=self.df)
-        tw.setdataframe(self.df)
+        keywords = self.SearchBox1.text()                                               #get keyword from entry box
+        keywords = keywords.split(',')                                                  #split text
+        keywords = list(map(lambda x: x.lower(), keywords))                             #change all keywords to lower
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set datafram from date range
+        self.t1 = TwitterThread(parent=None,df=self.df)                                 #create thread
+        tw.setdataframe(self.df)                                                        #set dataframe same with self.df
         self.t1.setdataframe(self.df)
-        #self.t1.oldkey = self.keywords
         self.t1.until = str(self.dateUntilReturn())
         self.t1.Ans = 'real'
         if "" not in keywords:
             if self.showDialog() == 'Yes':
-                #self.t1 = TwitterThread(parent=None,df=self.df,key=keywords,Ans='real',until=str(self.dateUntilReturn()))
-                self.t1.key = keywords
+
+                self.t1.key = keywords                                                  #set keyword for search to thread
                 dhave = []
                 for keyword in keywords:
                     if keyword not in self.keywords:
                         dhave.append(keyword)
-                self.keywords.extend(dhave)
+                self.keywords.extend(dhave)                                             #add new keyword
                 self.t1.start()
-                self.t1.countkeys.connect(self.progressTime)
-                self.t1.dataframe.connect(self.setTableTab1)
-                #self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
-                
-                # self.model = TableModel(self.df) 
-                # self.table = QtWidgets.QTableView()
-                # self.table.setModel(self.model)
-                # self.tableView.setModel(self.model)
-            else:
-                return
-        else:
-            print('search new all keys')
-            if self.showDialog() == 'Yes':
-                self.t1.key = self.keywords
-                #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,Ans='real',until=str(self.dateUntilReturn()))
-                self.t1.start()
-                self.t1.countkeys.connect(self.progressTime)
-                self.t1.dataframe.connect(self.setTableTab1)
-                #self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
-                
-                # self.model = TableModel(self.df) 
-                # self.table = QtWidgets.QTableView()
-                # self.table.setModel(self.model)
-                # self.tableView.setModel(self.model)
-                #self.dateSet() 
-                
-            else:
-                return
-        self.progressBar.value(0)
+                self.t1.countkeys.connect(self.progressTime)                            #get progreassbar value from thread to set
+                self.t1.dataframe.connect(self.setTableTab1)                            #get df to set
 
-    def showDefaultFileTweetW(self) : #Refresh BUTTON for show collectkey(Tab2)
+            else:
+                return
+        else:                                                                           #search all key
+            print('search new all keys')
+            if self.showDialog() == 'Yes':                                              #r u sure for search all?
+                self.t1.key = self.keywords
+
+                self.t1.start()
+                self.t1.countkeys.connect(self.progressTime)
+                self.t1.dataframe.connect(self.setTableTab1)
+
+                
+            else:
+                return
+        #self.progressBar.value(0)
+
+    def showDefaultFileTweetW(self) :                                                   #Refresh BUTTON for show collectkey(Tab2)
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
         return
 
-    # def button1(self) :     #Search BUTTON
-        
-    #     #self.ShowdfTab1()
-    #     self.t1 = TwitterThread(parent=None)        #for can use GUI while data processing
-    #     self.t1.start()
-    #     self.t1.finished.connect(self.ShowdfTab1)
 
 
     def button1(self):          #Search BUTTON Tab1
@@ -265,84 +245,71 @@ class Ui_MainWindow(QWidget):
         if self.dateSinceReturn()>self.dateUntilReturn():
             self.showErrorDialog()
             return
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set day range dataframe 
-        #print(list(set(self.df['Keyword'].tolist())))
-        tw.setdataframe(self.df)        #set same dataframe for search 
-        self.t1 = TwitterThread(parent=None,df=self.df)
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))     #set datafram from date range
+        self.t1 = TwitterThread(parent=None,df=self.df)                                     #startThread
         self.t1.setdataframe(self.df)
-        self.t1.oldkey = self.keywords
-        self.t1.until = str(self.dateUntilReturn())
-        
-
+        self.t1.oldkey = self.keywords                                                      #add old key to Thread
+        self.t1.until = str(self.dateUntilReturn())                                         #set until date for search
+        tw.setdataframe(self.df)                                                            #set same dataframe for search 
         keywords = self.SearchBox1.text()
         keywords = keywords.split(',')
-        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        keywords = list(map(lambda x: x.lower(), keywords))                                  #change all keyword to lower
         if "" not in keywords:
-            self.t1.key = keywords
-            print(len(keywords),keywords)
+            self.t1.key = keywords                                                           #set keyword for search
+            print(len(keywords),self.t1.key)
             dhave = []
             for keyword in keywords:
                 if keyword not in self.keywords:
-                    dhave.append(keyword)
-            if len(dhave) > 0:      #new keyword
-                if datetime.now().date() <= self.dateUntilReturn():         #for search until day greater than today
+                    dhave.append(keyword)                                                     #add new keyword
+            if len(dhave) > 0:                                                                #have new keyword
+                if datetime.now().date() <= self.dateUntilReturn():                           #for search until day greater than today
                     pass
-                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:     #cannot search twitter new keyword greater than 7 day
+                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:           #cannot search twitter new keyword greater than 7 day
                     self.showErrorDialog2()
                     return
-                if self.showDialog() == 'Yes':      #search new 
-                    self.t1.Ans = 'yes'
-                    self.keywords.extend(dhave)
-                    #self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
+                if self.showDialog() == 'Yes':                                                #search new keyword 
+                    self.t1.Ans = 'yes'                                                       #set answer to thread
+                    print('check\t',self.t1.oldkey)
                     self.t1.start()
-                    self.t1.countkeys.connect(self.progressTime)#
-                    self.t1.dataframe.connect(self.setTableTab1)
-                    self.setPolarityTab1(self.df)
+                    self.t1.countkeys.connect(self.progressTime)                              #set progress bar value from thread for set
+                    self.t1.dataframe.connect(self.setTableTab1)                                            
+                    self.keywords.extend(dhave)                                               #add new keyword to self
                     
-                else:
-                    #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+                else:                                                                         #choose NO
+
                     return
                     
-            else:       #have key
-                #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+            else:                                                                             #search old keyword
+
                 self.t1.start()
-                #self.t1.countkeys.connect(self.progressTime)
                 self.t1.dataframe.connect(self.setTableTab1)
-                self.setPolarityTab1(self.df)
+
                 
-            self.t1.setdataframe(self.df)       #add new key to oldkey ??
+            self.t1.setdataframe(self.df)                                                       #set dataframe for do before thread   ###if delete u can not search new word because self.oldkey get bug
             tw.setdataframe(self.df)
-        else:
-            #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,until=str(self.dateUntilReturn()))
+        else:                                                                                   #search all old keywords
+
             self.setTableTab1(self.df)
-            self.setPolarityTab1(self.df)
 
-            # self.t1.key = self.keywords
-            # self.t1.start()
-            # self.t1.countkeys.connect(self.progressTime)
-            # self.t1.dataframe.connect(self.setTableTab1)
-        
 
-        print(len(self.df.index),tw.keys)
+    
 
-        # self.model = TableModel(self.df) 
-        # self.table = QtWidgets.QTableView()
-        # self.table.setModel(self.model)
-        # self.tableView.setModel(self.model)
-        # self.labelShowKeywords()
-        # print('tab1 finish')
-                    
-        #self.t2.count.connect(self.progressTime)
 
     def setPolarityTab1(self,df):
         polarity = df['Polarity'].value_counts()
         allrow = df.shape[0]
-        self.Tw_Positive = (polarity['positive']/allrow)*100
-        self.Tw_Negative = (polarity['negative']/allrow)*100
-        self.Tw_Neutral = (polarity['neutral']/allrow)*100
-        self.Tw_Positive_Total = str(polarity['positive'])
-        self.Tw_Negative_Total = str(polarity['negative'])
-        self.Tw_Neutral_Total = str(polarity['neutral'])
+        if allrow == 0:
+            allrow = 1
+        pola = {'positive':0,'negative':0,'neutral':0}
+        for p in pola:
+            if p in polarity:
+                pola[p] = int(polarity[p])                          #set polarity
+        self.Tw_Positive = (pola['positive']/allrow)*100            #persentage
+        self.Tw_Negative = (pola['negative']/allrow)*100
+        self.Tw_Neutral = (pola['neutral']/allrow)*100
+        self.Tw_Positive_Total = str(pola['positive'])              #total
+        self.Tw_Negative_Total = str(pola['negative'])
+        self.Tw_Neutral_Total = str(pola['neutral'])
         _translate = QtCore.QCoreApplication.translate
         self.labelPosTotal.setText(_translate("MainWindow", "Total " + self.Tw_Positive_Total + " tweets"))
         self.labelNegaTotal.setText(_translate("MainWindow", "Total " + self.Tw_Negative_Total + " tweets"))
@@ -357,38 +324,38 @@ class Ui_MainWindow(QWidget):
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView.setModel(self.model)
+        self.setPolarityTab1(df)                            #set GUI polarity
         self.labelShowKeywords()
-        dm.concatfile(df)
+        dm.concatfile(df)                                   #concat new search file to main df
         
-        self.addlist()
-        self.progressTime(100)
+        self.addlist()                                      #set keyword list tab1 in GUI
+        self.progressTime(100)                              #set 100% progreassbar
         self.t1.stop()
-        time.sleep(1)
+        time.sleep(1)                                       #for can change tab
         self.t2 = CollectWordThread(parent=None,df=df,en_stops=self.en_stops,th_stopwords=self.th_stopwords)         #use df from tab1 to data processing tab2
         self.t2.start()
-        self.t2.count.connect(self.progressTime_2)
+        self.t2.count.connect(self.progressTime_2)                  #set progressbar2 value from thread
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
-        self.progressTime(0)
+        #self.progressTime(0)
          
     
     def CollectwordTab2(self,df):
         self.tw_worddf = df
-        self.addlist_2()
+        self.addlist_2()                                            #set keyword list tab2 in GUI
         self.model2 = TableModel(self.tw_worddf) 
         self.table2 = QtWidgets.QTableView()
         self.table2.setModel(self.model2)
         self.tableView_2.setModel(self.model2)
         #print('tab2 finish')
         self.t2.stop()
-        self.progressTime_2(0)
+        #self.progressTime_2(0)
         
-    def button2(self) : # TAB2 BUTTON for seach collect word[:10]
-        # if self.tw_worddf == None:
-        #     return
+    def button2(self) :                                                         # TAB2 BUTTON for seach collect word[:10]
+
         tw.setdataframe(dm.df)
-        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
-        tenwords = list(map(lambda x: x.lower(), tenwords))
-        self.t1 = TwitterThread(parent=None,df=self.df)
+        tenwords = self.tw_worddf['Word'].tolist()[:10]                         #get only top ten words in df
+        tenwords = list(map(lambda x: x.lower(), tenwords))                     #set all word to lower
+        self.t1 = TwitterThread(parent=None,df=self.df)                         #start thread for search
         self.t1.until = str(self.dateUntilReturn())
         self.t1.Ans = 'yes'
         if self.showDialog() == 'Yes':
@@ -397,11 +364,10 @@ class Ui_MainWindow(QWidget):
             dhave = []
             for keyword in tenwords:
                 if keyword not in self.keywords:
-                    dhave.append(keyword)
+                    dhave.append(keyword)                                          
             if len(dhave) > 0:
-                self.keywords.extend(dhave)
-                #self.df = tw.searchkeys(tenwords,'yes',str(self.dateUntilReturn()))
-                self.t1.key = tenwords
+                self.keywords.extend(dhave)                                       #add new keywords
+                self.t1.key = tenwords                                            #set keyword to tenword
                 self.t1.start()
                 self.t1.countkeys.connect(self.progressTime_2)
                 self.t1.dataframe.connect(self.searchCollectTab)
@@ -420,11 +386,11 @@ class Ui_MainWindow(QWidget):
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
-        self.tableView_2.setModel(self.model)
+        self.tableView_2.setModel(self.model)                                       #set df to tab2
     
     def searchCollectTab(self,df):
-        dm.concatfile(df)
-        self.addlist() 
+        dm.concatfile(df)                               #concat new search file to main dataframe
+        self.addlist()                                  #set keyword list to GUI
         self.t1.stop()
         self.model2 = TableModel(df) 
         self.table2 = QtWidgets.QTableView()
@@ -437,13 +403,13 @@ class Ui_MainWindow(QWidget):
         self.SearchBox1.clear()
         self.dateSet()
         self.df = dm.setdefaultDF()
-        #self.df = dm.unionfile(self.filename)
-        #self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+
         print(len(self.df.index),tw.keys)
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+        self.setPolarityTab1(self.df)
         self.progressTime(100)
         return
 
@@ -453,20 +419,25 @@ class Ui_MainWindow(QWidget):
             keywords = self.SearchBox1.text()
             keywords = keywords.split(',')
             keywords = list(map(lambda x: x.lower(), keywords))
+            for key in keywords:
+                if key not in self.keywords:                        #delete keys that never existed. 
+                    print('Key not found')
+                    return
             if "" not in keywords:
                 self.progressTime(0)
                 self.dateSet()
-                self.SearchBox1.clear()
+                self.SearchBox1.clear()                              #clear entry box
                 self.df = dm.deletekeyword(keywords)
                 self.keywords = self.df['Keyword'].tolist()
                 self.keywords = list(set(self.keywords))
                 self.addlist()
                 self.model = TableModel(self.df) 
                 self.table = QtWidgets.QTableView()
-                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-                self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+                self.setPolarityTab1(self.df)
                 self.progressTime(100)
-            else:
+            else:                                                       #do not add keyword
                 print('nonKeyword')
                 return
         return 
@@ -910,6 +881,7 @@ class Ui_MainWindow(QWidget):
         self.gridLayout.addWidget(self.label_1, 1, 2, 1, 1)
         #self.processBarGUI()
         self.tabWidget.addTab(self.tab, "")
+        self.setPolarityTab1(self.df)
         
 
         #tab2 
