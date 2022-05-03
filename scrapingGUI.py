@@ -3,7 +3,7 @@ import encodings
 from msilib.schema import ListView
 from tabnanny import check
 from tkinter.messagebox import NO
-from typing_extensions import Self
+#from typing_extensions import Self
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
@@ -682,9 +682,35 @@ class Ui_MainWindow(QWidget):
             self.listView_3.addItem(item)
         return              
 
+    def deleteButton_3(self) : #สำหรับปุ่ม delete tab tweet
+        if self.showDeleteDialog() == "Yes":
+            keywords = self.SearchBox_3.text()
+            keywords = keywords.split(',')
+            keywords = list(map(lambda x: x.lower(), keywords))
+            if "" not in keywords:
+                #self.progressTime(0)
+                #self.dateSet()
+                self.SearchBox_3.clear()
+                self.dt = dm.deletekeyword(keywords)
+                self.keywords = self.df['Keyword'].tolist()
+                self.keywords = list(set(self.keywords))
+                self.addlist()
+                self.model = TableModel(self.dt) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+                self.tableView_3.setModel(self.model) #เอาตารางไปโชว์เลย
+                #self.progressTime(100)
+            else:
+                print('nonKeyword')
+                return
+        return 
+
     def deleteButton_3(self) : #สำหรับปุ่ม delete tab web
         deleteKey = self.SearchBox_3.text()
-        dm.deletekeyword(deleteKey)
+        deleteKey = deleteKey.split(',')
+        deleteKey = list(map(lambda x: x.lower(), deleteKey))
+        #print(deleteKey)
+        self.dt = dm.deletekeyword(deleteKey)
         return
     
     
@@ -755,7 +781,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar, 7, 5, 1, 5) 
+        self.gridLayout.addWidget(self.progressBar, 7, 1, 1, 9) 
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
@@ -782,10 +808,12 @@ class Ui_MainWindow(QWidget):
         self.labelPosTotal = QtWidgets.QLabel(self.tab)
         self.labelPosTotal.setAlignment(QtCore.Qt.AlignCenter)
         self.labelPosTotal.setObjectName("labelPosTotal")
+        
         self.gridLayout.addWidget(self.labelPosTotal, 6, 1, 1, 2)
         self.labelPos = QtWidgets.QLabel(self.tab)
         self.labelPos.setAlignment(QtCore.Qt.AlignCenter)
         self.labelPos.setObjectName("labelPos")
+        self.labelPos.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.labelPos, 4, 1, 1, 2)
         self.pushButtonPos = QtWidgets.QPushButton(self.tab)
         self.pushButtonPos.setObjectName("pushButtonPos")
@@ -799,6 +827,7 @@ class Ui_MainWindow(QWidget):
         self.labelNega = QtWidgets.QLabel(self.tab)
         self.labelNega.setAlignment(QtCore.Qt.AlignCenter)
         self.labelNega.setObjectName("labelNega")
+        self.labelNega.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.labelNega, 4, 4, 1, 2)
         self.labelNegaTotal = QtWidgets.QLabel(self.tab)
         self.labelNegaTotal.setAlignment(QtCore.Qt.AlignCenter)
@@ -807,6 +836,7 @@ class Ui_MainWindow(QWidget):
         self.labelNeutral = QtWidgets.QLabel(self.tab)
         self.labelNeutral.setAlignment(QtCore.Qt.AlignCenter)
         self.labelNeutral.setObjectName("labelNeutral")
+        self.labelNeutral.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.labelNeutral, 4, 7, 1, 3)
         self.labelNeutralTotal = QtWidgets.QLabel(self.tab)
         self.labelNeutralTotal.setAlignment(QtCore.Qt.AlignCenter)
@@ -815,6 +845,7 @@ class Ui_MainWindow(QWidget):
         self.label_2 = QtWidgets.QLabel(self.tab)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
+        self.label_2.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
@@ -875,6 +906,7 @@ class Ui_MainWindow(QWidget):
         self.label_1 = QtWidgets.QLabel(self.tab)
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
         self.label_1.setObjectName("label_1")
+        self.label_1.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_1, 1, 2, 1, 1)
         #self.processBarGUI()
         self.tabWidget.addTab(self.tab, "")
@@ -923,10 +955,12 @@ class Ui_MainWindow(QWidget):
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label1")
+        self.label_4.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_4, 1, 0, 1, 6)
         self.label_5 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Keyword"
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName("label2")
+        self.label_5.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
         '''self.label_6 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "to"
         self.label_6.setAlignment(QtCore.Qt.AlignCenter)
@@ -962,6 +996,7 @@ class Ui_MainWindow(QWidget):
         
         self.labelShow = QtWidgets.QLabel(self.tab_2)
         self.labelShow.setEnabled(True)
+        self.labelShow.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -1124,7 +1159,7 @@ class Ui_MainWindow(QWidget):
         self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_5.setText(_translate("MainWindow", "Keyword"))
         #self.label_6.setText(_translate("MainWindow", "to"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "TweetW"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "WordTweet"))
 
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
         self.PushButton_6.setText(_translate("MainWindow", "Search new"))
