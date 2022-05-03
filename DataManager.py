@@ -37,7 +37,7 @@ class DataManager:
         access_token = "759317188863897600-nuwQmcYfDX8lvdRyw2eCD6fMRMkLzzZ"
         access_token_secret = 'zFFc5OJywNMBrRAblI7kFV62ZTZPHfTU1Q5kZ1cKzUupD'
         auth = tw.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_token, access_token_secret)
+        auth.set_access_token(access_token, access_token_secret)            #twitter api
         self._api = tw.API(auth, wait_on_rate_limit=True)
         self.keys = os.listdir("collectkeys")
         self.df = None
@@ -52,7 +52,7 @@ class DataManager:
             self.FullLen += 1
             return self.FullLen
         
-    def getSentimentENG(self,text):
+    def getSentimentENG(self,text):                 #sentiment english from score
         if TextBlob(text).sentiment.polarity > 0:
             return 'positive'
         elif TextBlob(text).sentiment.polarity == 0:
@@ -60,9 +60,9 @@ class DataManager:
         else:
             return 'negative'
 
-    def getSentimentTH(self,text):
+    def getSentimentTH(self,text):      #sentiment thai
         # print(text)
-        text = re.sub(r'[%]',' ',text)
+        text = re.sub(r'[%]',' ',text)  #delete % in sentent
         # print(text)
         params = {'text':text}
         # print(json.dumps(params, sort_keys=False, indent=4))
@@ -77,7 +77,7 @@ class DataManager:
             pass
         return polarity
 
-    def formatdatetime(self,column):
+    def formatdatetime(self,column):    #set datetime format
         self.df[column] = pd.to_datetime(self.df[column],infer_datetime_format=True).dt.strftime('%Y/%m/%d')
         self.df[column] = pd.to_datetime(self.df[column])
     
@@ -85,22 +85,8 @@ class DataManager:
         self.df.sort_values(by=columns,inplace=True)
         return self.df
 
-    def unionfile(self,filenames):              #type filename -> list
-        self._start = 0
-        self.filenames = filenames
-        for file in filenames:
-            df1 = pd.read_csv(file)
-            if self._start != 0:
-                self.df = pd.concat([self.df,df1])
-                self.df.drop_duplicates(keep='last',inplace=True)
-            else:
-                self.df = df1
-                self._start += 1
-        self.keys = list(set(self.df['Keyword'].tolist()))
-        self.collectfile()
-        return self.df
     
-    def newUnion(self):
+    def newUnion(self):     #union tweet files to df
         path=os.getcwd()
         keys = []
         start = 0
@@ -108,39 +94,37 @@ class DataManager:
         totalFiles = 0
         for base, dirs, files in os.walk(file_folder):
             for directories in dirs:
-                keys.append(directories)
+                keys.append(directories)                                #append keyword 
             for Files in files:
-                totalFiles += 1
-        # for f in glob.glob(path+'/collectkeys/*'):
-        #     keyname = os.path.split(f)[-1]
-        #     keys.append(keyname)
+                totalFiles += 1                                         #count file
+
         for k in tqdm(keys):
-            for file in glob.glob(path+'/collectkeys/'+k+'/*.csv'):
-                #print(glob.glob(path+'/collectkeys/'+k+'/*.csv').index(file),totalFiles)
+            for file in glob.glob(path+'/collectkeys/'+k+'/*.csv'):     #access each file
+
                 if start == 0:
-                    self.df = pd.read_csv(file)
+                    self.df = pd.read_csv(file)                         #first dataframe        
                     start +=1
                 else:
                     dff = pd.read_csv(file)
                     self.df = pd.concat([self.df,dff])
         self.keys = keys
-        #self.collectfile()
+
         return self.df
     
     def setnewdf(self,dataframe):
         self.df = dataframe
         return self.df
     
-    def concatfile(self,dataframe):
+    def concatfile(self,dataframe):                         #concat df
         self.df = pd.concat([self.df,dataframe])
         self.df.drop_duplicates(keep='last',inplace=True)
         self.df.sort_values(by=['Keyword'],inplace=True)
         self.formatdatetime('Time')
-        self.keys = list(set(self.df['Keyword'].tolist()))
+        self.keys = list(set(self.df['Keyword'].tolist()))  #get keyword
         return self.df
     
     def setdefaultDF(self):
-        #self.df = self.unionfile(self.filenames)
+
         self.df = self.newUnion()
         return self.df
     
@@ -149,36 +133,28 @@ class DataManager:
         keys = list(set(self.df['Keyword'].tolist()))
         folder = "collectkeys"
         if not os.path.exists(folder):
-            os.mkdir(folder)    
+            os.mkdir(folder)                                        #create floder collectkey when not found
         for key in keys:
-            path = str(folder+'/'+key)
-            dff = self.df.loc[self.df['Keyword'].isin([key])]
-            days = list(set(dff['Time'].tolist()))
+            path = str(folder+'/'+key)                              #floder keyword in collectkey floder
+            dff = self.df.loc[self.df['Keyword'].isin([key])]       #get df data in range this keyword 
+            days = list(set(dff['Time'].tolist()))                  #get days in this keyword data
             if not os.path.exists(path):
-                os.mkdir(path)
-            for d in days:
+                os.mkdir(path)                                      #create keyword when not found floder
+            for d in days:                  
                 dfff = dff.loc[dff['Time'].isin([d])]
-                dfff.to_csv(path+'/'+key+'_'+d+'.csv',encoding='utf-8',index=False)
+                dfff.to_csv(path+'/'+key+'_'+d+'.csv',encoding='utf-8',index=False)     #create csv each day
         print('collect complete')
 
-    def getperiod(self,since,until):  ####column for twitter
+    def getperiod(self,since,until):  #column for twitter
 
         self.formatdatetime('Time')
         dff = self.df
         dff.sort_values(by=['Time','Keyword'],inplace=True)
-        if since == None and until != None:
-            mask = (dff['Time']<=until)
-        elif since != None and until == None:
-            mask = (dff['Time']>=since)
-        elif since != None and until != None:
-            mask = (dff['Time']>=since) & (dff['Time']<=until)
-        else:
-            return dff
+
+        mask = (dff['Time']>=since) & (dff['Time']<=until)            #mask range time
+
         return dff.loc[mask].sort_values(by=['Keyword','Time'])
 
-    def getrowwithkeys(self,keys):              #type keys -> list
-        df = self.df
-        return df.loc[df['Keyword'].isin(keys)]
 
     def collectwords(self,dataframe):
         #print(dataframe)
@@ -186,22 +162,22 @@ class DataManager:
         dataframe = dataframe.reset_index()
         th_stopwords = list(thai_stopwords())
         en_stops = set(stopwords.words('english'))
-        en_stops.update(list(string.ascii_lowercase))
+        en_stops.update(list(string.ascii_lowercase))                   #add alphabet lower and upper for not collect
         en_stops.update(list(string.ascii_uppercase))
-        en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
+        en_stops.update(['0','1','2','3','4','5','6','7','8','9'])      #add number for not collect
         word = {}
         countrow = len(dataframe.index)
         for index,row in dataframe.iterrows():    #only tweet
-            if row['Language'] == 'en':
+            if row['Language'] == 'en':             #this tweet is english language
                 allwords = str(row['Tweet']).split()
                 for w in allwords: 
                     if w not in en_stops:
                         if w in word:
-                            word[w] += 1
+                            word[w] += 1            #count word
                         else:
                             word[w] = 1
             elif row['Language'] == 'th':
-                allwords = word_tokenize(row['Tweet'], engine='newmm')
+                allwords = word_tokenize(row['Tweet'], engine='newmm')  #separate words for thai language
                 for w in allwords: 
                     if w not in th_stopwords:
                         if w in word:
@@ -215,18 +191,18 @@ class DataManager:
             del word['RT']  #for twitter
         if ' ' in word:
             del word[' ']   #for thai language
-        sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)
-        worddf = pd.DataFrame(sortword,columns=['Word','Count'])
+        sortword = sorted(word.items(),key=lambda x:x[1],reverse=True)      #sort words
+        worddf = pd.DataFrame(sortword,columns=['Word','Count'])            #set to dataframe
         return worddf   #word dataframe
         #return sortword     #tuple in list
     
     def deletekeyword(self,keyword):
-        path=os.getcwd()
+        path = os.getcwd()
         for k  in keyword:
-            shutil.rmtree(path+'//collectkeys//'+k+'//')
-            self.keys.remove(k)
-            #self.df.drop(self.df[self.df['Keyword']==k].index,inplace = True)
-            self.df = self.newUnion()
+            shutil.rmtree(os.path.join(path,'collectkeys', k ))     #delete keyword floder
+            self.keys.remove(k)                                     #remove keyword in self.keywords
+
+        self.df = self.newUnion()
         return self.df
     
     def convertJsonToDataframe(self,jsonDict):

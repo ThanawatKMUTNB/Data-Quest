@@ -2,6 +2,8 @@ from ast import keyword
 import encodings
 from msilib.schema import ListView
 from tabnanny import check
+from tkinter.messagebox import NO
+#from typing_extensions import Self
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
@@ -28,8 +30,6 @@ import nltk
 import string
 from nltk.corpus import stopwords
 from pythainlp.corpus import thai_stopwords
-
-import Web_thread as webTread
 
 import DataManager 
 import twitter_scrap
@@ -67,15 +67,12 @@ class Ui_MainWindow(QWidget):
         self.calendarDateClick = cn.qDateBegin()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
-        #self.df = dm.unionfile(self.filename) #win.readFile(win.path) save tweet file
+
         self.df = dm.newUnion()
         
-        #tw.setdataframe(self.df)
-        #tw.setdataframe(self.dt)
+
         self.dt = None
-        #tw.setdataframe(self.dt)
-        #self.data = win.OpenFile()
-        #pd.read_csv("tweet_data_2032022.csv", encoding='utf8',index_col=False)
+
         self.getSince = str
         self.getUntil = str
         '''self.getSince_2 = str
@@ -89,8 +86,8 @@ class Ui_MainWindow(QWidget):
         self.model = TableModel(self.df)
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
+        
         self.processWord = str
-
         #self.modelWeb = TableModel(dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation']))
         self.modelWeb = None
         self.tableWeb = QtWidgets.QTableView()
@@ -104,9 +101,10 @@ class Ui_MainWindow(QWidget):
         self.th_stopwords = list(thai_stopwords())
         nltk.download('stopwords')
         self.en_stops = set(stopwords.words('english'))
-        self.en_stops.update(list(string.ascii_lowercase))
+        self.en_stops.update(list(string.ascii_lowercase))                  #add alphabet lower and upper for not collect
         self.en_stops.update(list(string.ascii_uppercase))
-        self.en_stops.update(['0','1','2','3','4','5','6','7','8','9'])
+        self.en_stops.update(['0','1','2','3','4','5','6','7','8','9'])     #add number for not collect
+
 
     def showCalenderWin(self):
         self.MainWindow2 = QtWidgets.QMainWindow()
@@ -181,80 +179,62 @@ class Ui_MainWindow(QWidget):
         #print(self.getUntil)
         return self.getUntil_3
 
-    def showRealtime(self) : #BUTTON search key in this time
+    def showRealtime(self) : #BUTTON (search new) key in until time
         self.progressTime(0)
         print('real time')
-        if self.dateSinceReturn()>self.dateUntilReturn():
-            self.showErrorDialog()
+        if self.dateSinceReturn()>self.dateUntilReturn():                               #return when until date greater than since date
+            self.showErrorDialog()  
             return
         if datetime.now().date() <= self.dateUntilReturn():
             pass
-        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:
+        elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:             #can not search tweet until greater than 7 day
             self.showErrorDialog2()
             return
-        keywords = self.SearchBox1.text()
-        keywords = keywords.split(',')
-        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
-        self.t1 = TwitterThread(parent=None,df=self.df)
-        tw.setdataframe(self.df)
+        keywords = self.SearchBox1.text()                                               #get keyword from entry box
+        keywords = keywords.split(',')                                                  #split text
+        keywords = list(map(lambda x: x.lower(), keywords))                             #change all keywords to lower
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set datafram from date range
+        self.t1 = TwitterThread(parent=None,df=self.df)                                 #create thread
+        tw.setdataframe(self.df)                                                        #set dataframe same with self.df
         self.t1.setdataframe(self.df)
-        #self.t1.oldkey = self.keywords
         self.t1.until = str(self.dateUntilReturn())
         self.t1.Ans = 'real'
         if "" not in keywords:
             if self.showDialog() == 'Yes':
-                #self.t1 = TwitterThread(parent=None,df=self.df,key=keywords,Ans='real',until=str(self.dateUntilReturn()))
-                self.t1.key = keywords
+
+                self.t1.key = keywords                                                  #set keyword for search to thread
                 dhave = []
                 for keyword in keywords:
                     if keyword not in self.keywords:
                         dhave.append(keyword)
-                self.keywords.extend(dhave)
+                self.keywords.extend(dhave)                                             #add new keyword
                 self.t1.start()
-                self.t1.countkeys.connect(self.progressTime)
-                self.t1.dataframe.connect(self.setTableTab1)
-                #self.df = tw.searchkeys(keywords,'real',str(self.dateUntilReturn()))
-                
-                # self.model = TableModel(self.df) 
-                # self.table = QtWidgets.QTableView()
-                # self.table.setModel(self.model)
-                # self.tableView.setModel(self.model)
-            else:
-                return
-        else:
-            print('search new all keys')
-            if self.showDialog() == 'Yes':
-                self.t1.key = self.keywords
-                #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,Ans='real',until=str(self.dateUntilReturn()))
-                self.t1.start()
-                self.t1.countkeys.connect(self.progressTime)
-                self.t1.dataframe.connect(self.setTableTab1)
-                #self.df = tw.searchkeys(self.keywords,'real',str(self.dateUntilReturn()))
-                
-                # self.model = TableModel(self.df) 
-                # self.table = QtWidgets.QTableView()
-                # self.table.setModel(self.model)
-                # self.tableView.setModel(self.model)
-                #self.dateSet() 
-                
-            else:
-                return
-        #self.progressTime.value(0)
+                self.t1.countkeys.connect(self.progressTime)                            #get progreassbar value from thread to set
+                self.t1.dataframe.connect(self.setTableTab1)                            #get df to set
 
-    def showDefaultFileTweetW(self) : #Refresh BUTTON for show collectkey(Tab2)
+            else:
+                return
+        else:                                                                           #search all key
+            print('search new all keys')
+            if self.showDialog() == 'Yes':                                              #r u sure for search all?
+                self.t1.key = self.keywords
+
+                self.t1.start()
+                self.t1.countkeys.connect(self.progressTime)
+                self.t1.dataframe.connect(self.setTableTab1)
+
+                
+            else:
+                return
+        #self.progressBar.value(0)
+
+    def showDefaultFileTweetW(self) :                                                   #Refresh BUTTON for show collectkey(Tab2)
         self.model = TableModel(self.tw_worddf) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView_2.setModel(self.model)
         return
 
-    # def button1(self) :     #Search BUTTON
-        
-    #     #self.ShowdfTab1()
-    #     self.t1 = TwitterThread(parent=None)        #for can use GUI while data processing
-    #     self.t1.start()
-    #     self.t1.finished.connect(self.ShowdfTab1)
 
 
     def button1(self):          #Search BUTTON Tab1
@@ -265,115 +245,117 @@ class Ui_MainWindow(QWidget):
         if self.dateSinceReturn()>self.dateUntilReturn():
             self.showErrorDialog()
             return
-        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn())) #set day range dataframe 
-        #print(list(set(self.df['Keyword'].tolist())))
-        tw.setdataframe(self.df)        #set same dataframe for search 
-        self.t1 = TwitterThread(parent=None,df=self.df)
+        self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))     #set datafram from date range
+        self.t1 = TwitterThread(parent=None,df=self.df)                                     #startThread
         self.t1.setdataframe(self.df)
-        self.t1.oldkey = self.keywords
-        self.t1.until = str(self.dateUntilReturn())
-        
-
+        self.t1.oldkey = self.keywords                                                      #add old key to Thread
+        self.t1.until = str(self.dateUntilReturn())                                         #set until date for search
+        tw.setdataframe(self.df)                                                            #set same dataframe for search 
         keywords = self.SearchBox1.text()
         keywords = keywords.split(',')
-        keywords = list(map(lambda x: x.lower(), keywords))   #change to lower
+        keywords = list(map(lambda x: x.lower(), keywords))                                  #change all keyword to lower
         if "" not in keywords:
-            self.t1.key = keywords
-            print(len(keywords),keywords)
+            self.t1.key = keywords                                                           #set keyword for search
+            print(len(keywords),self.t1.key)
             dhave = []
             for keyword in keywords:
                 if keyword not in self.keywords:
-                    dhave.append(keyword)
-            if len(dhave) > 0:      #new keyword
-                if datetime.now().date() <= self.dateUntilReturn():         #for search until day greater than today
+                    dhave.append(keyword)                                                     #add new keyword
+            if len(dhave) > 0:                                                                #have new keyword
+                if datetime.now().date() <= self.dateUntilReturn():                           #for search until day greater than today
                     pass
-                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:     #cannot search twitter new keyword greater than 7 day
+                elif int(str(datetime.now().date()-self.dateUntilReturn())[0]) > 7:           #cannot search twitter new keyword greater than 7 day
                     self.showErrorDialog2()
                     return
-                if self.showDialog() == 'Yes':      #search new 
-                    self.t1.Ans = 'yes'
-                    self.keywords.extend(dhave)
-                    #self.df = tw.searchkeys(keywords ,'yes',str(self.dateUntilReturn()))
+                if self.showDialog() == 'Yes':                                                #search new keyword 
+                    self.t1.Ans = 'yes'                                                       #set answer to thread
+                    print('check\t',self.t1.oldkey)
                     self.t1.start()
-                    self.t1.countkeys.connect(self.progressTime)#
-                    self.t1.dataframe.connect(self.setTableTab1)
+                    self.t1.countkeys.connect(self.progressTime)                              #set progress bar value from thread for set
+                    self.t1.dataframe.connect(self.setTableTab1)                                            
+                    self.keywords.extend(dhave)                                               #add new keyword to self
                     
-                else:
-                    #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+                else:                                                                         #choose NO
+
                     return
                     
-            else:       #have key
-                #self.df = tw.searchkeys(keywords,'no',str(self.dateUntilReturn()))
+            else:                                                                             #search old keyword
+
                 self.t1.start()
-                #self.t1.countkeys.connect(self.progressTime)
                 self.t1.dataframe.connect(self.setTableTab1)
+
                 
-            self.t1.setdataframe(self.df)       #add new key to oldkey ??
+            self.t1.setdataframe(self.df)                                                       #set dataframe for do before thread   ###if delete u can not search new word because self.oldkey get bug
             tw.setdataframe(self.df)
-        else:
-            #self.t1 = TwitterThread(parent=None,df=self.df,key=self.keywords,until=str(self.dateUntilReturn()))
+        else:                                                                                   #search all old keywords
+
             self.setTableTab1(self.df)
-            # self.t1.key = self.keywords
-            # self.t1.start()
-            # self.t1.countkeys.connect(self.progressTime)
-            # self.t1.dataframe.connect(self.setTableTab1)
-        
 
-        print(len(self.df.index),tw.keys)
 
-        # self.model = TableModel(self.df) 
-        # self.table = QtWidgets.QTableView()
-        # self.table.setModel(self.model)
-        # self.tableView.setModel(self.model)
-        # self.labelShowKeywords()
-        # print('tab1 finish')
-                    
-        #self.t2.count.connect(self.progressTime)
+    
+
+
     def setPolarityTab1(self,df):
         polarity = df['Polarity'].value_counts()
         allrow = df.shape[0]
-        self.Tw_Positive = (polarity['positive']/allrow)*100
-        self.Tw_Negative = (polarity['negative']/allrow)*100
-        self.Tw_Neutral = (polarity['neutral']/allrow)*100
+        if allrow == 0:
+            allrow = 1
+        pola = {'positive':0,'negative':0,'neutral':0}
+        for p in pola:
+            if p in polarity:
+                pola[p] = int(polarity[p])                          #set polarity
+        self.Tw_Positive = (pola['positive']/allrow)*100            #persentage
+        self.Tw_Negative = (pola['negative']/allrow)*100
+        self.Tw_Neutral = (pola['neutral']/allrow)*100
+        self.Tw_Positive_Total = str(pola['positive'])              #total
+        self.Tw_Negative_Total = str(pola['negative'])
+        self.Tw_Neutral_Total = str(pola['neutral'])
+        _translate = QtCore.QCoreApplication.translate
+        self.labelPosTotal.setText(_translate("MainWindow", "Total " + self.Tw_Positive_Total + " tweets"))
+        self.labelNegaTotal.setText(_translate("MainWindow", "Total " + self.Tw_Negative_Total + " tweets"))
+        self.labelNeutralTotal.setText(_translate("MainWindow", "Total " + self.Tw_Neutral_Total + " tweets"))
+        self.pushButtonPos.setText(_translate("MainWindow", f"{self.Tw_Positive :.3f}" + "%"))
+        self.pushButtonNeu.setText(_translate("MainWindow", f"{self.Tw_Neutral:.3f}" + "%"))
+        self.pushButtonNega.setText(_translate("MainWindow", f"{self.Tw_Negative:.3f}" + "%"))
         #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
-        self.setPolarityTab1(df)
         self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
         self.tableView.setModel(self.model)
+        self.setPolarityTab1(df)                            #set GUI polarity
         self.labelShowKeywords()
-        dm.concatfile(df)
-        self.addlist()
-        self.progressTime(100)
+        dm.concatfile(df)                                   #concat new search file to main df
+        
+        self.addlist()                                      #set keyword list tab1 in GUI
+        self.progressTime(100)                              #set 100% progreassbar
         self.t1.stop()
-        time.sleep(1)
+        time.sleep(1)                                       #for can change tab
         self.t2 = CollectWordThread(parent=None,df=df,en_stops=self.en_stops,th_stopwords=self.th_stopwords)         #use df from tab1 to data processing tab2
         self.t2.start()
-        self.t2.count.connect(self.progressTime_2)
+        self.t2.count.connect(self.progressTime_2)                  #set progressbar2 value from thread
         self.t2.dataframe.connect(self.CollectwordTab2)             #use dataframe from ThreadClass to setupDataframe
         #self.progressTime(0)
          
     
     def CollectwordTab2(self,df):
         self.tw_worddf = df
-        self.addlist_2()
+        self.addlist_2()                                            #set keyword list tab2 in GUI
         self.model2 = TableModel(self.tw_worddf) 
         self.table2 = QtWidgets.QTableView()
         self.table2.setModel(self.model2)
         self.tableView_2.setModel(self.model2)
         #print('tab2 finish')
         self.t2.stop()
-        self.progressTime_2(0)
+        #self.progressTime_2(0)
         
-    def button2(self) : # TAB2 BUTTON for seach collect word[:10]
-        # if self.tw_worddf == None:
-        #     return
+    def button2(self) :                                                         # TAB2 BUTTON for seach collect word[:10]
+
         tw.setdataframe(dm.df)
-        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
-        tenwords = list(map(lambda x: x.lower(), tenwords))
-        self.t1 = TwitterThread(parent=None,df=self.df)
+        tenwords = self.tw_worddf['Word'].tolist()[:10]                         #get only top ten words in df
+        tenwords = list(map(lambda x: x.lower(), tenwords))                     #set all word to lower
+        self.t1 = TwitterThread(parent=None,df=self.df)                         #start thread for search
         self.t1.until = str(self.dateUntilReturn())
         self.t1.Ans = 'yes'
         if self.showDialog() == 'Yes':
@@ -382,11 +364,10 @@ class Ui_MainWindow(QWidget):
             dhave = []
             for keyword in tenwords:
                 if keyword not in self.keywords:
-                    dhave.append(keyword)
+                    dhave.append(keyword)                                          
             if len(dhave) > 0:
-                self.keywords.extend(dhave)
-                #self.df = tw.searchkeys(tenwords,'yes',str(self.dateUntilReturn()))
-                self.t1.key = tenwords
+                self.keywords.extend(dhave)                                       #add new keywords
+                self.t1.key = tenwords                                            #set keyword to tenword
                 self.t1.start()
                 self.t1.countkeys.connect(self.progressTime_2)
                 self.t1.dataframe.connect(self.searchCollectTab)
@@ -405,11 +386,11 @@ class Ui_MainWindow(QWidget):
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
-        self.tableView_2.setModel(self.model)
+        self.tableView_2.setModel(self.model)                                       #set df to tab2
     
     def searchCollectTab(self,df):
-        dm.concatfile(df)
-        self.addlist() 
+        dm.concatfile(df)                               #concat new search file to main dataframe
+        self.addlist()                                  #set keyword list to GUI
         self.t1.stop()
         self.model2 = TableModel(df) 
         self.table2 = QtWidgets.QTableView()
@@ -422,13 +403,13 @@ class Ui_MainWindow(QWidget):
         self.SearchBox1.clear()
         self.dateSet()
         self.df = dm.setdefaultDF()
-        #self.df = dm.unionfile(self.filename)
-        #self.df = dm.getperiod(str(self.dateSinceReturn()),str(self.dateUntilReturn()))
+
         print(len(self.df.index),tw.keys)
         self.model = TableModel(self.df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
         self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+        self.setPolarityTab1(self.df)
         self.progressTime(100)
         return
 
@@ -438,20 +419,25 @@ class Ui_MainWindow(QWidget):
             keywords = self.SearchBox1.text()
             keywords = keywords.split(',')
             keywords = list(map(lambda x: x.lower(), keywords))
+            for key in keywords:
+                if key not in self.keywords:                        #delete keys that never existed. 
+                    print('Key not found')
+                    return
             if "" not in keywords:
                 self.progressTime(0)
                 self.dateSet()
-                self.SearchBox1.clear()
+                self.SearchBox1.clear()                              #clear entry box
                 self.df = dm.deletekeyword(keywords)
                 self.keywords = self.df['Keyword'].tolist()
                 self.keywords = list(set(self.keywords))
                 self.addlist()
                 self.model = TableModel(self.df) 
                 self.table = QtWidgets.QTableView()
-                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-                self.tableView.setModel(self.model) #เอาตารางไปโชว์เลย
+                self.table.setModel(self.model)
+                self.tableView.setModel(self.model)
+                self.setPolarityTab1(self.df)
                 self.progressTime(100)
-            else:
+            else:                                                       #do not add keyword
                 print('nonKeyword')
                 return
         return 
@@ -540,11 +526,17 @@ class Ui_MainWindow(QWidget):
             return 'Yes'
         elif returnValue == QMessageBox.No: #ถ้ากด no จะทำอะไร
             return 'No'
-            
+
     def showTableWeb(self) :
+<<<<<<< HEAD
         # print("\n\n")
         # print(len(self.dt.index),'rows')
         # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+=======
+        print("\n\n")
+        #print(len(self.dt.index),'rows')
+        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+>>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
             return'''
@@ -561,24 +553,18 @@ class Ui_MainWindow(QWidget):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                '''if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
-                    self.showErrorDialog2()
-                    return'''
-                
                 if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
-                    # self.wt.keyword = self.keywords
-                    # self.dt = self.wt.getDf()
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
                     dm.concatfile(self.dt)
+                    #print(list(set(dm.df['Keyword'].tolist())))
                     self.addlist()
                 else:
-                    # self.wt.keyword = self.keyword
-                    # self.dt = self.wt.getDf()
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
                     
                 #dm.concatfile(self.dt)
             else:
+<<<<<<< HEAD
                 # print("Am here")
                 # self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
@@ -593,6 +579,11 @@ class Ui_MainWindow(QWidget):
         # self.wt.stop()
         # self.upgradeProgressWeb(100)
         
+=======
+                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+            #self.dateSet()    
+            #tw.setdataframe(self.dt)
+>>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -686,12 +677,39 @@ class Ui_MainWindow(QWidget):
             self.listView_3.addItem(item)
         return              
 
-    def deleteButton_3() : #สำหรับปุ่ม delete tab web
+    def deleteButton_3(self) : #สำหรับปุ่ม delete tab tweet
+        if self.showDeleteDialog() == "Yes":
+            keywords = self.SearchBox_3.text()
+            keywords = keywords.split(',')
+            keywords = list(map(lambda x: x.lower(), keywords))
+            if "" not in keywords:
+                #self.progressTime(0)
+                #self.dateSet()
+                self.SearchBox_3.clear()
+                self.dt = dm.deletekeyword(keywords)
+                self.keywords = self.df['Keyword'].tolist()
+                self.keywords = list(set(self.keywords))
+                self.addlist()
+                self.model = TableModel(self.dt) 
+                self.table = QtWidgets.QTableView()
+                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+                self.tableView_3.setModel(self.model) #เอาตารางไปโชว์เลย
+                #self.progressTime(100)
+            else:
+                print('nonKeyword')
+                return
+        return 
+
+    def deleteButton_3(self) : #สำหรับปุ่ม delete tab web
+        deleteKey = self.SearchBox_3.text()
+        deleteKey = deleteKey.split(',')
+        deleteKey = list(map(lambda x: x.lower(), deleteKey))
+        #print(deleteKey)
+        self.dt = dm.deletekeyword(deleteKey)
         return
     
-    def percentProgress(self) :
-        valueTime = 0
-        rowdf = valueTime/100
+    
+
         
 
     def progressTime(self,counter): #สำหรับให้ Progress bar ทำงานในช่วงฟังก์ชั่นไหนทำงาน #
@@ -703,6 +721,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar_2.setValue(counter)
 
     def progressTimeWeb(self) :
+<<<<<<< HEAD
         keywords = self.SearchBox_3.text()
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords)) 
@@ -725,6 +744,14 @@ class Ui_MainWindow(QWidget):
         # val = dm.test()          
         self.progressBar_3.setValue(val)
         
+=======
+        #self.percentProgress()
+        self.progressBar_3.setValue(100)
+        self.showTableWeb()
+        self.progressBar_3.setValue(0)
+
+
+>>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -745,15 +772,22 @@ class Ui_MainWindow(QWidget):
         self.gridLayout = QtWidgets.QGridLayout(self.tab)
         self.gridLayout.setObjectName("gridLayout")
         self.label_3 = QtWidgets.QLabel(self.tab)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
+        self.label_3.setSizePolicy(sizePolicy)
+        self.label_3.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 0, 4, 1, 1, QtCore.Qt.AlignHCenter)
+        self.gridLayout.addWidget(self.label_3, 0, 8, 1, 1)
         self.dateEdit_1 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_1.setObjectName("dateEdit_1")
-        self.gridLayout.addWidget(self.dateEdit_1, 0, 3, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit_1, 0, 7, 1, 1)
         self.dateEdit_2 = QtWidgets.QDateEdit(self.tab)
         self.dateEdit_2.setObjectName("dateEdit_2")
-        self.gridLayout.addWidget(self.dateEdit_2, 0, 5, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit_2, 0, 9, 1, 1)
 
         #self.settime = self.df['Keywords'].apply(lambda x:x**3) #มันเรียกเอา column ทั้งหมดมานับแล้วำนวณเป็นเวลาออกมา
         self.progressBar = QProgressBar(self.tab)
@@ -767,7 +801,7 @@ class Ui_MainWindow(QWidget):
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar, 4, 4, 1, 2) 
+        self.gridLayout.addWidget(self.progressBar, 7, 1, 1, 9) 
 
         self.tableView = QtWidgets.QTableView(self.tab)
         self.tableView.setEnabled(True)
@@ -777,23 +811,71 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.tableView.sizePolicy().hasHeightForWidth())
         self.tableView.setSizePolicy(sizePolicy)
         self.tableView.setObjectName("tableView")
-        self.gridLayout.addWidget(self.tableView, 3, 1, 1, 5)
+        self.gridLayout.addWidget(self.tableView, 3, 1, 1, 9)
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
+
+        self.line = QtWidgets.QFrame(self.tab)
+        self.line.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.gridLayout.addWidget(self.line, 4, 3, 3, 1)
+        self.line_2 = QtWidgets.QFrame(self.tab)
+        self.line_2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.gridLayout.addWidget(self.line_2, 4, 6, 3, 1)
+        self.labelPosTotal = QtWidgets.QLabel(self.tab)
+        self.labelPosTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelPosTotal.setObjectName("labelPosTotal")
         
+        self.gridLayout.addWidget(self.labelPosTotal, 6, 1, 1, 2)
+        self.labelPos = QtWidgets.QLabel(self.tab)
+        self.labelPos.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelPos.setObjectName("labelPos")
+        self.labelPos.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        self.gridLayout.addWidget(self.labelPos, 4, 1, 1, 2)
+        self.pushButtonPos = QtWidgets.QPushButton(self.tab)
+        self.pushButtonPos.setObjectName("pushButtonPos")
+        self.gridLayout.addWidget(self.pushButtonPos, 5, 1, 1, 2)
+        self.pushButtonNeu = QtWidgets.QPushButton(self.tab)
+        self.pushButtonNeu.setObjectName("pushButtonNeu")
+        self.gridLayout.addWidget(self.pushButtonNeu, 5, 7, 1, 3)
+        self.pushButtonNega = QtWidgets.QPushButton(self.tab)
+        self.pushButtonNega.setObjectName("pushButtonNega")
+        self.gridLayout.addWidget(self.pushButtonNega, 5, 4, 1, 2)
+        self.labelNega = QtWidgets.QLabel(self.tab)
+        self.labelNega.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNega.setObjectName("labelNega")
+        self.labelNega.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        self.gridLayout.addWidget(self.labelNega, 4, 4, 1, 2)
+        self.labelNegaTotal = QtWidgets.QLabel(self.tab)
+        self.labelNegaTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNegaTotal.setObjectName("labelNegaTotal")
+        self.gridLayout.addWidget(self.labelNegaTotal, 6, 4, 1, 2)
+        self.labelNeutral = QtWidgets.QLabel(self.tab)
+        self.labelNeutral.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNeutral.setObjectName("labelNeutral")
+        self.labelNeutral.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        self.gridLayout.addWidget(self.labelNeutral, 4, 7, 1, 3)
+        self.labelNeutralTotal = QtWidgets.QLabel(self.tab)
+        self.labelNeutralTotal.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelNeutralTotal.setObjectName("labelNeutralTotal")
+        self.gridLayout.addWidget(self.labelNeutralTotal, 6, 7, 1, 3)
         self.label_2 = QtWidgets.QLabel(self.tab)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
+        self.label_2.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
 
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
         self.PushButton_2.clicked.connect(self.showRealtime)
 
-        self.gridLayout.addWidget(self.PushButton_2, 2, 5, 1, 1)
+        self.gridLayout.addWidget(self.PushButton_2, 2, 9, 1, 1)
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
         self.PushButton_1.setObjectName("PushButton_1")
-        self.gridLayout.addWidget(self.PushButton_1, 2, 4, 1, 1)
+        self.gridLayout.addWidget(self.PushButton_1, 2, 7, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -825,7 +907,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setSizePolicy(sizePolicy)
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
-        self.gridLayout.addWidget(self.listView, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.listView, 3, 0, 4, 1)
         #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
@@ -836,7 +918,7 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.SearchBox1.sizePolicy().hasHeightForWidth())
         self.SearchBox1.setSizePolicy(sizePolicy)
         self.SearchBox1.setObjectName("SearchBox1")
-        self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 3)
+        self.gridLayout.addWidget(self.SearchBox1, 2, 1, 1, 6)
         #test = self.SearchBox1.text() #text
         #checkNew1 = functools.partial(self.checkInput,self.SearchBox1.text())
         #self.PushButton_1.clicked.connect(checkNew1)
@@ -844,9 +926,11 @@ class Ui_MainWindow(QWidget):
         self.label_1 = QtWidgets.QLabel(self.tab)
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
         self.label_1.setObjectName("label_1")
-        self.gridLayout.addWidget(self.label_1, 1, 0, 1, 6)
+        self.label_1.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        self.gridLayout.addWidget(self.label_1, 1, 2, 1, 1)
         #self.processBarGUI()
         self.tabWidget.addTab(self.tab, "")
+        self.setPolarityTab1(self.df)
         
 
         #tab2 
@@ -892,10 +976,12 @@ class Ui_MainWindow(QWidget):
         self.label_4 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Tweeter keyword"
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label1")
+        self.label_4.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_4, 1, 0, 1, 6)
         self.label_5 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "Keyword"
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName("label2")
+        self.label_5.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
         '''self.label_6 = QtWidgets.QLabel(self.tab_2) #แสดงคำว่า "to"
         self.label_6.setAlignment(QtCore.Qt.AlignCenter)
@@ -931,6 +1017,7 @@ class Ui_MainWindow(QWidget):
         
         self.labelShow = QtWidgets.QLabel(self.tab_2)
         self.labelShow.setEnabled(True)
+        self.labelShow.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -974,6 +1061,7 @@ class Ui_MainWindow(QWidget):
         self.label_8 = QtWidgets.QLabel(self.tab_3)
         self.label_8.setAlignment(QtCore.Qt.AlignCenter)
         self.label_8.setObjectName("label2")
+        self.label_8.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_8, 2, 0, 1, 1)
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
@@ -1000,7 +1088,7 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
         self.progressBar_3.setSizePolicy(sizePolicy)
         self.progressBar_3.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar_3.setTextVisible(True)
+        self.progressBar_3.setTextVisible(False)
         self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_3.setObjectName("progressBar")
@@ -1046,6 +1134,7 @@ class Ui_MainWindow(QWidget):
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
+        self.label_7.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
         self.dateSet_3()
         self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
@@ -1078,6 +1167,10 @@ class Ui_MainWindow(QWidget):
         self.label_1.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_2.setText(_translate("MainWindow", "Keyword"))
         self.label_3.setText(_translate("MainWindow", "to"))
+        self.labelPos.setText(_translate("MainWindow", "Positive"))
+        self.labelNega.setText(_translate("MainWindow", "Negative"))
+        self.labelNeutral.setText(_translate("MainWindow", "Neutral"))
+        self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
@@ -1089,7 +1182,7 @@ class Ui_MainWindow(QWidget):
         self.label_4.setText(_translate("MainWindow", "Twitter keyword"))
         self.label_5.setText(_translate("MainWindow", "Keyword"))
         #self.label_6.setText(_translate("MainWindow", "to"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "TweetW"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "WordTweet"))
 
         self.PushButton_5.setText(_translate("MainWindow", "Search"))
         self.PushButton_6.setText(_translate("MainWindow", "Search new"))
