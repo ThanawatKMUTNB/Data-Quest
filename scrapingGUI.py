@@ -129,17 +129,17 @@ class Ui_MainWindow(QWidget):
 
     def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        dm.formatdatetime('Time')
-        since = dm.df['Time'].min().strftime('%Y/%m/%d')
-        date = (datetime.strptime(since,'%Y/%m/%d')).date()
+        #dm.formatdatetime('Time')
+        since = dm.df['Time'].min()#.strftime('%Y-%m-%d')
+        date = (datetime.strptime(since,'%Y-%m-%d')).date()
         self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_5.dateChanged.connect(self.dateSinceReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         #date2 = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        until = dm.df['Time'].max().strftime('%Y/%m/%d')
-        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
+        until = dm.df['Time'].max()#.strftime('%Y-%m-%d')
+        date2 = (datetime.strptime(str(until),'%Y-%m-%d')).date()
         self.dateEdit_6.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
-        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช
+        self.dateEdit_6.dateChanged.connect(self.dateUntilReturnWeb) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
     '''def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
@@ -1097,11 +1097,16 @@ class Ui_MainWindow(QWidget):
         sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
         self.progressBar_3.setSizePolicy(sizePolicy)
         self.progressBar_3.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.progressBar_3.setTextVisible(False)
+        self.progressBar_3.setTextVisible(True)
         self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.progressBar_3.setObjectName("progressBar")
-        self.gridLayout.addWidget(self.progressBar_3, 4,4, 1, 2) 
+        self.gridLayout.addWidget(self.progressBar_3, 7,1, 1, 5) 
+
+        self.exportButtonWeb = QtWidgets.QPushButton(self.tab)
+        self.exportButtonWeb.setObjectName("exportButtonWeb")
+        self.exportButtonWeb.clicked.connect(self.ExportTab1)
+        self.gridLayout.addWidget(self.exportButtonWeb, 7, 0, 1, 1)
 
         self.listView_3 = QtWidgets.QListWidget(self.tab_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -1198,6 +1203,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_6.setText(_translate("MainWindow", "Search new"))
         self.PushButtonRefresh_3.setText(_translate("MainWindow", ""))
         self.PushButtonDelete_3.setText(_translate("MainWindow", ""))
+        self.exportButtonWeb.setText(_translate("MainWindow", "Export"))
         self.label_7.setText(_translate("MainWindow", "Web scraping"))
         self.label_8.setText(_translate("MainWindow", "Keyword"))
         self.label_9.setText(_translate("MainWindow", "to"))
