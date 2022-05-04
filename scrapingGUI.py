@@ -64,7 +64,7 @@ class Ui_MainWindow(QWidget):
     
     def __init__(self):
         super().__init__()
-        self.calendarDateClick = cn.qDateBegin()
+        #self.calendarDateClick = cn.qDateBegin()
         self.table = QtWidgets.QTableView()
         self.filename = glob.glob(str(str(os.getcwd())+"\\Backup_Data\\*.csv"))
 

@@ -681,6 +681,7 @@ class DataManager:
     
 
     def startSearch(self,Ldate,LWord):# date []
+        print(Ldate,LWord)
         ListOfDate = self.date_range(Ldate[0],Ldate[1])
         # print("List Of Date : ",ListOfDate)
         # print("List Of Word : ",LWord)

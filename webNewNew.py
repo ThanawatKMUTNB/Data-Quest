@@ -2,6 +2,7 @@ import calendar
 from ast import keyword
 import encodings
 from msilib.schema import ListView
+from pickle import NONE
 from tabnanny import check
 from xml.etree.ElementTree import tostring
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -14,7 +15,7 @@ import glob
 from os.path import dirname, realpath, join
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidget, QTableWidgetItem,QMessageBox, QProgressBar
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import functools
@@ -36,8 +37,8 @@ import scrapingGUI
 class Ui_MainWindowSecond(object):
     def __init__(self):
         super().__init__()
-        self.qDateBegin = str
-        self.qDateEnd = str
+        self.qDateBegin = None
+        self.qDateEnd = None
         self.enterM = str
 
     def showTableWebNewTab(self) :
@@ -86,33 +87,44 @@ class Ui_MainWindowSecond(object):
 
     def enterMassage(self) :
         enterM = self.textBrowser.text()
-        DataManager.DataManager.startSearch([self.qDateBegin, self.qDateEnd],[enterM])
+        #enterM = enterM.split(',')
+        #enterM = list(map(lambda x: x.lower(), enterM))   #change to lower
+        DataManager.DataManager().startSearch([self.dateSinceReturn(),self.dateUntilReturn()],[enterM])
         
     def dateSet(self) :
-        since = datetime.now().date()
-        date = (datetime.strptime(str(since),'%Y-%m-%d'))
+        
+        since = datetime.now().date().strftime('%Y/%m/%d')
+        print(since)
+        print(type(since))
+        date = (datetime.strptime(since,'%Y/%m/%d')).date()
         self.dateEdit.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit.dateChanged.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
-        until = datetime.now().date()
-        date2 = (datetime.strptime(str(until),'%Y-%m-%d'))
+        until = datetime.now().date().strftime('%Y/%m/%d')
+        date2 = (datetime.strptime(until,'%Y/%m/%d')).date()
         self.dateEdit_2.setDate(date2) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
         self.dateEdit_2.dateChanged.connect(self.dateUntilReturn)
 
     def dateSinceReturn(self) :
-        self.qDateBegin = self.dateEdit.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        dateChange = self.dateEdit.date().toPyDate()
+        dateDataBegin = str(dateChange.strftime('%d-%m-%Y'))
         #print(self.getSince)
-        return self.qDateBegin
+        return dateDataBegin
 
     def dateUntilReturn(self) :
-        self.qDateEnd = self.dateEdit_2.date().toPyDate() #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
+        dateChange = self.dateEdit_2.date().toPyDate()
+        dateDataEnd = str(dateChange.strftime('%d-%m-%Y'))  #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getUntil)
-        return self.qDateEnd
+        return dateDataEnd
 
     '''def printDateInfo(self, qDate):
         calendarDate = '{0}-{1}-{2}'.format(qDate.day(),qDate.month(),qDate.year())
         print(calendarDate)
         return self.qDate'''
+    
+    def testDate(self) :
+        enterM = self.textBrowser.text()
+        print(enterM)
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -139,6 +151,7 @@ class Ui_MainWindowSecond(object):
         self.dateEdit_2 = QtWidgets.QDateEdit(self.centralwidget)
         self.dateEdit_2.setObjectName("dateEdit_2")
         self.gridLayout.addWidget(self.dateEdit_2, 1, 2, 1, 1)
+        self.dateSet()
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.label_2.setObjectName("label_2")
@@ -147,13 +160,14 @@ class Ui_MainWindowSecond(object):
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 2, 3, 1, 1)
         self.pushButton.clicked.connect(self.enterMassage) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        #self.pushButton.clicked.connect(self.testDate)
 
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setObjectName("pushButton_2")
         self.gridLayout.addWidget(self.pushButton_2, 2, 4, 1, 1)
         self.pushButton_2.clicked.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
-        self.dateSet()
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 536, 26))
@@ -175,4 +189,14 @@ class Ui_MainWindowSecond(object):
         self.pushButton.setText(_translate("MainWindow", "OK"))
         self.pushButton_2.setText(_translate("MainWindow", "Cancel"))
 
-
+if __name__ == "__main__":
+    #dm = DataManager.DataManager()
+    #tw = twitter_scrap.Twitter_Scrap()
+    #Dialog = QtWidgets.QDialog()
+    # = webNewNew.Ui_MainWindowSecond()
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindowSecond()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
