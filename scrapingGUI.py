@@ -242,6 +242,7 @@ class Ui_MainWindow(QWidget):
             os.remove(fname)
         self.df.to_csv(fname,index=False)
         print('Export Complete')
+        self.showExportDialog()
 
     def button1(self):          #Search BUTTON Tab1
         print("\n\n")
@@ -326,6 +327,7 @@ class Ui_MainWindow(QWidget):
         #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
+        self.df = df
         self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -626,6 +628,15 @@ class Ui_MainWindow(QWidget):
         msg.setText("Since date less than Until date")
         #msg.setInformativeText('More information')
         msg.setWindowTitle("Period time Error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+    
+    def showExportDialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Export file Complete")
+        #msg.setInformativeText('More information')
+        msg.setWindowTitle("Export to CSV")
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
