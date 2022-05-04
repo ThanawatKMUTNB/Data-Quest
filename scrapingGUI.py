@@ -737,12 +737,8 @@ class Ui_MainWindow(QWidget):
         self.progressBar_3.setValue(0)
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
-<<<<<<< HEAD
         
         self.wt = WebThread.WebThread(None,sd,ed,keywords)
-=======
-        #self.wt = webTread.WebThread(None,sd,ed,keywords)
->>>>>>> 48eb8014981312678ad2cb77a2e194ce64ed7f14
         # print(sd,ed,keywords)
         self.wt.start()
         self.wt.any_signal.connect(self.upgradeProgressWeb)
