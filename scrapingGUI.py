@@ -236,7 +236,14 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model)
         return
 
-
+    def ExportTab1(self):
+        fname = 'Tweetcsv.csv'
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%d/%m/%Y')
+        if fname in glob.glob('*.csv'):
+            os.remove(fname)
+        self.df.to_csv(fname,index=False)
+        print('Export Complete')
+        self.showExportDialog()
 
     def button1(self):          #Search BUTTON Tab1
         print("\n\n")
@@ -321,6 +328,7 @@ class Ui_MainWindow(QWidget):
         #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
+        self.df = df
         self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -414,6 +422,7 @@ class Ui_MainWindow(QWidget):
         self.progressTime(100)
         return
 
+    
 
     def deleteButton_1(self) : #สำหรับปุ่ม delete tab tweet
         if self.showDeleteDialog() == "Yes":
@@ -626,6 +635,15 @@ class Ui_MainWindow(QWidget):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
+    def showExportDialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Export file Complete")
+        #msg.setInformativeText('More information')
+        msg.setWindowTitle("Export to CSV")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+    
     def showErrorDialog2(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -719,8 +737,12 @@ class Ui_MainWindow(QWidget):
         self.progressBar_3.setValue(0)
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
+<<<<<<< HEAD
         
         self.wt = WebThread.WebThread(None,sd,ed,keywords)
+=======
+        #self.wt = webTread.WebThread(None,sd,ed,keywords)
+>>>>>>> 48eb8014981312678ad2cb77a2e194ce64ed7f14
         # print(sd,ed,keywords)
         self.wt.start()
         self.wt.any_signal.connect(self.upgradeProgressWeb)
@@ -800,6 +822,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
 
+
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -856,11 +879,16 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
         self.PushButton_2.clicked.connect(self.showRealtime)
-
         self.gridLayout.addWidget(self.PushButton_2, 2, 9, 1, 1)
+
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
         self.PushButton_1.setObjectName("PushButton_1")
         self.gridLayout.addWidget(self.PushButton_1, 2, 7, 1, 1)
+
+        self.exportButton = QtWidgets.QPushButton(self.tab)
+        self.exportButton.setObjectName("exportButton")
+        self.exportButton.clicked.connect(self.ExportTab1)
+        self.gridLayout.addWidget(self.exportButton, 7, 0, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -892,7 +920,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setSizePolicy(sizePolicy)
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
-        self.gridLayout.addWidget(self.listView, 3, 0, 4, 1)
+        self.gridLayout.addWidget(self.listView, 2, 0, 4, 1)
         #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
@@ -1158,6 +1186,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
+        self.exportButton.setText(_translate("MainWindow", "Export"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.PushButtonDelete.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
