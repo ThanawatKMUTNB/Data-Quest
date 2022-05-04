@@ -23,6 +23,7 @@ import numpy as np
 from regex import W
 from tqdm import tqdm
 from requests import delete
+import Web_thread as WebThread
 import importWin as windo 
 import time
 import threading
@@ -242,6 +243,7 @@ class Ui_MainWindow(QWidget):
             os.remove(fname)
         self.df.to_csv(fname,index=False)
         print('Export Complete')
+        self.showExportDialog()
 
     def button1(self):          #Search BUTTON Tab1
         print("\n\n")
@@ -326,6 +328,7 @@ class Ui_MainWindow(QWidget):
         #print(self.Tw_Neutral,self.Tw_Positive,self.Tw_Negative)
     
     def setTableTab1(self,df):
+        self.df = df
         self.model = TableModel(df) 
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.model)
@@ -567,17 +570,20 @@ class Ui_MainWindow(QWidget):
             else:
                 # print("Am here")
                 # self.wt.start()
+                # self.wt.any_signal.connect(self.upgradeProgressWeb)
+                self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
                 self.dt = self.wt.getDf()
-                self.wt.any_signal.connect(self.upgradeProgressWeb)
+                # print(len(self.dt))
+                # self.wt.any_signal.connect(self.upgradeProgressWeb)
         
                 # dm.concatfile(self.dt)
-                # self.wt.stop()
+                self.wt.stop()
+                # self.upgradeProgressWeb(0)
             #self.dateSet()    
             #tw.setdataframe(self.dt)
-
         # self.wt.stop()
-        # self.upgradeProgressWeb(100)
+        # self.upgradeProgressWeb(0)
         
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
@@ -626,6 +632,15 @@ class Ui_MainWindow(QWidget):
         msg.setText("Since date less than Until date")
         #msg.setInformativeText('More information')
         msg.setWindowTitle("Period time Error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+    
+    def showExportDialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Export file Complete")
+        #msg.setInformativeText('More information')
+        msg.setWindowTitle("Export to CSV")
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
@@ -722,19 +737,25 @@ class Ui_MainWindow(QWidget):
         self.progressBar_3.setValue(0)
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
+<<<<<<< HEAD
+        
+        self.wt = WebThread.WebThread(None,sd,ed,keywords)
+=======
         #self.wt = webTread.WebThread(None,sd,ed,keywords)
+>>>>>>> 48eb8014981312678ad2cb77a2e194ce64ed7f14
         # print(sd,ed,keywords)
-        # self.wt.start()
         self.wt.start()
         self.wt.any_signal.connect(self.upgradeProgressWeb)
-                
+        # self.wt.finished.connect(self.finishedThread)
+        # self.wt.start()
+        
         self.showTableWeb()
         
         # self.wt.stop()
         # self.progressBar_3.setValue(0)
         
     def upgradeProgressWeb(self,val):
-        print("\nupgradeProgressWeb : ",val,'\n')
+        # print("\nupgradeProgressWeb : ",val,'\n')
         # val = dm.test()          
         self.progressBar_3.setValue(val)
         
