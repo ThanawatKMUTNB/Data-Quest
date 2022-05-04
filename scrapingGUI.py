@@ -766,6 +766,13 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
 
+        
+        self.exportButton = QtWidgets.QPushButton(self.tab)
+        self.exportButton.setObjectName("PushButtonExport")
+        #self.exportButton.clicked.connect(self.) #เชื่้อมได้เลย
+        #self.exportButton.setGeometry(QtCore.QRect(11, 683, 93, 28))
+        self.gridLayout.addWidget(self.exportButton, 7, 0, 1, 1)
+
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -858,7 +865,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setSizePolicy(sizePolicy)
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
-        self.gridLayout.addWidget(self.listView, 3, 0, 4, 1)
+        self.gridLayout.addWidget(self.listView, 2, 0, 4, 1)
         #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
@@ -1124,6 +1131,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
+        self.exportButton.setText(_translate("MainWindow", "Export"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.PushButtonDelete.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
