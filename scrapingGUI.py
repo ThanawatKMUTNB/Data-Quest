@@ -574,16 +574,10 @@ class Ui_MainWindow(QWidget):
                 self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
                 self.dt = self.wt.getDf()
+                print(self.wt.result)
                 # print(len(self.dt))
-                # self.wt.any_signal.connect(self.upgradeProgressWeb)
-        
-                # dm.concatfile(self.dt)
-                self.wt.stop()
-                # self.upgradeProgressWeb(0)
             #self.dateSet()    
             #tw.setdataframe(self.dt)
-        # self.wt.stop()
-        # self.upgradeProgressWeb(0)
         
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
@@ -754,6 +748,7 @@ class Ui_MainWindow(QWidget):
         # print("\nupgradeProgressWeb : ",val,'\n')
         # val = dm.test()          
         self.progressBar_3.setValue(val)
+<<<<<<< HEAD
     
     def exportWeb(self) :
         fname = 'Webcsv.csv'
@@ -781,6 +776,13 @@ class Ui_MainWindow(QWidget):
 
 
 
+=======
+        if val == 100:
+            self.progressBar_3.setValue(0)
+            self.wt.stop()
+            
+        
+>>>>>>> 7a6f4b23f67df3fa56d24bbbab168dbd4e173c5b
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
