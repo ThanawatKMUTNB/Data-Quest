@@ -574,10 +574,16 @@ class Ui_MainWindow(QWidget):
                 self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
                 self.dt = self.wt.getDf()
-                print(self.wt.result)
                 # print(len(self.dt))
+                # self.wt.any_signal.connect(self.upgradeProgressWeb)
+        
+                # dm.concatfile(self.dt)
+                self.wt.stop()
+                # self.upgradeProgressWeb(0)
             #self.dateSet()    
             #tw.setdataframe(self.dt)
+        # self.wt.stop()
+        # self.upgradeProgressWeb(0)
         
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
@@ -748,7 +754,6 @@ class Ui_MainWindow(QWidget):
         # print("\nupgradeProgressWeb : ",val,'\n')
         # val = dm.test()          
         self.progressBar_3.setValue(val)
-<<<<<<< HEAD
     
     def exportWeb(self) :
         fname = 'Webcsv.csv'
@@ -756,33 +761,19 @@ class Ui_MainWindow(QWidget):
             print("Not have data")
             pass
         else :
-            self.dt['Date'] = pd.to_datetime(self.dt['Date'])
-            if fname in glob.glob('*.csv'):
-                os.remove(fname)
-            self.df.to_csv(fname,index=False)
-            print('Export Complete')
-            self.showExportDialog()
-        '''file_filter = 'Data File (*.xlsx *.csv *.dat);; Excel File (*.xlsx *.xls)'
-        response = QFileDialog.getSaveFileName(
+            file_filter = 'Data File (*.xlsx *.csv *.dat);; Excel File (*.xlsx *.xls)'
+            response = QFileDialog.getSaveFileName(
             parent=self,
             caption='Select a data file',
             directory= 'Data File.dat',
             filter=file_filter,
             initialFilter='Excel File (*.xlsx *.xls)'
-        )
-        print(response)
-        y = str(response)
-        dt = self.dt.to_csv(y,index = False, header=True)'''
+            )
+            self.dt.to_csv(response, index = False, header=True)
+            #print(response)
 
 
 
-=======
-        if val == 100:
-            self.progressBar_3.setValue(0)
-            self.wt.stop()
-            
-        
->>>>>>> 7a6f4b23f67df3fa56d24bbbab168dbd4e173c5b
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
