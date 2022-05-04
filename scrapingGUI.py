@@ -23,6 +23,7 @@ import numpy as np
 from regex import W
 from tqdm import tqdm
 from requests import delete
+import Web_thread as WebThread
 import importWin as windo 
 import time
 import threading
@@ -528,15 +529,9 @@ class Ui_MainWindow(QWidget):
             return 'No'
 
     def showTableWeb(self) :
-<<<<<<< HEAD
         # print("\n\n")
         # print(len(self.dt.index),'rows')
         # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
-=======
-        print("\n\n")
-        #print(len(self.dt.index),'rows')
-        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
             return'''
@@ -564,26 +559,23 @@ class Ui_MainWindow(QWidget):
                     
                 #dm.concatfile(self.dt)
             else:
-<<<<<<< HEAD
                 # print("Am here")
                 # self.wt.start()
+                # self.wt.any_signal.connect(self.upgradeProgressWeb)
+                self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
                 self.dt = self.wt.getDf()
-                self.wt.any_signal.connect(self.upgradeProgressWeb)
+                # print(len(self.dt))
+                # self.wt.any_signal.connect(self.upgradeProgressWeb)
         
                 # dm.concatfile(self.dt)
-                # self.wt.stop()
+                self.wt.stop()
+                # self.upgradeProgressWeb(0)
             #self.dateSet()    
             #tw.setdataframe(self.dt)
-
         # self.wt.stop()
-        # self.upgradeProgressWeb(100)
+        # self.upgradeProgressWeb(0)
         
-=======
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
-            #self.dateSet()    
-            #tw.setdataframe(self.dt)
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -721,37 +713,30 @@ class Ui_MainWindow(QWidget):
         self.progressBar_2.setValue(counter)
 
     def progressTimeWeb(self) :
-<<<<<<< HEAD
         keywords = self.SearchBox_3.text()
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords)) 
         self.progressBar_3.setValue(0)
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
-        self.wt = webTread.WebThread(None,sd,ed,keywords)
+        
+        self.wt = WebThread.WebThread(None,sd,ed,keywords)
         # print(sd,ed,keywords)
-        # self.wt.start()
         self.wt.start()
         self.wt.any_signal.connect(self.upgradeProgressWeb)
-                
+        # self.wt.finished.connect(self.finishedThread)
+        # self.wt.start()
+        
         self.showTableWeb()
         
         # self.wt.stop()
         # self.progressBar_3.setValue(0)
         
     def upgradeProgressWeb(self,val):
-        print("\nupgradeProgressWeb : ",val,'\n')
+        # print("\nupgradeProgressWeb : ",val,'\n')
         # val = dm.test()          
         self.progressBar_3.setValue(val)
         
-=======
-        #self.percentProgress()
-        self.progressBar_3.setValue(100)
-        self.showTableWeb()
-        self.progressBar_3.setValue(0)
-
-
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)

@@ -659,24 +659,43 @@ class DataManager:
                     self.setDictSentiment(soup,l,p,todayByFile)
     
     def getReadByKeyword(self,date,kw):
+        # print("\ngetReadByKeyword ",type(date),date)
         DList = []
-        path = os.path.join("web search",date)
-        for root, dirs, files in os.walk(path):
-            for name in files:
-                # print(name)
-                nameOnly = name.split(".")
-                if kw == nameOnly[0] : 
+        FileName = []
+        try:
+            path = os.path.join("web search",str(date))
+            # print("Path : ",path)
+            for root, dirs, files in os.walk(path):
+                for name in files:
                     # print(name)
-                    DList.append(pd.read_csv(os.path.join(path,name)).drop_duplicates())
-                    
-                nameOnly = name.split("(")
-                if kw == nameOnly[0] : 
-                    # print(name)
-                    DList.append(pd.read_csv(os.path.join(path,name)).drop_duplicates())
-                    # DList.append(len(pd.read_csv(os.path.join(path,name)).drop_duplicates()))
-                    # DList.append(os.path.abspath(os.path.join(root, name)))
-                    # print(os.path.abspath(os.path.join(root, name)))
-        # print("File : ",len(DList))
+                    try:
+                        nameOnly = name.split(".")
+                        nameOnly1 = name.split("(")
+                        newPath = os.path.join(path,name)
+                        if kw == nameOnly[0] or kw == nameOnly1[0] : 
+                            # print(name)
+                            # print("newPath ",newPath)
+                            FileName.append(newPath)
+                            # df = pd.read_csv(str(newPath))
+                            # DList.append(df)
+                    except :
+                        print("Error Loop In : ", newPath)
+                        pass
+            #     print("Loop In")
+            # print("File : ",len(FileName))
+            for i in FileName:
+                try:
+                    df = pd.read_csv(i)
+                    DList.append(df)
+                except :
+                    print("Error Read File : ", i)
+                    pass
+                # df = pd.read_csv(i)
+                # DList.append(df)
+            print("Dataframe : ",len(DList))
+        except :
+            print("Big Loop")
+            pass
         return DList
     
 
