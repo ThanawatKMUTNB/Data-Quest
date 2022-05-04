@@ -39,7 +39,7 @@ class WebThread(QThread):
         dfResult = []
         self.FullLen =  len(ListOfDate)+1
         self.currentLen = 0
-        path = "C:/Users/tongu/Desktop/Web SC 2/Web-Scraping/web search"
+        path = "web search"
         checkDate = os.listdir(path)
         print("checkDate : ",checkDate)
         for j in ListOfDate:
