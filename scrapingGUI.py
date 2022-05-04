@@ -129,7 +129,7 @@ class Ui_MainWindow(QWidget):
 
     def dateSet_3(self) :
         #date = (datetime.now()).date() #แปลงวันที่มีเวลาติดมาด้วยเป็นวันเฉยๆ อันนี้ตั้งให้เป็นเวลาปัจจุบัน
-        #dm.formatdatetime('Time')
+        dm.formatdatetime('Time')
         since = dm.df['Time'].min()#.strftime('%Y-%m-%d')
         date = (datetime.strptime(since,'%Y-%m-%d')).date()
         self.dateEdit_5.setDate(date) #เอาเวลาที่ตั้งไว้ไปโชว์ใน GUI
@@ -754,7 +754,33 @@ class Ui_MainWindow(QWidget):
         # print("\nupgradeProgressWeb : ",val,'\n')
         # val = dm.test()          
         self.progressBar_3.setValue(val)
-        
+    
+    def exportWeb(self) :
+        fname = 'Webcsv.csv'
+        if self.dt == None :
+            print("Not have data")
+            pass
+        else :
+            self.dt['Date'] = pd.to_datetime(self.dt['Date'])
+            if fname in glob.glob('*.csv'):
+                os.remove(fname)
+            self.df.to_csv(fname,index=False)
+            print('Export Complete')
+            self.showExportDialog()
+        '''file_filter = 'Data File (*.xlsx *.csv *.dat);; Excel File (*.xlsx *.xls)'
+        response = QFileDialog.getSaveFileName(
+            parent=self,
+            caption='Select a data file',
+            directory= 'Data File.dat',
+            filter=file_filter,
+            initialFilter='Excel File (*.xlsx *.xls)'
+        )
+        print(response)
+        y = str(response)
+        dt = self.dt.to_csv(y,index = False, header=True)'''
+
+
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -1105,7 +1131,7 @@ class Ui_MainWindow(QWidget):
 
         self.exportButtonWeb = QtWidgets.QPushButton(self.tab)
         self.exportButtonWeb.setObjectName("exportButtonWeb")
-        self.exportButtonWeb.clicked.connect(self.ExportTab1)
+        self.exportButtonWeb.clicked.connect(self.exportWeb)
         self.gridLayout.addWidget(self.exportButtonWeb, 7, 0, 1, 1)
 
         self.listView_3 = QtWidgets.QListWidget(self.tab_3)
@@ -1150,9 +1176,9 @@ class Ui_MainWindow(QWidget):
         self.label_7.setObjectName("label1")
         self.label_7.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
-        self.dateSet_3()
-        self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
         
+        self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
+        #self.dateSet_3()
         self.tabWidget.addTab(self.tab_3, "")
 
 
