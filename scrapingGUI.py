@@ -235,7 +235,13 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model)
         return
 
-
+    def ExportTab1(self):
+        fname = 'Tweetcsv.csv'
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%d/%m/%Y')
+        if fname in glob.glob('*.csv'):
+            os.remove(fname)
+        self.df.to_csv(fname,index=False)
+        print('Export Complete')
 
     def button1(self):          #Search BUTTON Tab1
         print("\n\n")
@@ -413,6 +419,7 @@ class Ui_MainWindow(QWidget):
         self.progressTime(100)
         return
 
+    
 
     def deleteButton_1(self) : #สำหรับปุ่ม delete tab tweet
         if self.showDeleteDialog() == "Yes":
@@ -528,14 +535,14 @@ class Ui_MainWindow(QWidget):
             return 'No'
 
     def showTableWeb(self) :
-        print("\n\n")
-        #print(len(self.dt.index),'rows')
-        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+        # print("\n\n")
+        # print(len(self.dt.index),'rows')
+        # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
         '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
             return'''
         self.dt = dm.getperiod(str(self.dateSinceReturnWeb()),str(self.dateUntilReturnWeb()))
-        print(list(set(self.dt['Keyword'].tolist())))
+        # print(list(set(self.dt['Keyword'].tolist())))
         tw.setdataframe(self.dt)
         keywords = self.SearchBox_3.text()
         keywords = keywords.split(',')
@@ -555,11 +562,23 @@ class Ui_MainWindow(QWidget):
                     self.addlist()
                 else:
                     self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                    
                 #dm.concatfile(self.dt)
             else:
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
+                # print("Am here")
+                # self.wt.start()
+                self.wt.any_signal.connect(self.upgradeProgressWeb)
+                self.dt = self.wt.getDf()
+                self.wt.any_signal.connect(self.upgradeProgressWeb)
+        
+                # dm.concatfile(self.dt)
+                # self.wt.stop()
             #self.dateSet()    
             #tw.setdataframe(self.dt)
+
+        # self.wt.stop()
+        # self.upgradeProgressWeb(100)
+        
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -697,12 +716,28 @@ class Ui_MainWindow(QWidget):
         self.progressBar_2.setValue(counter)
 
     def progressTimeWeb(self) :
-        #self.percentProgress()
-        self.progressBar_3.setValue(100)
-        self.showTableWeb()
+        keywords = self.SearchBox_3.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords)) 
         self.progressBar_3.setValue(0)
-
-
+        sd = self.dateSinceReturnWeb()
+        ed = self.dateUntilReturnWeb()
+        #self.wt = webTread.WebThread(None,sd,ed,keywords)
+        # print(sd,ed,keywords)
+        # self.wt.start()
+        self.wt.start()
+        self.wt.any_signal.connect(self.upgradeProgressWeb)
+                
+        self.showTableWeb()
+        
+        # self.wt.stop()
+        # self.progressBar_3.setValue(0)
+        
+    def upgradeProgressWeb(self,val):
+        print("\nupgradeProgressWeb : ",val,'\n')
+        # val = dm.test()          
+        self.progressBar_3.setValue(val)
+        
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -766,6 +801,7 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
 
+
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -822,11 +858,16 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
         self.PushButton_2.clicked.connect(self.showRealtime)
-
         self.gridLayout.addWidget(self.PushButton_2, 2, 9, 1, 1)
+
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
         self.PushButton_1.setObjectName("PushButton_1")
         self.gridLayout.addWidget(self.PushButton_1, 2, 7, 1, 1)
+
+        self.exportButton = QtWidgets.QPushButton(self.tab)
+        self.exportButton.setObjectName("exportButton")
+        self.exportButton.clicked.connect(self.ExportTab1)
+        self.gridLayout.addWidget(self.exportButton, 7, 0, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
@@ -858,7 +899,7 @@ class Ui_MainWindow(QWidget):
         self.listView.setSizePolicy(sizePolicy)
         self.listView.setMidLineWidth(0)
         self.listView.setObjectName("listView")
-        self.gridLayout.addWidget(self.listView, 3, 0, 4, 1)
+        self.gridLayout.addWidget(self.listView, 2, 0, 4, 1)
         #self.addlist()
 
         self.SearchBox1 = QtWidgets.QLineEdit(self.tab)
@@ -1012,6 +1053,7 @@ class Ui_MainWindow(QWidget):
         self.label_8 = QtWidgets.QLabel(self.tab_3)
         self.label_8.setAlignment(QtCore.Qt.AlignCenter)
         self.label_8.setObjectName("label2")
+        self.label_8.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_8, 2, 0, 1, 1)
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
@@ -1084,6 +1126,7 @@ class Ui_MainWindow(QWidget):
         self.label_7 = QtWidgets.QLabel(self.tab_3)
         self.label_7.setAlignment(QtCore.Qt.AlignCenter)
         self.label_7.setObjectName("label1")
+        self.label_7.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.gridLayout.addWidget(self.label_7, 1, 0, 1, 6)
         self.dateSet_3()
         self.dateSet() #เรียกใช้ฟังก์ชั่นที่ตัดเวลาออก และคืนค่าวันที่ออกมา หากมีการเปลี่ยนแปลงวันที่ผ่านตัว GUI
@@ -1122,6 +1165,7 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2.setText(_translate("MainWindow", "PushButton"))
         self.PushButton_1.setText(_translate("MainWindow", "Search"))
         self.PushButton_2.setText(_translate("MainWindow", "Search new"))
+        self.exportButton.setText(_translate("MainWindow", "Export"))
         self.PushButtonRefresh.setText(_translate("MainWindow", ""))
         self.PushButtonDelete.setText(_translate("MainWindow", ""))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tweet"))
