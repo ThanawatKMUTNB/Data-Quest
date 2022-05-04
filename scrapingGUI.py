@@ -235,7 +235,13 @@ class Ui_MainWindow(QWidget):
         self.tableView_2.setModel(self.model)
         return
 
-
+    def ExportTab1(self):
+        fname = 'Tweetcsv.csv'
+        self.df['Time'] = pd.to_datetime(self.df['Time']).dt.strftime('%d/%m/%Y')
+        if fname in glob.glob('*.csv'):
+            os.remove(fname)
+        self.df.to_csv(fname,index=False)
+        print('Export Complete')
 
     def button1(self):          #Search BUTTON Tab1
         print("\n\n")
@@ -413,6 +419,7 @@ class Ui_MainWindow(QWidget):
         self.progressTime(100)
         return
 
+    
 
     def deleteButton_1(self) : #สำหรับปุ่ม delete tab tweet
         if self.showDeleteDialog() == "Yes":
@@ -528,15 +535,9 @@ class Ui_MainWindow(QWidget):
             return 'No'
 
     def showTableWeb(self) :
-<<<<<<< HEAD
         # print("\n\n")
         # print(len(self.dt.index),'rows')
         # print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
-=======
-        print("\n\n")
-        #print(len(self.dt.index),'rows')
-        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
             return'''
@@ -564,7 +565,6 @@ class Ui_MainWindow(QWidget):
                     
                 #dm.concatfile(self.dt)
             else:
-<<<<<<< HEAD
                 # print("Am here")
                 # self.wt.start()
                 self.wt.any_signal.connect(self.upgradeProgressWeb)
@@ -579,11 +579,6 @@ class Ui_MainWindow(QWidget):
         # self.wt.stop()
         # self.upgradeProgressWeb(100)
         
-=======
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
-            #self.dateSet()    
-            #tw.setdataframe(self.dt)
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
         print(self.SearchBox_3.text())
         print(len(self.dt.index),tw.keys)
         
@@ -721,14 +716,13 @@ class Ui_MainWindow(QWidget):
         self.progressBar_2.setValue(counter)
 
     def progressTimeWeb(self) :
-<<<<<<< HEAD
         keywords = self.SearchBox_3.text()
         keywords = keywords.split(',')
         keywords = list(map(lambda x: x.lower(), keywords)) 
         self.progressBar_3.setValue(0)
         sd = self.dateSinceReturnWeb()
         ed = self.dateUntilReturnWeb()
-        self.wt = webTread.WebThread(None,sd,ed,keywords)
+        #self.wt = webTread.WebThread(None,sd,ed,keywords)
         # print(sd,ed,keywords)
         # self.wt.start()
         self.wt.start()
@@ -744,14 +738,6 @@ class Ui_MainWindow(QWidget):
         # val = dm.test()          
         self.progressBar_3.setValue(val)
         
-=======
-        #self.percentProgress()
-        self.progressBar_3.setValue(100)
-        self.showTableWeb()
-        self.progressBar_3.setValue(0)
-
-
->>>>>>> 52957f96ca36c8044ac4cc848f91b52b5168ea26
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -815,12 +801,6 @@ class Ui_MainWindow(QWidget):
         self.tableView.setModel(self.model) #show table in pyqt5
         #self.progressBar.setMaximum(1)
 
-        
-        self.exportButton = QtWidgets.QPushButton(self.tab)
-        self.exportButton.setObjectName("PushButtonExport")
-        #self.exportButton.clicked.connect(self.) #เชื่้อมได้เลย
-        #self.exportButton.setGeometry(QtCore.QRect(11, 683, 93, 28))
-        self.gridLayout.addWidget(self.exportButton, 7, 0, 1, 1)
 
         self.line = QtWidgets.QFrame(self.tab)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
@@ -878,11 +858,16 @@ class Ui_MainWindow(QWidget):
         self.PushButton_2 = QtWidgets.QPushButton(self.tab)
         self.PushButton_2.setObjectName("PushButton_2")
         self.PushButton_2.clicked.connect(self.showRealtime)
-
         self.gridLayout.addWidget(self.PushButton_2, 2, 9, 1, 1)
+
         self.PushButton_1 = QtWidgets.QPushButton(self.tab)
         self.PushButton_1.setObjectName("PushButton_1")
         self.gridLayout.addWidget(self.PushButton_1, 2, 7, 1, 1)
+
+        self.exportButton = QtWidgets.QPushButton(self.tab)
+        self.exportButton.setObjectName("exportButton")
+        self.exportButton.clicked.connect(self.ExportTab1)
+        self.gridLayout.addWidget(self.exportButton, 7, 0, 1, 1)
         
 
         #เป็นวิธีการใส่พารามิเตอร์ลงไปในฟังก์ชั่นที่ต้องการเชื่อมกับปุ่ม
