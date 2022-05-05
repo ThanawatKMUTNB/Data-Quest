@@ -74,5 +74,5 @@ class WebThread(QThread):
     def stop(self):
         self.is_running = False
         print('Stopping Web thread...')
-        self.any_signal.emit(0)    
+        # self.any_signal.emit(0)    
         self.terminate()

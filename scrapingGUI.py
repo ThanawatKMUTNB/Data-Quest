@@ -597,30 +597,12 @@ class Ui_MainWindow(QWidget):
         #dm.startSearch(["16-04-2022","17-04-2022"],['anime','animation'])
 
     def searchNewWebButton(self) :
-        tenwords = self.tw_worddf['Word'].tolist()[:10]  #only top ten words
-        tenwords = list(map(lambda x: x.lower(), tenwords))
-        if self.showDialogWebForNew() == 'Yes':
-            self.keywords.extend(tenwords)
-            self.dateSet_3()
-            dhave = []
-            for keyword in tenwords:
-                if keyword not in self.keywords:
-                    dhave.append(keyword)
-            if len(dhave) > 0:
-                self.keywords.extend(dhave)
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
-                dm.concatfile(self.dt)
-                
-            else:
-                self.dt = dm.startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
-            # self.df = tw.savedata(tenwords)
-            # print(self.df)
-            # dm.concatfile(self.df)
-            # self.addlist()
-        else:
-            return
+        keywords = webNewNew.Ui_MainWindowSecond().enterMassage()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))
+        dm.addNewWordToAll(keywords)
         #self.addlist_2()    
-        self.addlist() 
+        self.addlist_3() 
         self.modelNew = TableModel(self.dt) 
         self.table2 = QtWidgets.QTableView()
         self.table2.setModel(self.modelNew)
@@ -679,35 +661,45 @@ class Ui_MainWindow(QWidget):
         #     self.listView_2.addItem(item)
 
     def addlist_3(self): #ของ tab Web scraping
-        self.addlist()
+        keywordsWeb = os.listdir('collectkeys')
         self.listView_3.clear()
         #self.keywords.sort()
-        for i in range(len(self.keywords)) :
-            item = QtWidgets.QListWidgetItem(self.keywords[i])
+        for i in keywordsWeb :
+            item = QtWidgets.QListWidgetItem(i)
             self.listView_3.addItem(item)
         return              
 
+    
+
+    def enterMassage(self) :
+        
+        enterM = self.SearchBox_3.text()
+        enterM = enterM.split(',')
+        
+        keyword = list(map(lambda x: x.lower(), enterM))
+        #print(keyword)
+        DataManager.DataManager().addNewWordToAll(keyword)
+        #self.addlist_3()
+
     def deleteButton_3(self) : #สำหรับปุ่ม delete tab tweet
-        if self.showDeleteDialog() == "Yes":
-            keywords = self.SearchBox_3.text()
-            keywords = keywords.split(',')
-            keywords = list(map(lambda x: x.lower(), keywords))
-            if "" not in keywords:
-                #self.progressTime(0)
-                #self.dateSet()
-                self.SearchBox_3.clear()
-                self.dt = dm.deletekeyword(keywords)
-                self.keywords = self.df['Keyword'].tolist()
-                self.keywords = list(set(self.keywords))
-                self.addlist()
-                self.model = TableModel(self.dt) 
-                self.table = QtWidgets.QTableView()
-                self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
-                self.tableView_3.setModel(self.model) #เอาตารางไปโชว์เลย
-                #self.progressTime(100)
-            else:
-                print('nonKeyword')
-                return
+        
+        keywords = self.SearchBox_3.text()
+        keywords = keywords.split(',')
+        keywords = list(map(lambda x: x.lower(), keywords))
+        if "" not in keywords:
+            #self.progressTime(0)
+            #self.dateSet()
+            self.SearchBox_3.clear()
+            self.dt = dm.delWordAllFile(keywords)
+            self.keywords = self.df['Keyword'].tolist()
+            self.keywords = list(set(self.keywords))
+            self.listView_3.takeItem(keywords)
+            self.model = TableModel(self.dt) 
+            self.table = QtWidgets.QTableView()
+            self.table.setModel(self.model) #เอา df แปลงเป็นตารางเรียบร้อย
+            self.tableView_3.setModel(self.model) #เอาตารางไปโชว์เลย
+            #self.progressTime(100)
+        
         return 
 
     def deleteButton_3(self) : #สำหรับปุ่ม delete tab web
@@ -1094,7 +1086,7 @@ class Ui_MainWindow(QWidget):
 
         self.PushButton_6 = QtWidgets.QPushButton(self.tab_3)
         self.PushButton_6.setObjectName("PushButton_6")
-        self.PushButton_6.clicked.connect(self.showCalenderWin)
+        self.PushButton_6.clicked.connect(self.enterMassage)
 
         self.gridLayout.addWidget(self.PushButton_6, 2, 5, 1, 1)
         self.PushButton_5 = QtWidgets.QPushButton(self.tab_3)
@@ -1155,6 +1147,8 @@ class Ui_MainWindow(QWidget):
         self.PushButtonRefresh_3.setObjectName("PushButtonRefresh_3")
         self.PushButtonRefresh_3.setGeometry(QtCore.QRect(10, 10, 30, 30))
         self.PushButtonRefresh_3.setIcon(QtGui.QIcon('reload_update_refresh_icon_143703.png')) #ไว้เชือมรูป
+        self.PushButtonRefresh_3.clicked.connect(self.addlist_3) 
+
         #btmRefresh_2 = functools.partial(self.refreshButton)   
         #self.PushButtonRefresh_3.clicked.connect(btmRefresh_2)
 

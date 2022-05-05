@@ -5,6 +5,7 @@ import csv
 import json
 from operator import index
 from unittest import result
+from bs4 import BeautifulSoup
 from numpy import choose
 from textblob import TextBlob 
 from datetime import datetime, timedelta
@@ -426,7 +427,7 @@ class DataManager:
             
     def addNewWordToAll(self,NewWord): #List NewWord #List of str Date ["17-03-2022", "19-04-2022"]
         # print("----------",NewWord,dateAdd)
-        ex = web.webScraping()
+        #ex = web.webScraping()
         # startDate = datetime.strptime(dateAdd[0], '%d-%m-%Y')
         # endDate = datetime.strptime(dateAdd[1], '%d-%m-%Y')
         # print("Date : ",startDate,endDate)
@@ -439,13 +440,17 @@ class DataManager:
         # ListOfDate = self.date_range(str(startDate.isoformat()),str(endDate.isoformat()))
         # ListOfDate = self.date_range(dateAdd[0],dateAdd[1])
         # print('ListOfDate : ',ListOfDate)
+        
         path = "web search"
         todayByFile = os.listdir(path)
         
         #Add new word file to all date file
         for i in todayByFile:
             for kw in NewWord:
+                print(i,kw)
                 newpath = os.path.join('web search',i,kw+'.csv')
+
+                
                 if not os.path.exists(newpath):
                     # print("New")
                     self.creatNewSearchFile(newpath)
@@ -472,10 +477,23 @@ class DataManager:
             data = self.readJson(os.path.join("WebData",fileName))
             for d in data.keys():
                 for l in list(data[d].keys()):
-                    soup = ex.makeSoup(l)
-                    for p in data[d][l]["Data"]:
-                        todayByfileName = fileName.split("_")[0]
-                        self.setDictSentimentBynewWord(soup,l,p,todayByfileName,NewWord)
+                    #soup = ex.makeSoup(l)
+                    try:
+                        req = requests.get(l)
+                        if req.status_code == 200:
+                            req.encoding = "utf-8"
+                            soup = BeautifulSoup(req.text,"html.parser")
+                            #self.soupList.append(soup)
+                            for p in data[d][l]["Data"]:
+                                todayByfileName = fileName.split("_")[0]
+                                self.setDictSentimentBynewWord(soup,l,p,todayByfileName,NewWord)
+                            print("finished")
+                    except :
+                        print("Error makeSoup",l)
+            # print(req)
+                        pass
+        
+                        
         
             
             # self.setDataByAllKeyword(i)
@@ -725,3 +743,4 @@ class DataManager:
         return newDf.drop_duplicates()
                     
 #DataManager().startSearch(['16-04-2022', '16-04-2022'],['anime','animation'])
+#DataManager().addNewWordToAll(['H'])

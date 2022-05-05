@@ -37,17 +37,17 @@ import scrapingGUI
 class Ui_MainWindowSecond(object):
     def __init__(self):
         super().__init__()
-        self.qDateBegin = None
-        self.qDateEnd = None
+        #self.qDateBegin = None
+        #self.qDateEnd = None
         self.enterM = str
 
-    def showTableWebNewTab(self) :
+    '''def showTableWebNewTab(self) :
         print("\n\n")
         #print(len(self.dt.index),'rows')
-        print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
-        '''if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
+        #print(self.dateSinceReturnWeb(),self.dateUntilReturnWeb())
+        if self.dateSinceReturnWeb()>self.dateUntilReturnWeb():
             self.showErrorDialog()
-            return'''
+            retur
         self.dt = DataManager.DataManager().getperiod(str(self.dateSinceReturnWeb()),str(self.dateUntilReturnWeb()))
         print(list(set(self.dt['Keyword'].tolist())))
         twitter_scrap.Twitter_Scrap().setdataframe(self.dt)
@@ -61,9 +61,9 @@ class Ui_MainWindowSecond(object):
                 if keyword not in self.keywords:
                     dhave.append(keyword)
             if len(dhave) > 0:
-                '''if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
+               if int(str(datetime.now().date()-self.dateUntilReturnWeb())[0]) > 7:
                     self.showErrorDialog2()
-                    return'''
+                    return
                 if self.showDialogWebForNew() == 'Yes':      #search new 
                     self.keywords.extend(dhave)
                     self.dt = DataManager.DataManager().startSearch([self.dateSinceReturnWeb(),self.dateUntilReturnWeb()],[keyword])
@@ -83,15 +83,17 @@ class Ui_MainWindowSecond(object):
         self.modelNew = scrapingGUI.TableModel(self.dt) 
         self.table2 = QtWidgets.QTableView()
         self.table2.setModel(self.modelNew)
-        scrapingGUI.Ui_MainWindow().tableView_3.setModel(self.modelNew)
+        scrapingGUI.Ui_MainWindow().tableView_3.setModel(self.modelNew)'''
 
     def enterMassage(self) :
+        
         enterM = self.textBrowser.text()
         #enterM = enterM.split(',')
-        #enterM = list(map(lambda x: x.lower(), enterM))   #change to lower
-        DataManager.DataManager().startSearch([self.dateSinceReturn(),self.dateUntilReturn()],[enterM])
+        keyword = list(map(lambda x: x.lower(), enterM))
+        #print(keyword)
+        DataManager.DataManager().addNewWordToAll(keyword)
         
-    def dateSet(self) :
+    '''def dateSet(self) :
         
         since = datetime.now().date().strftime('%Y/%m/%d')
         print(since)
@@ -116,8 +118,7 @@ class Ui_MainWindowSecond(object):
         dateDataEnd = str(dateChange.strftime('%d-%m-%Y'))  #เป็นการอ่านค่าจากวันที่ที่ปรับไว้ในตัววันที่ของ GUI
         #print(self.getUntil)
         return dateDataEnd
-
-    '''def printDateInfo(self, qDate):
+    def printDateInfo(self, qDate):
         calendarDate = '{0}-{1}-{2}'.format(qDate.day(),qDate.month(),qDate.year())
         print(calendarDate)
         return self.qDate'''
@@ -142,20 +143,9 @@ class Ui_MainWindowSecond(object):
         self.textBrowser.setAcceptDrops(True)
         self.textBrowser.setObjectName("textBrowser")
         self.gridLayout.addWidget(self.textBrowser, 0, 1, 1, 4)
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setObjectName("label")
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 2)
-        self.dateEdit = QtWidgets.QDateEdit(self.centralwidget)
-        self.dateEdit.setObjectName("dateEdit")
-        self.gridLayout.addWidget(self.dateEdit, 1, 4, 1, 1)
-        self.dateEdit_2 = QtWidgets.QDateEdit(self.centralwidget)
-        self.dateEdit_2.setObjectName("dateEdit_2")
-        self.gridLayout.addWidget(self.dateEdit_2, 1, 2, 1, 1)
-        self.dateSet()
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-        self.label_2.setObjectName("label_2")
-        self.gridLayout.addWidget(self.label_2, 1, 3, 1, 1)
+        
+        #self.dateSet()
+       
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 2, 3, 1, 1)
@@ -165,7 +155,7 @@ class Ui_MainWindowSecond(object):
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setObjectName("pushButton_2")
         self.gridLayout.addWidget(self.pushButton_2, 2, 4, 1, 1)
-        self.pushButton_2.clicked.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
+        #self.pushButton_2.clicked.connect(self.dateSinceReturn) #ถ้าวันที่มีการเปลี่ยนแปลง จะเรียกฟังก์ชั้นมาใช้
 
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -184,8 +174,7 @@ class Ui_MainWindowSecond(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label_3.setText(_translate("MainWindow", "Keyword"))
-        self.label.setText(_translate("MainWindow", "Choose date want to search"))
-        self.label_2.setText(_translate("MainWindow", "to"))
+        
         self.pushButton.setText(_translate("MainWindow", "OK"))
         self.pushButton_2.setText(_translate("MainWindow", "Cancel"))
 
